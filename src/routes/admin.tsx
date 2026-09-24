@@ -1,0 +1,3300 @@
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { useAuth, useMyRoles } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
+import { useMemo, useState } from "react";
+import {
+  Lock,
+  LayoutDashboard,
+  Car,
+  PlusCircle,
+  Plug,
+  LogOut,
+  Trash2,
+  CheckCircle2,
+  Image as ImageIcon,
+  X,
+  ArrowLeft,
+  ArrowRight,
+  ShieldCheck,
+  Activity,
+  KeyRound,
+  Database,
+  Inbox,
+  Wrench,
+  Euro,
+  Phone,
+  Mail,
+  Sparkles,
+  Loader2,
+  Copy,
+  Check,
+  CalendarDays,
+  Star,
+  TrendingUp,
+  Plus,
+  Link2,
+  Bell,
+  Send,
+  Download,
+  Briefcase,
+  Users,
+  Power,
+  Pencil,
+} from "lucide-react";
+import { toast } from "sonner";
+import {
+  MODELS_BY_BRAND,
+  type Brand,
+  type Condition,
+  type FuelType,
+  type Transmission,
+} from "@/lib/vehicles";
+import { useVehicles, vehiclesStore, type AdminVehicle } from "@/lib/vehicles-store";
+import { leadsStore, useLeads, type Lead, type LeadStatus } from "@/lib/leads-store";
+import {
+  careersStore,
+  useApplicants,
+  useJobs,
+  type Applicant,
+  type ApplicantStatus,
+  type JobPosting,
+} from "@/lib/careers-store";
+
+export const Route = createFileRoute("/admin")({
+  head: () => ({
+    meta: [
+      { title: "Auto Semmel — Händler-Dashboard" },
+      { name: "description", content: "Internes Verwaltungs-Dashboard für Auto Semmel." },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
+  component: AdminPage,
+});
+
+function AdminPage() {
+  const { user, loading } = useAuth();
+  const { isStaff } = useMyRoles(user);
+  const router = useRouter();
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    router.navigate({ to: "/" });
+  }
+
+  if (loading) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-background text-foreground">
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Lade…
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LoginPrompt />;
+  }
+
+  if (!isStaff) {
+    return <NoAccessScreen email={user.email ?? ""} onLogout={handleLogout} />;
+  }
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <Dashboard onLogout={handleLogout} userEmail={user.email ?? ""} />
+    </div>
+  );
+}
+
+function LoginPrompt() {
+  return (
+    <div className="relative grid min-h-screen place-items-center overflow-hidden px-6 text-foreground">
+      <div className="absolute inset-0 carbon-texture opacity-30" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(185,14,10,0.18),_transparent_60%)]" />
+      <div className="relative w-full max-w-md text-center">
+        <div className="tricolore-bar mx-auto mb-6 h-[3px] w-24 opacity-80" />
+        <div className="glass rounded-2xl border border-border/60 p-8 shadow-2xl">
+          <div className="mx-auto mb-5 grid h-12 w-12 place-items-center rounded-xl bg-primary/15 text-primary">
+            <ShieldCheck className="h-6 w-6" />
+          </div>
+          <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Auto Semmel</p>
+          <h1 className="mt-1 font-display text-2xl font-semibold">Händler-Dashboard</h1>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+            Bitte melden Sie sich an, um auf den geschützten Bereich zuzugreifen.
+          </p>
+          <Link
+            to="/auth"
+            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-[0_10px_30px_-10px_rgba(185,14,10,0.6)] transition hover:bg-primary/90"
+          >
+            <Lock className="h-4 w-4" /> Zum Login
+          </Link>
+          <Link
+            to="/"
+            className="mt-4 inline-flex items-center justify-center gap-2 text-xs text-muted-foreground transition hover:text-foreground"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" /> Zurück zur Website
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function NoAccessScreen({ email, onLogout }: { email: string; onLogout: () => void }) {
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+  const router = useRouter();
+
+  async function claim() {
+    setBusy(true);
+    setMsg(null);
+    try {
+      const { claimFirstAdmin } = await import("@/lib/admin-bootstrap.functions");
+      const result = await claimFirstAdmin();
+      if (result.granted) {
+        setMsg("Admin-Rechte erteilt. Lade Dashboard…");
+        router.invalidate();
+      } else {
+        setMsg(result.reason);
+      }
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "Bootstrap fehlgeschlagen.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="grid min-h-screen place-items-center bg-background px-6 text-foreground">
+      <div className="w-full max-w-md text-center">
+        <div className="mx-auto mb-5 grid h-12 w-12 place-items-center rounded-xl bg-amber-500/15 text-amber-700">
+          <ShieldCheck className="h-6 w-6" />
+        </div>
+        <h1 className="font-display text-2xl font-semibold">Kein Zugriff</h1>
+        <p className="mt-3 text-sm text-muted-foreground">
+          Ihr Konto <span className="text-foreground">{email}</span> hat keine Berechtigung für
+          das Händler-Dashboard.
+        </p>
+        <button
+          onClick={claim}
+          disabled={busy}
+          className="mt-5 w-full rounded-lg border border-primary/50 bg-primary/10 px-4 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary/20 disabled:opacity-60"
+        >
+          {busy ? "Prüfe…" : "Als ersten Administrator einrichten"}
+        </button>
+        {msg && (
+          <p className="mt-3 rounded-md border border-border/60 bg-card/40 px-3 py-2 text-xs text-muted-foreground">
+            {msg}
+          </p>
+        )}
+        <p className="mt-3 text-[11px] text-muted-foreground">
+          Funktioniert nur einmalig, solange noch kein Administrator existiert. Weitere
+          Mitarbeiter werden anschließend über das Backend angelegt.
+        </p>
+        <div className="mt-6 flex justify-center gap-2">
+          <button
+            onClick={onLogout}
+            className="rounded-lg border border-border/70 bg-card/40 px-4 py-2 text-sm font-medium text-foreground transition hover:border-foreground/40 hover:bg-muted/30"
+          >
+            Abmelden
+          </button>
+          <Link
+            to="/"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+          >
+            Zur Website
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- Dashboard ---------------- */
+
+type Tab = "list" | "new" | "leads" | "api" | "calendar" | "reviews" | "newsletter" | "emailq" | "careers";
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</span>
+      {children}
+    </label>
+  );
+}
+
+function Dashboard({ onLogout, userEmail }: { onLogout: () => void; userEmail: string }) {
+  const [tab, setTab] = useState<Tab>("list");
+  const vehicles = useVehicles();
+  const leads = useLeads();
+  const newLeadCount = leads.filter((l) => l.status === "Neu").length;
+
+  return (
+    <div className="flex min-h-screen flex-col lg:flex-row">
+      {/* Sidebar */}
+      <aside className="border-b border-border/60 bg-card/40 lg:w-72 lg:border-b-0 lg:border-r">
+        <div className="flex items-center justify-between p-6">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="grid h-9 w-9 place-items-center rounded-lg bg-primary text-primary-foreground">
+              <span className="font-display text-sm font-bold">AS</span>
+            </div>
+            <div>
+              <p className="font-display text-sm font-semibold leading-tight">Auto Semmel</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Dashboard</p>
+            </div>
+          </Link>
+          <button
+            onClick={onLogout}
+            className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted/50 hover:text-foreground"
+            title="Abmelden"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
+        </div>
+
+        <nav className="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-col lg:gap-1 lg:px-3 lg:pb-6">
+          <NavBtn icon={<Car className="h-4 w-4" />} active={tab === "list"} onClick={() => setTab("list")}>
+            Fahrzeugliste
+            <span className="ml-auto rounded-md bg-muted/60 px-1.5 py-0.5 text-[10px]">{vehicles.length}</span>
+          </NavBtn>
+          <NavBtn icon={<PlusCircle className="h-4 w-4" />} active={tab === "new"} onClick={() => setTab("new")}>
+            Neues Fahrzeug
+          </NavBtn>
+          <NavBtn icon={<Inbox className="h-4 w-4" />} active={tab === "leads"} onClick={() => setTab("leads")}>
+            Posteingang / Leads
+            {newLeadCount > 0 && (
+              <span className="relative ml-auto inline-flex">
+                <span className="absolute inset-0 animate-ping rounded-md bg-primary/60" />
+                <span className="relative rounded-md bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground shadow-sm">
+                  {newLeadCount}
+                </span>
+              </span>
+            )}
+          </NavBtn>
+          <NavBtn icon={<CalendarDays className="h-4 w-4" />} active={tab === "calendar"} onClick={() => setTab("calendar")}>
+            Werkstatt-Planer
+          </NavBtn>
+          <NavBtn icon={<Star className="h-4 w-4" />} active={tab === "reviews"} onClick={() => setTab("reviews")}>
+            Google Bewertungen
+          </NavBtn>
+          <NavBtn icon={<Mail className="h-4 w-4" />} active={tab === "newsletter"} onClick={() => setTab("newsletter")}>
+            Newsletter & Marketing
+          </NavBtn>
+          <NavBtn icon={<Inbox className="h-4 w-4" />} active={tab === "emailq"} onClick={() => setTab("emailq")}>
+            E-Mail-Queue
+          </NavBtn>
+          <NavBtn icon={<Briefcase className="h-4 w-4" />} active={tab === "careers"} onClick={() => setTab("careers")}>
+            Stellen & Bewerber
+          </NavBtn>
+          <NavBtn icon={<Plug className="h-4 w-4" />} active={tab === "api"} onClick={() => setTab("api")}>
+            Schnittstellen-Status
+          </NavBtn>
+        </nav>
+
+        <div className="hidden border-t border-border/60 p-6 lg:block">
+          <div className="rounded-xl border border-border/60 bg-card/60 p-4">
+            <div className="mb-2 flex items-center gap-2 text-xs text-emerald-700">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
+              System Online
+            </div>
+            <p className="text-xs text-muted-foreground">Letzter Sync · gerade eben</p>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main */}
+      <main className="flex-1 px-6 py-8 lg:px-10">
+        <header className="mb-8 flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-widest text-muted-foreground">
+              {tab === "list" && "Bestand verwalten"}
+              {tab === "new" && "Neuen Eintrag erstellen"}
+              {tab === "leads" && "Kundenanfragen"}
+              {tab === "calendar" && "Werkstatt-Planer"}
+              {tab === "reviews" && "Reputation"}
+              {tab === "newsletter" && "Marketing & CRM"}
+              {tab === "emailq" && "Zustellung & Monitoring"}
+              {tab === "careers" && "Personal & Bewerbungen"}
+              {tab === "api" && "Integrationen"}
+            </p>
+            <h1 className="font-display text-3xl font-semibold">
+              {tab === "list" && "Fahrzeugliste"}
+              {tab === "new" && "Neues Fahrzeug anlegen"}
+              {tab === "leads" && "Posteingang / Leads"}
+              {tab === "calendar" && "Werkstatt-Kalender"}
+              {tab === "reviews" && "Google Bewertungen"}
+              {tab === "newsletter" && "Newsletter & Marketing"}
+              {tab === "emailq" && "Transaktionale E-Mail-Queue"}
+              {tab === "careers" && "Stellen & Bewerber"}
+              {tab === "api" && "Schnittstellen-Status"}
+            </h1>
+          </div>
+          <div className="hidden items-center gap-2 rounded-full border border-border/60 bg-card/60 px-3 py-1.5 text-xs text-muted-foreground md:flex">
+            <LayoutDashboard className="h-3.5 w-3.5" /> {userEmail || "Admin"} · Langenselbold
+          </div>
+        </header>
+
+        <KpiHeader vehicleCount={vehicles.length} openLeads={newLeadCount} />
+
+        {tab === "list" && <VehicleList vehicles={vehicles} />}
+        {tab === "new" && <NewVehicleForm onCreated={() => setTab("list")} />}
+        {tab === "leads" && <LeadsInbox leads={leads} />}
+        {tab === "calendar" && <WerkstattPlaner />}
+        {tab === "reviews" && <ReviewsManager />}
+        {tab === "newsletter" && <NewsletterManager />}
+        {tab === "emailq" && <EmailQueueView />}
+        {tab === "careers" && <CareersManager />}
+        {tab === "api" && <ApiStatus />}
+
+        <footer className="mt-12 border-t border-border/60 pt-5 text-[11px] text-muted-foreground">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <div>© 2026 Auto Semmel Langenselbold — Offizieller Stellantis-Partner für Alfa Romeo, Fiat &amp; Abarth</div>
+            <div>Gelnhäuser Straße 40 · 63505 Langenselbold</div>
+          </div>
+        </footer>
+      </main>
+    </div>
+  );
+}
+
+function NavBtn({
+  icon,
+  active,
+  children,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  active: boolean;
+  children: React.ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+        active
+          ? "bg-primary/15 text-primary"
+          : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+      }`}
+    >
+      {icon}
+      {children}
+    </button>
+  );
+}
+
+/* ---------------- Vehicle list ---------------- */
+
+function VehicleList({ vehicles }: { vehicles: AdminVehicle[] }) {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/40">
+      {vehicles.length === 0 && (
+        <div className="p-10 text-center text-sm text-muted-foreground">Keine Fahrzeuge im Bestand.</div>
+      )}
+
+      <ul className="divide-y divide-border/40">
+        {vehicles.map((v) => (
+          <VehicleListRow key={v.id} v={v} />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function VehicleListRow({ v }: { v: AdminVehicle }) {
+  const [showDiscount, setShowDiscount] = useState(v.discountPrice != null);
+  const [draft, setDraft] = useState<string>(
+    v.discountPrice != null ? String(v.discountPrice) : "",
+  );
+
+  const isReduced = v.discountPrice != null;
+
+  async function setStatus(status: AdminVehicle["status"]) {
+    await vehiclesStore.update(v.id, { status });
+  }
+  async function toggleReduced() {
+    if (isReduced) {
+      setShowDiscount(false);
+      setDraft("");
+      await vehiclesStore.update(v.id, { discountPrice: null });
+    } else {
+      setShowDiscount(true);
+    }
+  }
+  async function saveDiscount() {
+    const n = Number(draft);
+    if (!n || n <= 0 || n >= v.price) return;
+    await vehiclesStore.update(v.id, { discountPrice: n });
+  }
+
+  return (
+    <li className="grid grid-cols-1 gap-4 px-5 py-4 md:grid-cols-[80px_minmax(0,1.4fr)_minmax(0,1.1fr)_minmax(0,1.4fr)_120px] md:items-center">
+      <div className="h-14 w-20 overflow-hidden rounded-lg bg-muted">
+        {v.images[0] ? (
+          <img src={v.images[0]} alt={v.model} className="h-full w-full object-cover" />
+        ) : (
+          <div className="grid h-full w-full place-items-center text-muted-foreground">
+            <ImageIcon className="h-5 w-5" />
+          </div>
+        )}
+      </div>
+      <div className="min-w-0">
+        <p className="text-xs uppercase tracking-wider text-muted-foreground">{v.brand}</p>
+        <p className="truncate font-medium">
+          {v.model} <span className="text-muted-foreground">{v.version}</span>
+        </p>
+      </div>
+      <div>
+        {isReduced ? (
+          <>
+            <div className="text-xs text-muted-foreground line-through">
+              {v.price.toLocaleString("de-DE")} €
+            </div>
+            <div className="font-display text-lg font-semibold text-primary">
+              {v.discountPrice!.toLocaleString("de-DE")} €
+            </div>
+          </>
+        ) : (
+          <div className="font-display text-lg font-semibold">
+            {v.price.toLocaleString("de-DE")} €
+          </div>
+        )}
+      </div>
+      <div className="flex flex-wrap items-center gap-1.5">
+        <QuickToggle
+          active={v.status === "Verfügbar"}
+          tone="green"
+          onClick={() => setStatus("Verfügbar")}
+        >
+          Verfügbar
+        </QuickToggle>
+        <QuickToggle
+          active={v.status === "Reserviert"}
+          tone="amber"
+          onClick={() => setStatus("Reserviert")}
+        >
+          Reserviert
+        </QuickToggle>
+        <QuickToggle
+          active={isReduced}
+          tone="red"
+          onClick={toggleReduced}
+        >
+          Preis reduziert
+        </QuickToggle>
+        {showDiscount && !isReduced && (
+          <div className="flex w-full items-center gap-1.5 pt-1">
+            <input
+              type="number"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder={`< ${v.price.toLocaleString("de-DE")} €`}
+              className="h-8 w-32 rounded-md border border-border bg-input px-2 text-xs focus:border-primary focus:outline-none"
+            />
+            <button
+              onClick={saveDiscount}
+              className="rounded-md bg-primary px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground transition hover:brightness-110"
+            >
+              Speichern
+            </button>
+          </div>
+        )}
+      </div>
+      <div className="flex items-center justify-start gap-2 md:justify-end">
+        {v.status === "Verfügbar" && (
+          <button
+            onClick={() => vehiclesStore.markSold(v.id)}
+            className="rounded-lg border border-border/60 p-2 text-emerald-700 transition hover:border-emerald-500/60 hover:bg-emerald-500/10"
+            title="Als verkauft markieren"
+          >
+            <CheckCircle2 className="h-4 w-4" />
+          </button>
+        )}
+        <button
+          onClick={() => {
+            if (confirm(`"${v.brand} ${v.model}" wirklich löschen?`)) vehiclesStore.remove(v.id);
+          }}
+          className="rounded-lg border border-border/60 p-2 text-muted-foreground transition hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
+          title="Löschen"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      </div>
+    </li>
+  );
+}
+
+function QuickToggle({
+  active,
+  tone,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  tone: "green" | "amber" | "red";
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  const toneCls: Record<typeof tone, string> = {
+    green: active
+      ? "bg-emerald-500/15 text-emerald-700 border-emerald-500/50"
+      : "border-border/60 text-muted-foreground hover:border-emerald-500/40 hover:text-emerald-700",
+    amber: active
+      ? "bg-amber-500/15 text-amber-700 border-amber-500/50"
+      : "border-border/60 text-muted-foreground hover:border-amber-500/40 hover:text-amber-700",
+    red: active
+      ? "bg-primary/15 text-primary border-primary/50"
+      : "border-border/60 text-muted-foreground hover:border-primary/40 hover:text-primary",
+  };
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider transition ${toneCls[tone]}`}
+    >
+      <span
+        className={`h-1.5 w-1.5 rounded-full ${
+          active
+            ? tone === "green"
+              ? "bg-emerald-500"
+              : tone === "amber"
+                ? "bg-amber-500"
+                : "bg-primary"
+            : "bg-muted-foreground/40"
+        }`}
+      />
+      {children}
+    </button>
+  );
+}
+
+/* ---------------- New vehicle form ---------------- */
+
+const BRANDS: Brand[] = ["Alfa Romeo", "Fiat", "Abarth", "Fiat Professional"];
+const CONDITIONS: Condition[] = ["Neuwagen", "Tageszulassung", "Gebrauchtwagen"];
+const FUELS: FuelType[] = ["Benzin", "Diesel", "Hybrid", "Elektro"];
+const GEARS: Transmission[] = ["Automatik", "Schaltgetriebe"];
+
+interface FormState {
+  brand: Brand;
+  model: string;
+  version: string;
+  condition: Condition;
+  price: string;
+  vatDeductible: boolean;
+  financingMonthly: string;
+  mileage: string;
+  firstRegistration: string;
+  powerHp: string;
+  fuelType: FuelType;
+  transmission: Transmission;
+  features: string;
+  co2Class: string;
+  consumptionCombined: string;
+  powerConsumption: string;
+  co2Emissions: string;
+}
+
+const initialForm: FormState = {
+  brand: "Alfa Romeo",
+  model: "",
+  version: "",
+  condition: "Neuwagen",
+  price: "",
+  vatDeductible: true,
+  financingMonthly: "",
+  mileage: "",
+  firstRegistration: new Date().toISOString().slice(0, 10),
+  powerHp: "",
+  fuelType: "Benzin",
+  transmission: "Automatik",
+  features: "",
+  co2Class: "B",
+  consumptionCombined: "",
+  powerConsumption: "",
+  co2Emissions: "",
+};
+
+function NewVehicleForm({ onCreated }: { onCreated: () => void }) {
+  const [step, setStep] = useState(0);
+  const [form, setForm] = useState<FormState>(initialForm);
+  const [images, setImages] = useState<string[]>([]);
+
+  const models = useMemo(
+    () => MODELS_BY_BRAND[form.brand].filter((m) => m !== "Alle Modelle"),
+    [form.brand],
+  );
+
+  function set<K extends keyof FormState>(k: K, v: FormState[K]) {
+    setForm((f) => ({ ...f, [k]: v }));
+  }
+
+  function handleFiles(files: FileList | null) {
+    if (!files) return;
+    const urls: string[] = [];
+    Array.from(files).forEach((f) => urls.push(URL.createObjectURL(f)));
+    setImages((prev) => [...prev, ...urls]);
+  }
+
+  function submit() {
+    const price = Number(form.price) || 0;
+    const isElectric = form.fuelType === "Elektro";
+    void vehiclesStore.add({
+      brand: form.brand,
+      model: form.model || "Modell",
+      version: form.version,
+      condition: form.condition,
+      price,
+      vatDeductible: form.vatDeductible,
+      financingMonthly: Number(form.financingMonthly) || Math.round(price / 140),
+      mileage: Number(form.mileage) || 0,
+      firstRegistration: form.firstRegistration,
+      powerHp: Number(form.powerHp) || 0,
+      fuelType: form.fuelType,
+      transmission: form.transmission,
+      imageUrls: images,
+      features: form.features.split(",").map((s) => s.trim()).filter(Boolean),
+      badge: null,
+      co2Class: form.co2Class || null,
+      consumptionCombined: !isElectric && form.consumptionCombined ? Number(form.consumptionCombined) : null,
+      powerConsumption: (isElectric || form.fuelType === "Hybrid") && form.powerConsumption ? Number(form.powerConsumption) : null,
+      co2Emissions: form.co2Emissions ? Number(form.co2Emissions) : null,
+    });
+    setForm(initialForm);
+    setImages([]);
+    setStep(0);
+    onCreated();
+  }
+
+  const steps = ["Marke & Modell", "Technische Daten", "Preis & Medien"];
+
+  return (
+    <div className="mx-auto max-w-4xl">
+      <Stepper step={step} labels={steps} />
+
+      <div className="mt-8 rounded-2xl border border-border/60 bg-card/40 p-6 md:p-8">
+        {step === 0 && (
+          <div className="grid gap-5 md:grid-cols-2">
+            <Field label="Marke">
+              <select className="input" value={form.brand} onChange={(e) => set("brand", e.target.value as Brand)}>
+                {BRANDS.map((b) => (
+                  <option key={b}>{b}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Modell">
+              <input
+                list="model-options"
+                className="input"
+                value={form.model}
+                onChange={(e) => set("model", e.target.value)}
+                placeholder="z.B. Tonale"
+              />
+              <datalist id="model-options">
+                {models.map((m) => (
+                  <option key={m} value={m} />
+                ))}
+              </datalist>
+            </Field>
+            <Field label="Version / Ausstattung">
+              <input
+                className="input"
+                value={form.version}
+                onChange={(e) => set("version", e.target.value)}
+                placeholder="z.B. 1.5 VGT MHEV TCT Veloce"
+              />
+            </Field>
+            <Field label="Zustand">
+              <select className="input" value={form.condition} onChange={(e) => set("condition", e.target.value as Condition)}>
+                {CONDITIONS.map((c) => (
+                  <option key={c}>{c}</option>
+                ))}
+              </select>
+            </Field>
+          </div>
+        )}
+
+        {step === 1 && (
+          <div className="grid gap-5 md:grid-cols-2">
+            <Field label="Erstzulassung">
+              <input
+                type="date"
+                className="input"
+                value={form.firstRegistration}
+                onChange={(e) => set("firstRegistration", e.target.value)}
+              />
+            </Field>
+            <Field label="Kilometerstand (km)">
+              <input
+                type="number"
+                className="input"
+                value={form.mileage}
+                onChange={(e) => set("mileage", e.target.value)}
+                placeholder="z.B. 24300"
+              />
+            </Field>
+            <Field label="Leistung (PS)">
+              <input
+                type="number"
+                className="input"
+                value={form.powerHp}
+                onChange={(e) => set("powerHp", e.target.value)}
+                placeholder="z.B. 160"
+              />
+            </Field>
+            <Field label="Kraftstoff">
+              <select className="input" value={form.fuelType} onChange={(e) => set("fuelType", e.target.value as FuelType)}>
+                {FUELS.map((f) => (
+                  <option key={f}>{f}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Getriebe">
+              <select className="input" value={form.transmission} onChange={(e) => set("transmission", e.target.value as Transmission)}>
+                {GEARS.map((g) => (
+                  <option key={g}>{g}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Ausstattung (kommagetrennt)">
+              <input
+                className="input"
+                value={form.features}
+                onChange={(e) => set("features", e.target.value)}
+                placeholder="Panoramadach, Lederausstattung, …"
+              />
+            </Field>
+          </div>
+        )}
+
+        {step === 1 && (
+          <div className="mt-6 grid gap-5 rounded-xl border border-border/60 bg-background/40 p-5 md:grid-cols-2">
+            <div className="md:col-span-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+              Pflichtangaben gemäß Pkw-EnVKV (WLTP)
+            </div>
+            <Field label="CO₂-Effizienzklasse">
+              <select className="input" value={form.co2Class} onChange={(e) => set("co2Class", e.target.value)}>
+                <option value="">— bitte wählen —</option>
+                {["A", "B", "C", "D", "E", "F", "G"].map((c) => (
+                  <option key={c} value={c}>Klasse {c}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="CO₂-Emissionen komb. (g/km)">
+              <input
+                type="number"
+                className="input"
+                value={form.co2Emissions}
+                onChange={(e) => set("co2Emissions", e.target.value)}
+                placeholder="z.B. 142"
+              />
+            </Field>
+            {form.fuelType !== "Elektro" && (
+              <Field label="Kraftstoffverbrauch komb. (l/100 km)">
+                <input
+                  type="number"
+                  step="0.1"
+                  className="input"
+                  value={form.consumptionCombined}
+                  onChange={(e) => set("consumptionCombined", e.target.value)}
+                  placeholder="z.B. 6.2"
+                />
+              </Field>
+            )}
+            {(form.fuelType === "Elektro" || form.fuelType === "Hybrid") && (
+              <Field label="Stromverbrauch komb. (kWh/100 km)">
+                <input
+                  type="number"
+                  step="0.1"
+                  className="input"
+                  value={form.powerConsumption}
+                  onChange={(e) => set("powerConsumption", e.target.value)}
+                  placeholder="z.B. 17.5"
+                />
+              </Field>
+            )}
+          </div>
+        )}
+
+        {step === 1 && <AiInseratAssistant form={form} />}
+
+
+
+
+
+        {step === 2 && (
+          <div className="space-y-6">
+            <div className="grid gap-5 md:grid-cols-3">
+              <Field label="Preis (€)">
+                <input
+                  type="number"
+                  className="input"
+                  value={form.price}
+                  onChange={(e) => set("price", e.target.value)}
+                  placeholder="34890"
+                />
+              </Field>
+              <Field label="Finanzierung ab (€/Monat)">
+                <input
+                  type="number"
+                  className="input"
+                  value={form.financingMonthly}
+                  onChange={(e) => set("financingMonthly", e.target.value)}
+                  placeholder="249"
+                />
+              </Field>
+              <label className="flex cursor-pointer items-end gap-3 rounded-xl border border-border/60 bg-background/60 px-4 py-3">
+                <input
+                  type="checkbox"
+                  checked={form.vatDeductible}
+                  onChange={(e) => set("vatDeductible", e.target.checked)}
+                  className="h-4 w-4 accent-primary"
+                />
+                <span className="text-sm">MwSt. ausweisbar</span>
+              </label>
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Fahrzeugbilder
+              </p>
+              <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border/60 bg-background/40 px-6 py-10 text-center transition hover:border-primary/60 hover:bg-primary/5">
+                <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                <span className="text-sm font-medium">Bilder hochladen</span>
+                <span className="text-xs text-muted-foreground">PNG, JPG bis 10 MB · Mehrfachauswahl möglich</span>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleFiles(e.target.files)}
+                />
+              </label>
+
+              {images.length > 0 && (
+                <div className="mt-4 grid grid-cols-3 gap-3 md:grid-cols-6">
+                  {images.map((src, i) => (
+                    <div key={i} className="relative aspect-square overflow-hidden rounded-lg border border-border/60">
+                      <img src={src} alt="" className="h-full w-full object-cover" />
+                      <button
+                        onClick={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
+                        className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-background/80 text-foreground"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="mt-8 flex items-center justify-between gap-3 border-t border-border/60 pt-6">
+          <button
+            onClick={() => setStep((s) => Math.max(0, s - 1))}
+            disabled={step === 0}
+            className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm text-muted-foreground transition hover:text-foreground disabled:opacity-40"
+          >
+            <ArrowLeft className="h-4 w-4" /> Zurück
+          </button>
+          {step < steps.length - 1 ? (
+            <button
+              onClick={() => setStep((s) => s + 1)}
+              className="flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-glow)] transition hover:brightness-110"
+            >
+              Weiter <ArrowRight className="h-4 w-4" />
+            </button>
+          ) : (
+            <button
+              onClick={submit}
+              className="flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-glow)] transition hover:brightness-110"
+            >
+              <CheckCircle2 className="h-4 w-4" /> Fahrzeug veröffentlichen
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- AI Inserat-Assistent ---------------- */
+
+function AiInseratAssistant({ form }: { form: FormState }) {
+  const [loading, setLoading] = useState(false);
+  const [text, setText] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  function generate() {
+    setLoading(true);
+    setText("");
+    setCopied(false);
+    setTimeout(() => {
+      setText(buildInseratText(form));
+      setLoading(false);
+    }, 2000);
+  }
+
+  async function copyText() {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      /* noop */
+    }
+  }
+
+  return (
+    <div className="mt-8 overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/5 via-background to-background p-6 shadow-sm">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
+            <Sparkles className="h-5 w-5" />
+          </span>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-display text-lg font-semibold">KI-Inserats-Assistent</h3>
+              <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
+                Beta
+              </span>
+            </div>
+            <p className="mt-1 max-w-md text-sm text-muted-foreground">
+              Emotionalen, suchmaschinenoptimierten deutschen Verkaufstext aus den Fahrzeugdaten erzeugen.
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={generate}
+          disabled={loading}
+          style={{ minWidth: "22rem" }}
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-wider text-primary-foreground shadow-[var(--shadow-glow)] transition hover:brightness-110 disabled:cursor-wait disabled:opacity-80"
+        >
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+          {loading ? "KI generiert…" : "Verkaufstext generieren"}
+        </button>
+      </div>
+
+      <div className="relative mt-5">
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          rows={8}
+          placeholder="Hier erscheint der von der KI generierte Verkaufstext – feinjustierbar, bevor Sie ihn übernehmen."
+          className="input min-h-[180px] resize-y leading-relaxed"
+        />
+        {loading && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-xl bg-background/70 backdrop-blur-sm">
+            <div className="flex items-center gap-3 rounded-full border border-primary/30 bg-background/90 px-4 py-2 text-sm font-medium text-primary shadow-sm">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              KI generiert Text für Auto Semmel…
+            </div>
+          </div>
+        )}
+      </div>
+
+      {text && !loading && (
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs text-muted-foreground">
+            Tipp: Bitte vor Veröffentlichung kurz prüfen – die KI generiert auf Basis Ihrer Eingaben.
+          </p>
+          <button
+            type="button"
+            onClick={copyText}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border/70 bg-background px-3 py-1.5 text-xs font-semibold transition hover:border-primary hover:text-primary"
+          >
+            {copied ? <Check className="h-3.5 w-3.5 text-primary" /> : <Copy className="h-3.5 w-3.5" />}
+            {copied ? "Kopiert" : "Text kopieren"}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function buildInseratText(f: FormState): string {
+  const brand = f.brand || "Italiener";
+  const model = f.model || "Modell";
+  const version = f.version ? ` ${f.version}` : "";
+  const ps = f.powerHp ? `${f.powerHp} PS` : "kraftvoller Motorisierung";
+  const km = f.mileage ? `${Number(f.mileage).toLocaleString("de-DE")} km` : "geringer Laufleistung";
+  const fuel = f.fuelType;
+  const gear = f.transmission;
+  const features = f.features
+    ? f.features.split(",").map((s) => s.trim()).filter(Boolean).slice(0, 4).join(", ")
+    : "Matrix-LED, edle Alufelgen und ein Interieur, das Luxus neu definiert";
+
+  if (brand === "Alfa Romeo") {
+    return `Erleben Sie echte italienische Passion! Dieser wunderschöne ${brand} ${model}${version} vereint bahnbrechende ${fuel}-Technologie (${ps}, ${gear}) mit der unvergleichlichen Dynamik der Traditionsmarke aus Mailand. Perfekt gepflegt, nur ${km} – sofort verfügbar in Langenselbold. Highlights: ${features}. Vereinbaren Sie jetzt Ihre persönliche Probefahrt bei Auto Semmel – Ihrem Stellantis-Partner im Main-Kinzig-Kreis. La Passione wartet auf Sie!`;
+  }
+  if (brand === "Abarth") {
+    return `Adrenalin in Reinkultur: Der ${brand} ${model}${version} ist kein Auto – er ist ein Statement. ${ps}, ${gear}, kompromisslose Performance und der unverwechselbare Skorpion-Sound. Mit nur ${km} und ${fuel}-Antrieb ist dieses Sammlerstück sofort fahrbereit. Ausstattung der Extraklasse: ${features}. Erleben Sie italienische Rennsport-DNA live in Langenselbold – jetzt Probefahrt bei Auto Semmel sichern!`;
+  }
+  if (brand === "Fiat Professional") {
+    return `Ihr zuverlässiger Partner für jedes Projekt: Der ${brand} ${model}${version} überzeugt mit ${ps} ${fuel}, ${gear} und nur ${km} – wirtschaftlich, robust und sofort einsatzbereit. Ausstattung: ${features}. Profitieren Sie von 40+ Jahren Stellantis-Kompetenz bei Auto Semmel in Langenselbold. Vereinbaren Sie jetzt einen Beratungstermin – wir konfigurieren Ihre Mobilität.`;
+  }
+  return `Pure italienische Lebensfreude: Der ${brand} ${model}${version} bringt mediterranen Charme auf deutsche Straßen. ${ps} ${fuel}, ${gear}, gepflegte ${km} – ein echtes Lifestyle-Statement aus Turin. Highlights: ${features}. Jetzt entdecken bei Auto Semmel in Langenselbold – Ihrem Partner für italienische Automobil-Kultur im Main-Kinzig-Kreis. Vereinbaren Sie heute Ihre Probefahrt!`;
+}
+
+
+function Stepper({ step, labels }: { step: number; labels: string[] }) {
+  return (
+    <ol className="flex items-center gap-3">
+      {labels.map((label, i) => {
+        const active = i === step;
+        const done = i < step;
+        return (
+          <li key={label} className="flex flex-1 items-center gap-3">
+            <div
+              className={`grid h-9 w-9 shrink-0 place-items-center rounded-full border text-sm font-semibold transition ${
+                active
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : done
+                  ? "border-emerald-500/60 bg-emerald-500/15 text-emerald-700"
+                  : "border-border/60 bg-card text-muted-foreground"
+              }`}
+            >
+              {done ? <CheckCircle2 className="h-4 w-4" /> : i + 1}
+            </div>
+            <span className={`hidden text-sm md:inline ${active ? "text-foreground" : "text-muted-foreground"}`}>
+              {label}
+            </span>
+            {i < labels.length - 1 && <div className="h-px flex-1 bg-border/60" />}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+/* ---------------- API status ---------------- */
+
+function ApiStatus() {
+  const [autoImport, setAutoImport] = useState(true);
+  return (
+    <div className="space-y-6">
+      {/* Headline widget — Mobile.de */}
+      <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-card/40 p-6 sm:p-8">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(185,14,10,0.16),_transparent_60%)]" />
+        <div className="relative">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/15 text-primary">
+                <Database className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+                  Listing Sync
+                </p>
+                <h3 className="font-display text-xl font-semibold">
+                  Mobile.de Echtzeit-Synchronisation
+                </h3>
+              </div>
+            </div>
+            <span className="relative flex items-center gap-2 rounded-full bg-emerald-500/15 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              </span>
+              Status: Live-API verbunden (Synchronisiert)
+            </span>
+          </div>
+
+          {/* Micro-dashboard */}
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            {[
+              { label: "Fahrzeuge importiert", value: "84", tone: "text-foreground" },
+              { label: "Letzter Sync", value: "vor 12 Min.", tone: "text-foreground" },
+              { label: "Sync-Fehler", value: "0", tone: "text-emerald-700" },
+            ].map((m) => (
+              <div
+                key={m.label}
+                className="rounded-xl border border-border/60 bg-background/40 p-4 transition hover:border-primary/40 hover:shadow-sm"
+              >
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{m.label}</p>
+                <p className={`mt-1 font-display text-2xl font-semibold ${m.tone}`}>{m.value}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Auto-import toggle */}
+          <div className="mt-6 grid gap-4 rounded-xl border border-border/60 bg-background/40 p-5 sm:grid-cols-[1fr_auto] sm:items-center">
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-medium text-foreground">Automatischer täglicher Import</p>
+                <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-700">
+                  Aktiv
+                </span>
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Synchronisiert Bestand, Bilder und Preise jede Nacht automatisch aus Mobile.de.
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={autoImport}
+              onClick={() => setAutoImport((v) => !v)}
+              className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors duration-300 ${
+                autoImport ? "bg-primary" : "bg-muted/60"
+              }`}
+            >
+              <span
+                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform duration-300 ${
+                  autoImport ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Connection details */}
+          <ul className="mt-5 grid gap-2 text-sm sm:grid-cols-2">
+            <Row label="Endpoint" value="services.mobile.de/seller-api/v1" />
+            <Row label="Authentifizierung" value="Basic Auth · Händler-Key" />
+            <Row label="Letzter Sync" value="Heute, vor 12 Min." />
+            <Row label="Inserate synchronisiert" value="84 / 84" />
+          </ul>
+
+          {/* Info box */}
+          <div className="mt-6 flex gap-3 rounded-xl border border-primary/30 bg-primary/10 p-4 text-sm">
+            <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+            <p className="leading-relaxed text-foreground/90">
+              <span className="font-semibold text-primary">Vorteil für Auto Semmel: </span>
+              Sobald Ihr Mobile.de-Händler-Key hinterlegt ist, werden alle Fahrzeuge
+              vollautomatisch synchronisiert. Manuelle Pflege entfällt.
+            </p>
+          </div>
+
+          <button className="mt-6 inline-flex items-center gap-2 rounded-lg border border-primary/60 bg-primary/10 px-4 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary/20">
+            <KeyRound className="h-4 w-4" /> Händler-Key hinterlegen
+          </button>
+        </div>
+      </div>
+
+      {/* Synchronisations-Log */}
+      <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/40">
+        <div className="flex items-center justify-between border-b border-border/60 px-6 py-4">
+          <div className="flex items-center gap-3">
+            <span className="grid h-9 w-9 place-items-center rounded-lg bg-emerald-500/15 text-emerald-700">
+              <Activity className="h-4 w-4" />
+            </span>
+            <div>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Synchronisations-Log
+              </p>
+              <h3 className="font-display text-base font-semibold">Mobile.de Import-Historie</h3>
+            </div>
+          </div>
+          <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-medium text-emerald-700">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+            Aktiv
+          </span>
+        </div>
+        <ul className="divide-y divide-border/40 text-sm">
+          {[
+            {
+              when: "15:32:10",
+              msg: "Sync: Alfa Romeo Tonale data updated",
+              detail: "Price change detected on mobile.de · 38.900 € → 37.450 €",
+              ok: true,
+            },
+            {
+              when: "15:30:15",
+              msg: "Sync: Fiat 500e photos successfully refreshed",
+              detail: "12 neue Bilder · 4 ersetzt",
+              ok: true,
+            },
+            {
+              when: "14:15:02",
+              msg: "Sync: Fiat Ducato successfully imported as new vehicle",
+              detail: "Kastenwagen L2H2 140 Multijet · ID #MD-84019",
+              ok: true,
+            },
+            {
+              when: "Heute, 06:00",
+              msg: "Nightly Full-Sync",
+              detail: "84 Fahrzeuge geprüft · Preise aktualisiert",
+              ok: true,
+            },
+            {
+              when: "Gestern, 06:00",
+              msg: "Nightly Full-Sync",
+              detail: "82 Fahrzeuge geprüft · 2 neu · 7 Bilder aktualisiert",
+              ok: true,
+            },
+          ].map((entry, i) => (
+            <li key={i} className="flex flex-wrap items-start gap-4 px-6 py-4 transition hover:bg-muted/30">
+              <span
+                className={`mt-1 h-2 w-2 shrink-0 rounded-full ${
+                  entry.ok ? "bg-emerald-500" : "bg-amber-500"
+                }`}
+              />
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <p className="font-medium text-foreground">{entry.msg}</p>
+                  <span className="font-mono text-[11px] text-muted-foreground">{entry.when}</span>
+                </div>
+                <p className="mt-0.5 text-xs text-muted-foreground">{entry.detail}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <div className="border-t border-border/60 bg-background/30 px-6 py-3 text-[11px] text-muted-foreground">
+          Demo-Daten für die Präsentation · Live-Sync aktiviert sich automatisch, sobald der
+          Händler-Key hinterlegt ist.
+        </div>
+      </div>
+
+
+      {/* Secondary integrations */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        <StatusCard
+          title="Lovable Cloud Datenbank"
+          subtitle="Vehicle storage"
+          icon={<Database className="h-5 w-5" />}
+          status="ready"
+          statusLabel="Bereit"
+          desc="Schema definiert. Bereit zum Migrieren des lokalen Bestands."
+        />
+        <StatusCard
+          title="DAT / Schwacke Bewertung"
+          subtitle="Ankauf-Modul"
+          icon={<Activity className="h-5 w-5" />}
+          status="standby"
+          statusLabel="Geplant"
+          desc="Automatische Fahrzeugbewertung für Ankaufsanfragen."
+        />
+        <StatusCard
+          title="Stellantis Händlerportal"
+          subtitle="Bestands-Import"
+          icon={<ShieldCheck className="h-5 w-5" />}
+          status="ready"
+          statusLabel="Verbunden"
+          desc="Neuwagen-Konfigurationen werden täglich aktualisiert."
+        />
+      </div>
+    </div>
+  );
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <li className="flex items-center justify-between border-b border-border/40 pb-2 last:border-0">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-mono text-xs">{value}</span>
+    </li>
+  );
+}
+
+function StatusCard({
+  title,
+  subtitle,
+  icon,
+  status,
+  statusLabel,
+  desc,
+}: {
+  title: string;
+  subtitle: string;
+  icon: React.ReactNode;
+  status: "ready" | "standby";
+  statusLabel: string;
+  desc: string;
+}) {
+  const cls =
+    status === "ready"
+      ? "bg-emerald-500/15 text-emerald-700"
+      : "bg-amber-500/15 text-amber-700";
+  const dot = status === "ready" ? "bg-emerald-400" : "bg-amber-400";
+  return (
+    <div className="rounded-2xl border border-border/60 bg-card/40 p-5">
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="grid h-10 w-10 place-items-center rounded-lg bg-muted/50 text-foreground">{icon}</div>
+          <div>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{subtitle}</p>
+            <p className="font-medium">{title}</p>
+          </div>
+        </div>
+        <span className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${cls}`}>
+          <span className={`h-1.5 w-1.5 rounded-full ${dot}`} /> {statusLabel}
+        </span>
+      </div>
+      <p className="text-sm text-muted-foreground">{desc}</p>
+    </div>
+  );
+}
+
+/* ---------------- Leads inbox ---------------- */
+
+const LEAD_TYPE_META: Record<Lead["type"], { icon: typeof Car; tint: string; label: string }> = {
+  Probefahrt: { icon: Car, tint: "bg-primary/15 text-primary", label: "Probefahrt" },
+  Werkstattermin: { icon: Wrench, tint: "bg-blue-500/15 text-blue-400", label: "Werkstatt" },
+  Fahrzeugankauf: { icon: Euro, tint: "bg-emerald-500/15 text-emerald-700", label: "Ankauf" },
+  Kontakt: { icon: Mail, tint: "bg-muted/40 text-foreground", label: "Kontakt" },
+};
+
+const STATUS_META: Record<LeadStatus, string> = {
+  Neu: "bg-primary/15 text-primary",
+  "In Bearbeitung": "bg-amber-500/15 text-amber-700",
+  Erledigt: "bg-emerald-500/15 text-emerald-700",
+};
+
+function formatAgo(ts: number) {
+  const diff = Math.floor((Date.now() - ts) / 1000);
+  if (diff < 60) return "gerade eben";
+  if (diff < 3600) return `vor ${Math.floor(diff / 60)} Min`;
+  if (diff < 86400) return `vor ${Math.floor(diff / 3600)} Std`;
+  return `vor ${Math.floor(diff / 86400)} Tagen`;
+}
+
+function LeadsInbox({ leads }: { leads: Lead[] }) {
+  const [filter, setFilter] = useState<"Alle" | LeadStatus>("Alle");
+  const [selectedId, setSelectedId] = useState<string | null>(leads[0]?.id ?? null);
+
+  const filtered = useMemo(
+    () => (filter === "Alle" ? leads : leads.filter((l) => l.status === filter)),
+    [leads, filter],
+  );
+  const selected = filtered.find((l) => l.id === selectedId) ?? filtered[0] ?? null;
+
+  const counts = {
+    Alle: leads.length,
+    Neu: leads.filter((l) => l.status === "Neu").length,
+    "In Bearbeitung": leads.filter((l) => l.status === "In Bearbeitung").length,
+    Erledigt: leads.filter((l) => l.status === "Erledigt").length,
+  };
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+      <div className="space-y-3">
+        <div className="flex flex-wrap gap-2">
+          {(["Alle", "Neu", "In Bearbeitung", "Erledigt"] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                filter === f
+                  ? "border-primary bg-primary/10 text-foreground"
+                  : "border-border/60 text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {f} <span className="ml-1 text-muted-foreground">{counts[f]}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/40">
+          {filtered.length === 0 && (
+            <div className="p-10 text-center text-sm text-muted-foreground">Keine Anfragen.</div>
+          )}
+          <ul className="divide-y divide-border/40">
+            {filtered.map((l) => {
+              const meta = LEAD_TYPE_META[l.type];
+              const Icon = meta.icon;
+              const active = selected?.id === l.id;
+              const isTopNew = l.status === "Neu" && filtered.find((x) => x.status === "Neu")?.id === l.id;
+              return (
+                <li
+                  key={l.id}
+                  className={
+                    isTopNew
+                      ? "relative bg-gradient-to-r from-primary/10 via-primary/5 to-transparent ring-1 ring-inset ring-primary/30 animate-fade-in"
+                      : ""
+                  }
+                >
+                  {isTopNew && (
+                    <span className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-primary" />
+                  )}
+                  <button
+                    onClick={() => setSelectedId(l.id)}
+                    className={`flex w-full items-start gap-3 px-4 py-4 text-left transition-colors duration-200 ${
+                      active && !isTopNew ? "bg-primary/5" : !isTopNew ? "hover:bg-muted/30" : "hover:bg-primary/10"
+                    }`}
+                  >
+                    <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg ${meta.tint}`}>
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="truncate text-sm font-medium">
+                          {isTopNew && (
+                            <span className="mr-1.5 rounded bg-primary px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary-foreground">
+                              Neu
+                            </span>
+                          )}
+                          {l.name}
+                        </p>
+                        <span className="shrink-0 text-[10px] text-muted-foreground">{formatAgo(l.createdAt)}</span>
+                      </div>
+                      <p className={`mt-0.5 truncate text-xs ${isTopNew ? "text-foreground/80 font-medium" : "text-muted-foreground"}`}>{l.subject}</p>
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${STATUS_META[l.status]}`}>
+                          {l.status}
+                        </span>
+                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{meta.label}</span>
+                      </div>
+                    </div>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </div>
+
+      {selected ? (
+        <LeadDetail lead={selected} />
+      ) : (
+        <div className="grid place-items-center rounded-2xl border border-dashed border-border/60 bg-card/30 p-12 text-center text-sm text-muted-foreground">
+          Wählen Sie eine Anfrage links aus.
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LeadDetail({ lead }: { lead: Lead }) {
+  const meta = LEAD_TYPE_META[lead.type];
+  const Icon = meta.icon;
+  return (
+    <div className="rounded-2xl border border-border/60 bg-card/40 p-6 lg:p-8">
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border/60 pb-5">
+        <div className="flex items-start gap-3">
+          <span className={`grid h-11 w-11 place-items-center rounded-xl ${meta.tint}`}>
+            <Icon className="h-5 w-5" />
+          </span>
+          <div>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              {meta.label} · {formatAgo(lead.createdAt)}
+            </p>
+            <h3 className="font-display text-xl font-semibold">{lead.subject}</h3>
+          </div>
+        </div>
+        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_META[lead.status]}`}>
+          {lead.status}
+        </span>
+      </div>
+
+      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+        <div className="rounded-lg border border-border/60 bg-background/40 p-3">
+          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Kunde</div>
+          <div className="mt-1 font-medium">{lead.name}</div>
+        </div>
+        {lead.phone && (
+          <a
+            href={`tel:${lead.phone}`}
+            className="flex items-center gap-2 rounded-lg border border-border/60 bg-background/40 p-3 transition hover:border-primary/60"
+          >
+            <Phone className="h-4 w-4 text-primary" />
+            <div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Telefon</div>
+              <div className="text-sm font-medium">{lead.phone}</div>
+            </div>
+          </a>
+        )}
+        {lead.email && (
+          <a
+            href={`mailto:${lead.email}`}
+            className="flex items-center gap-2 rounded-lg border border-border/60 bg-background/40 p-3 transition hover:border-primary/60 sm:col-span-2"
+          >
+            <Mail className="h-4 w-4 text-primary" />
+            <div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">E-Mail</div>
+              <div className="text-sm font-medium">{lead.email}</div>
+            </div>
+          </a>
+        )}
+      </div>
+
+      <div className="mt-5">
+        <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Details
+        </div>
+        <dl className="overflow-hidden rounded-lg border border-border/60 bg-background/40 text-sm">
+          {Object.entries(lead.details).map(([k, v], i, arr) => (
+            <div
+              key={k}
+              className={`grid grid-cols-[140px_1fr] gap-2 px-4 py-2.5 ${
+                i < arr.length - 1 ? "border-b border-border/40" : ""
+              }`}
+            >
+              <dt className="text-muted-foreground">{k}</dt>
+              <dd className="text-foreground">{v}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-border/60 pt-5">
+        <span className="text-xs text-muted-foreground">Status ändern:</span>
+        {(["Neu", "In Bearbeitung", "Erledigt"] as LeadStatus[]).map((s) => (
+          <button
+            key={s}
+            onClick={() => leadsStore.setStatus(lead.id, s)}
+            disabled={lead.status === s}
+            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+              lead.status === s
+                ? "border-primary bg-primary/10 text-foreground"
+                : "border-border/60 text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {s}
+          </button>
+        ))}
+        <button
+          onClick={() => {
+            if (confirm("Anfrage wirklich löschen?")) leadsStore.remove(lead.id);
+          }}
+          className="ml-auto flex items-center gap-1.5 rounded-lg border border-border/60 px-3 py-1.5 text-xs text-muted-foreground transition hover:border-primary/60 hover:text-primary"
+        >
+          <Trash2 className="h-3.5 w-3.5" /> Löschen
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- KPI Header ---------------- */
+
+function KpiHeader({ vehicleCount: _vehicleCount, openLeads }: { vehicleCount: number; openLeads: number }) {
+  // Static demo values for the pitch; openLeads still reflects live data when > 0
+  const leadsValue = openLeads > 0 ? openLeads : 5;
+  return (
+    <div className="mb-8 grid gap-4 md:grid-cols-3">
+      <KpiCard
+        icon={<Car className="h-4 w-4" />}
+        label="Fahrzeug-Bestand Gesamt"
+        value="84 Fahrzeuge"
+        sub="Synchronisiert mit mobile.de"
+      />
+      <KpiCard
+        icon={<Inbox className="h-4 w-4" />}
+        label="Aktive Kundenanfragen"
+        value={`${leadsValue} Leads offen`}
+        sub="Letzte Anfrage vor 12 Min."
+        pulse
+      />
+      <KpiCard
+        icon={<TrendingUp className="h-4 w-4" />}
+        label="Bestandswert (Brutto)"
+        value="1.489.600 €"
+        sub="Durchschnittspreis: 17.733 €"
+      />
+    </div>
+  );
+}
+
+function KpiCard({
+  icon,
+  label,
+  value,
+  sub,
+  pulse,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  sub: string;
+  pulse?: boolean;
+}) {
+  return (
+    <div className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card/60 p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md">
+      <div className="mb-3 flex items-center justify-between text-xs uppercase tracking-widest text-muted-foreground">
+        <span className="flex items-center gap-2">
+          <span className="grid h-7 w-7 place-items-center rounded-lg bg-muted/60 text-foreground/80">{icon}</span>
+          {label}
+        </span>
+        {pulse && (
+          <span className="relative inline-flex h-2.5 w-2.5">
+            <span className="absolute inset-0 animate-ping rounded-full bg-primary/60" />
+            <span className="relative inline-block h-2.5 w-2.5 rounded-full bg-primary" />
+          </span>
+        )}
+      </div>
+      <p className="font-display text-2xl font-semibold leading-tight">{value}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{sub}</p>
+    </div>
+  );
+}
+
+/* ---------------- Werkstatt-Planer ---------------- */
+
+type SlotColor = "blue" | "purple" | "green" | "amber";
+type Appointment = {
+  id: string;
+  day: number;
+  time: string;
+  title: string;
+  sub: string;
+  color: SlotColor;
+  cancelled?: boolean;
+  customerName?: string;
+  customerEmail?: string;
+};
+
+type NotificationKind = "created" | "rescheduled" | "cancelled" | "reactivated" | "deleted" | "updated";
+type NotificationEntry = {
+  id: string;
+  kind: NotificationKind;
+  to: string;
+  customerName: string;
+  subject: string;
+  preview: string;
+  appointmentTitle: string;
+  when: string; // ISO
+};
+
+const DAYS = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"];
+const SLOTS = ["08:00", "10:00", "13:00", "15:00"];
+
+const COLOR_CLASSES: Record<SlotColor, string> = {
+  blue: "border-sky-200 bg-sky-50 text-sky-900",
+  purple: "border-violet-200 bg-violet-50 text-violet-900",
+  green: "border-emerald-200 bg-emerald-50 text-emerald-900",
+  amber: "border-amber-200 bg-amber-50 text-amber-900",
+};
+
+const COLOR_OPTIONS: { value: SlotColor; label: string }[] = [
+  { value: "blue", label: "Blau · Inspektion" },
+  { value: "purple", label: "Violett · HU/AU" },
+  { value: "green", label: "Grün · Reifen" },
+  { value: "amber", label: "Bernstein · Sonstiges" },
+];
+
+const KIND_META: Record<NotificationKind, { label: string; dot: string; verb: string }> = {
+  created: { label: "Bestätigt", dot: "bg-emerald-500", verb: "wurde bestätigt" },
+  rescheduled: { label: "Verschoben", dot: "bg-sky-500", verb: "wurde verschoben" },
+  updated: { label: "Aktualisiert", dot: "bg-violet-500", verb: "wurde aktualisiert" },
+  cancelled: { label: "Abgesagt", dot: "bg-amber-500", verb: "wurde abgesagt" },
+  reactivated: { label: "Reaktiviert", dot: "bg-emerald-500", verb: "wurde reaktiviert" },
+  deleted: { label: "Gelöscht", dot: "bg-red-500", verb: "wurde storniert" },
+};
+
+const emptyDraft = (): Omit<Appointment, "id"> => ({
+  day: 0,
+  time: "08:00",
+  title: "",
+  sub: "",
+  color: "amber",
+  cancelled: false,
+  customerName: "",
+  customerEmail: "",
+});
+
+function WerkstattPlaner() {
+  const [appointments, setAppointments] = useState<Appointment[]>([
+    { id: "a1", day: 0, time: "08:00", title: "Inspektion & Ölwechsel", sub: "Fiat 500 · MKK-AS 120", color: "blue", customerName: "Markus Becker", customerEmail: "m.becker@example.de" },
+    { id: "a2", day: 1, time: "15:00", title: "HU/AU Hauptuntersuchung", sub: "Alfa Romeo Stelvio", color: "purple", customerName: "Sabine Schulz", customerEmail: "sabine.s@example.de" },
+    { id: "a3", day: 3, time: "10:00", title: "Reifenwechsel (Winter/Sommer)", sub: "Fiat Ducato", color: "green", customerName: "Thomas Klein", customerEmail: "t.klein@example.de" },
+  ]);
+  const [notifications, setNotifications] = useState<NotificationEntry[]>([]);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draft, setDraft] = useState<Omit<Appointment, "id">>(emptyDraft());
+  const [conflictError, setConflictError] = useState<string | null>(null);
+  const [syncOpen, setSyncOpen] = useState(false);
+
+  const notify = (apt: Appointment, kind: NotificationKind, extra?: { oldSlot?: string }) => {
+    const email = (apt.customerEmail || "").trim();
+    const name = (apt.customerName || "").trim() || "Kunde/in";
+    const slot = `${DAYS[apt.day]}, ${apt.time} Uhr`;
+    const subjectMap: Record<NotificationKind, string> = {
+      created: `Terminbestätigung: ${apt.title} – ${slot}`,
+      rescheduled: `Ihr Werkstatttermin wurde verschoben – jetzt ${slot}`,
+      updated: `Aktualisierung zu Ihrem Werkstatttermin (${slot})`,
+      cancelled: `Absage: ${apt.title} (${slot})`,
+      reactivated: `Ihr Termin wurde wieder bestätigt – ${slot}`,
+      deleted: `Stornierung: ${apt.title} (${slot})`,
+    };
+    const previewMap: Record<NotificationKind, string> = {
+      created: `Guten Tag ${name}, wir bestätigen Ihren Termin "${apt.title}" am ${slot} in der Auto Semmel Werkstatt, Gelnhäuser Straße 40, Langenselbold.`,
+      rescheduled: `Guten Tag ${name}, Ihr Termin "${apt.title}" wurde von ${extra?.oldSlot ?? "—"} auf ${slot} verschoben. Bei Fragen erreichen Sie uns unter 06184 / 12 34.`,
+      updated: `Guten Tag ${name}, wir haben Details zu Ihrem Termin am ${slot} ("${apt.title}") aktualisiert.`,
+      cancelled: `Guten Tag ${name}, leider müssen wir Ihren Termin "${apt.title}" am ${slot} absagen. Wir melden uns für einen Ersatztermin.`,
+      reactivated: `Guten Tag ${name}, Ihr Termin "${apt.title}" am ${slot} wurde reaktiviert und ist wieder bestätigt.`,
+      deleted: `Guten Tag ${name}, der Termin "${apt.title}" (${slot}) wurde aus unserem System entfernt.`,
+    };
+    const entry: NotificationEntry = {
+      id: `n${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      kind,
+      to: email || "—",
+      customerName: name,
+      subject: subjectMap[kind],
+      preview: previewMap[kind],
+      appointmentTitle: apt.title,
+      when: new Date().toISOString(),
+    };
+    setNotifications((list) => [entry, ...list].slice(0, 20));
+    const meta = KIND_META[kind];
+    if (email) {
+      toast.success(`E-Mail an ${name} gesendet`, {
+        description: `${apt.title} ${meta.verb} · ${slot}`,
+        icon: <Mail className="h-4 w-4" />,
+      });
+    } else {
+      toast(`Termin ${meta.verb.toLowerCase()}`, {
+        description: `Keine Kunden-E-Mail hinterlegt – Benachrichtigung nur protokolliert.`,
+      });
+    }
+  };
+
+  const findApt = (day: number, time: string) =>
+    appointments.find((a) => a.day === day && a.time === time);
+
+
+  const openCreate = (day = 0, time = "08:00") => {
+    setEditingId(null);
+    setDraft({ ...emptyDraft(), day, time });
+    setConflictError(null);
+    setEditorOpen(true);
+  };
+
+  const openEdit = (apt: Appointment) => {
+    setEditingId(apt.id);
+    setDraft({
+      day: apt.day,
+      time: apt.time,
+      title: apt.title,
+      sub: apt.sub,
+      color: apt.color,
+      cancelled: apt.cancelled,
+      customerName: apt.customerName ?? "",
+      customerEmail: apt.customerEmail ?? "",
+    });
+    setConflictError(null);
+    setEditorOpen(true);
+  };
+
+  const closeEditor = () => {
+    setEditorOpen(false);
+    setEditingId(null);
+    setConflictError(null);
+  };
+
+  const save = () => {
+    if (!draft.title.trim()) {
+      setConflictError("Bitte einen Service-Titel eintragen.");
+      return;
+    }
+    if (draft.customerEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.customerEmail.trim())) {
+      setConflictError("Bitte eine gültige Kunden-E-Mail eintragen (oder leer lassen).");
+      return;
+    }
+    const clash = appointments.find(
+      (a) => a.day === draft.day && a.time === draft.time && a.id !== editingId,
+    );
+    if (clash) {
+      setConflictError(`Slot belegt: ${DAYS[draft.day]} ${draft.time} · ${clash.title}`);
+      return;
+    }
+    if (editingId) {
+      const prev = appointments.find((a) => a.id === editingId);
+      setAppointments((list) => list.map((a) => (a.id === editingId ? { ...a, ...draft } : a)));
+      if (prev) {
+        const moved = prev.day !== draft.day || prev.time !== draft.time;
+        const updated: Appointment = { ...prev, ...draft, id: prev.id };
+        notify(
+          updated,
+          moved ? "rescheduled" : "updated",
+          moved ? { oldSlot: `${DAYS[prev.day]}, ${prev.time} Uhr` } : undefined,
+        );
+      }
+    } else {
+      const created: Appointment = { id: `a${Date.now()}`, ...draft };
+      setAppointments((list) => [...list, created]);
+      notify(created, "created");
+    }
+    closeEditor();
+  };
+
+  const removeApt = (id: string) => {
+    const apt = appointments.find((a) => a.id === id);
+    setAppointments((list) => list.filter((a) => a.id !== id));
+    if (apt) notify(apt, "deleted");
+    if (editingId === id) closeEditor();
+  };
+
+  const toggleCancel = (id: string) => {
+    const apt = appointments.find((a) => a.id === id);
+    setAppointments((list) => list.map((a) => (a.id === id ? { ...a, cancelled: !a.cancelled } : a)));
+    if (apt) notify({ ...apt, cancelled: !apt.cancelled }, apt.cancelled ? "reactivated" : "cancelled");
+  };
+
+  const moveApt = (id: string, deltaDay: number, deltaSlot: number) => {
+    const apt = appointments.find((a) => a.id === id);
+    if (!apt) return;
+    const newDay = Math.min(DAYS.length - 1, Math.max(0, apt.day + deltaDay));
+    const idx = SLOTS.indexOf(apt.time);
+    const newSlot = Math.min(SLOTS.length - 1, Math.max(0, idx + deltaSlot));
+    const newTime = SLOTS[newSlot];
+    if (newDay === apt.day && newTime === apt.time) return;
+    if (appointments.some((a) => a.id !== id && a.day === newDay && a.time === newTime)) {
+      toast.error("Slot belegt", { description: `${DAYS[newDay]} ${newTime} ist bereits vergeben.` });
+      return;
+    }
+    const oldSlot = `${DAYS[apt.day]}, ${apt.time} Uhr`;
+    const moved: Appointment = { ...apt, day: newDay, time: newTime };
+    setAppointments((list) => list.map((a) => (a.id === id ? moved : a)));
+    notify(moved, "rescheduled", { oldSlot });
+  };
+
+
+  const activeCount = appointments.filter((a) => !a.cancelled).length;
+
+  const exportICS = () => {
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const fmt = (d: Date) =>
+      `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}00Z`;
+    const esc = (s: string) => (s || "").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+    // Anker: Montag der aktuellen Woche
+    const now = new Date();
+    const monday = new Date(now);
+    const dow = (now.getDay() + 6) % 7; // Mo=0
+    monday.setDate(now.getDate() - dow);
+    monday.setHours(0, 0, 0, 0);
+    const stamp = fmt(new Date());
+    const lines: string[] = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//Auto Semmel//Werkstatt-Planer//DE",
+      "CALSCALE:GREGORIAN",
+      "METHOD:PUBLISH",
+      "X-WR-CALNAME:Auto Semmel Werkstatt",
+      "X-WR-TIMEZONE:Europe/Berlin",
+    ];
+    appointments.filter((a) => !a.cancelled).forEach((a) => {
+      const [h, m] = a.time.split(":").map(Number);
+      const start = new Date(monday);
+      start.setDate(monday.getDate() + a.day);
+      start.setHours(h, m, 0, 0);
+      const end = new Date(start.getTime() + 90 * 60 * 1000);
+      lines.push(
+        "BEGIN:VEVENT",
+        `UID:${a.id}@auto-semmel.de`,
+        `DTSTAMP:${stamp}`,
+        `DTSTART:${fmt(start)}`,
+        `DTEND:${fmt(end)}`,
+        `SUMMARY:${esc(a.title)}`,
+        `DESCRIPTION:${esc(`${a.sub}${a.customerName ? ` · Kunde: ${a.customerName}` : ""}${a.customerEmail ? ` <${a.customerEmail}>` : ""}`)}`,
+        "LOCATION:Auto Semmel · Gelnhäuser Straße 40, 63505 Langenselbold",
+        "STATUS:CONFIRMED",
+        "END:VEVENT",
+      );
+    });
+    lines.push("END:VCALENDAR");
+    const blob = new Blob([lines.join("\r\n")], { type: "text/calendar;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `auto-semmel-werkstatt-${monday.toISOString().slice(0, 10)}.ics`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast.success("Kalender exportiert", { description: `${activeCount} Termine als .ics-Datei heruntergeladen.` });
+  };
+
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-3 py-1.5 text-xs text-muted-foreground">
+          <CalendarDays className="h-3.5 w-3.5" /> KW {Math.ceil(new Date().getDate() / 7)} · Werkstatt Langenselbold ·{" "}
+          <span className="font-semibold text-foreground">{activeCount}</span> aktive Termine
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={exportICS}
+            className="flex items-center gap-2 rounded-lg border border-border/70 bg-card/70 px-4 py-2 text-sm font-semibold text-foreground shadow-sm transition hover:border-primary/40 hover:bg-card"
+          >
+            <Download className="h-4 w-4 text-primary" /> Kalender exportieren (.ics)
+          </button>
+          <button
+            onClick={() => setSyncOpen(true)}
+            className="flex items-center gap-2 rounded-lg border border-border/70 bg-card/70 px-4 py-2 text-sm font-semibold text-foreground shadow-sm transition hover:border-primary/40 hover:bg-card"
+          >
+            <Link2 className="h-4 w-4 text-primary" /> Kalender-Synchronisation (iCal / Outlook)
+          </button>
+          <button
+            onClick={() => openCreate()}
+            className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
+          >
+            <Plus className="h-4 w-4" /> Manuellen Werkstattermin eintragen
+          </button>
+        </div>
+      </div>
+
+      {syncOpen && <CalendarSyncModal onClose={() => setSyncOpen(false)} />}
+
+      {editorOpen && (
+        <div className="rounded-2xl border border-border/60 bg-card/60 p-5 shadow-sm animate-fade-in">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-widest text-muted-foreground">
+                {editingId ? "Termin bearbeiten" : "Neuer Termin"}
+              </p>
+              <h3 className="font-display text-lg font-semibold">
+                {editingId ? draft.title || "Termin" : "Werkstattermin eintragen"}
+              </h3>
+            </div>
+            <button onClick={closeEditor} className="rounded-full p-1.5 text-muted-foreground transition hover:bg-muted/50 hover:text-foreground">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="grid gap-3 md:grid-cols-5">
+            <Field label="Tag">
+              <select className="input" value={draft.day} onChange={(e) => setDraft({ ...draft, day: Number(e.target.value) })}>
+                {DAYS.map((d, i) => <option key={d} value={i}>{d}</option>)}
+              </select>
+            </Field>
+            <Field label="Uhrzeit">
+              <select className="input" value={draft.time} onChange={(e) => setDraft({ ...draft, time: e.target.value })}>
+                {SLOTS.map((s) => <option key={s}>{s}</option>)}
+              </select>
+            </Field>
+            <Field label="Service">
+              <input className="input" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} placeholder="z.B. Inspektion" />
+            </Field>
+            <Field label="Fahrzeug / Kennzeichen">
+              <input className="input" value={draft.sub} onChange={(e) => setDraft({ ...draft, sub: e.target.value })} placeholder="z.B. Fiat 500 · MKK-AS 120" />
+            </Field>
+            <Field label="Kategorie">
+              <select className="input" value={draft.color} onChange={(e) => setDraft({ ...draft, color: e.target.value as SlotColor })}>
+                {COLOR_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </Field>
+          </div>
+          <div className="mt-3 grid gap-3 md:grid-cols-2">
+            <Field label="Kunde (Name)">
+              <input className="input" value={draft.customerName ?? ""} onChange={(e) => setDraft({ ...draft, customerName: e.target.value })} placeholder="z.B. Markus Becker" />
+            </Field>
+            <Field label="Kunde (E-Mail für Benachrichtigung)">
+              <input type="email" className="input" value={draft.customerEmail ?? ""} onChange={(e) => setDraft({ ...draft, customerEmail: e.target.value })} placeholder="kunde@example.de" />
+            </Field>
+          </div>
+          <p className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+            <Bell className="h-3 w-3 text-primary" /> Bei Erstellen, Verschieben und Absagen wird automatisch eine E-Mail an den Kunden ausgelöst.
+          </p>
+          {conflictError && (
+            <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">{conflictError}</p>
+          )}
+
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              {editingId && (
+                <>
+                  <button
+                    onClick={() => toggleCancel(editingId)}
+                    className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800 transition hover:bg-amber-100"
+                  >
+                    {draft.cancelled ? "Wieder aktivieren" : "Termin absagen"}
+                  </button>
+                  <button
+                    onClick={() => removeApt(editingId)}
+                    className="flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-100"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> Löschen
+                  </button>
+                </>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <button onClick={closeEditor} className="rounded-lg border border-border/60 px-4 py-2 text-sm font-medium transition hover:bg-muted/50">
+                Abbrechen
+              </button>
+              <button onClick={save} className="rounded-lg bg-foreground px-4 py-2 text-sm font-semibold text-background transition hover:opacity-90">
+                {editingId ? "Änderungen speichern" : "Eintragen"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="overflow-x-auto rounded-2xl border border-border/60 bg-card/60 shadow-sm">
+        <table className="w-full min-w-[760px] border-collapse">
+          <thead>
+            <tr className="border-b border-border/60 text-xs uppercase tracking-widest text-muted-foreground">
+              <th className="w-24 p-4 text-left font-medium">Uhrzeit</th>
+              {DAYS.map((d) => (
+                <th key={d} className="p-4 text-left font-medium">{d}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {SLOTS.map((time) => (
+              <tr key={time} className="border-b border-border/40 last:border-0">
+                <td className="p-4 align-top text-sm font-semibold text-muted-foreground">{time}</td>
+                {DAYS.map((_, day) => {
+                  const a = findApt(day, time);
+                  return (
+                    <td key={day} className="p-2 align-top">
+                      {a ? (
+                        <div
+                          className={`group relative rounded-xl border px-3 py-2 text-xs shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${COLOR_CLASSES[a.color]} ${a.cancelled ? "opacity-60" : ""}`}
+                        >
+                          <button
+                            onClick={() => openEdit(a)}
+                            className="block w-full text-left"
+                          >
+                            <p className={`font-semibold leading-tight ${a.cancelled ? "line-through" : ""}`}>{a.title}</p>
+                            <p className="mt-1 opacity-80">{a.sub}</p>
+                            {a.cancelled && (
+                              <span className="mt-1 inline-block rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-red-700">
+                                Abgesagt
+                              </span>
+                            )}
+                          </button>
+                          <div className="mt-2 flex items-center justify-between gap-1 border-t border-current/10 pt-2 opacity-0 transition group-hover:opacity-100">
+                            <div className="flex items-center gap-0.5">
+                              <button
+                                title="Slot früher"
+                                onClick={() => moveApt(a.id, 0, -1)}
+                                className="rounded p-1 hover:bg-white/60"
+                              ><ArrowLeft className="h-3 w-3 rotate-90" /></button>
+                              <button
+                                title="Slot später"
+                                onClick={() => moveApt(a.id, 0, 1)}
+                                className="rounded p-1 hover:bg-white/60"
+                              ><ArrowRight className="h-3 w-3 rotate-90" /></button>
+                              <button
+                                title="Tag zurück"
+                                onClick={() => moveApt(a.id, -1, 0)}
+                                className="rounded p-1 hover:bg-white/60"
+                              ><ArrowLeft className="h-3 w-3" /></button>
+                              <button
+                                title="Tag vor"
+                                onClick={() => moveApt(a.id, 1, 0)}
+                                className="rounded p-1 hover:bg-white/60"
+                              ><ArrowRight className="h-3 w-3" /></button>
+                            </div>
+                            <div className="flex items-center gap-0.5">
+                              <button
+                                title={a.cancelled ? "Reaktivieren" : "Absagen"}
+                                onClick={() => toggleCancel(a.id)}
+                                className="rounded p-1 hover:bg-white/60"
+                              ><X className="h-3 w-3" /></button>
+                              <button
+                                title="Löschen"
+                                onClick={() => removeApt(a.id)}
+                                className="rounded p-1 text-red-700 hover:bg-white/60"
+                              ><Trash2 className="h-3 w-3" /></button>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => openCreate(day, time)}
+                          className="flex h-full min-h-[56px] w-full items-center justify-center rounded-xl border border-dashed border-border/50 text-muted-foreground/40 transition hover:border-primary/40 hover:bg-muted/30 hover:text-primary"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </button>
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="rounded-2xl border border-border/60 bg-card/60 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-5 py-4">
+          <div className="flex items-center gap-2">
+            <div className="rounded-lg bg-primary/10 p-2 text-primary"><Bell className="h-4 w-4" /></div>
+            <div>
+              <h3 className="font-display text-base font-semibold leading-tight">Kunden-Benachrichtigungen</h3>
+              <p className="text-xs text-muted-foreground">Automatische E-Mails bei Erstellen · Verschieben · Absagen</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-700">
+              <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500 align-middle" /> Prototyp · Live-Versand bereit
+            </span>
+            {notifications.length > 0 && (
+              <button
+                onClick={() => setNotifications([])}
+                className="rounded-lg border border-border/60 px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-muted/50 hover:text-foreground"
+              >
+                Log leeren
+              </button>
+            )}
+          </div>
+        </div>
+        {notifications.length === 0 ? (
+          <div className="px-5 py-10 text-center text-sm text-muted-foreground">
+            Noch keine Benachrichtigungen versendet. Erstelle, verschiebe oder sage einen Termin ab — die E-Mail an den Kunden erscheint hier.
+          </div>
+        ) : (
+          <ul className="divide-y divide-border/50">
+            {notifications.map((n) => {
+              const meta = KIND_META[n.kind];
+              return (
+                <li key={n.id} className="flex flex-col gap-2 px-5 py-4 md:flex-row md:items-start md:gap-4">
+                  <div className="flex items-center gap-2 md:w-44 md:shrink-0">
+                    <span className={`h-2 w-2 rounded-full ${meta.dot}`} />
+                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{meta.label}</span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+                      <Send className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="font-medium text-foreground">{n.customerName}</span>
+                      <span className="text-muted-foreground">·</span>
+                      <span className="font-mono text-xs text-muted-foreground">{n.to}</span>
+                    </div>
+                    <p className="mt-1 text-sm font-semibold text-foreground">{n.subject}</p>
+                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{n.preview}</p>
+                  </div>
+                  <div className="text-[11px] text-muted-foreground md:w-32 md:text-right">
+                    {new Date(n.when).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })} Uhr
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- Google Bewertungen ---------------- */
+
+type Review = { id: string; author: string; rating: number; text: string; date: string; published: boolean };
+
+function ReviewsManager() {
+  const [reviews, setReviews] = useState<Review[]>([
+    { id: "r1", author: "Markus B.", rating: 5, text: "Top Beratung beim Kauf meines Alfa Romeo Tonale. Sehr persönlich.", date: "Vor 2 Wochen", published: true },
+    { id: "r2", author: "Sabine S.", rating: 5, text: "Seit Jahren Kundin mit meinem Fiat 500. Ehrlich, fair, transparent.", date: "Vor 1 Monat", published: true },
+    { id: "r3", author: "Thomas K.", rating: 5, text: "Reibungsloser Ankauf meines Altfahrzeugs und faire Verrechnung.", date: "Vor 1 Monat", published: true },
+  ]);
+  const [draft, setDraft] = useState({ author: "", rating: 5, text: "" });
+
+  return (
+    <div className="grid gap-6 animate-fade-in lg:grid-cols-[1fr_1.5fr]">
+      <div className="space-y-4 rounded-2xl border border-border/60 bg-card/60 p-6 shadow-sm">
+        <div>
+          <p className="text-xs uppercase tracking-widest text-muted-foreground">Kuratieren</p>
+          <h3 className="font-display text-lg font-semibold">Neue Bewertung hinzufügen</h3>
+        </div>
+        <Field label="Kunde">
+          <input className="input" value={draft.author} onChange={(e) => setDraft({ ...draft, author: e.target.value })} placeholder="z.B. Markus B." />
+        </Field>
+        <Field label="Sterne">
+          <select className="input" value={draft.rating} onChange={(e) => setDraft({ ...draft, rating: Number(e.target.value) })}>
+            {[5, 4, 3, 2, 1].map((n) => <option key={n} value={n}>{n} Sterne</option>)}
+          </select>
+        </Field>
+        <Field label="Bewertung">
+          <textarea className="input min-h-[100px]" value={draft.text} onChange={(e) => setDraft({ ...draft, text: e.target.value })} placeholder="Kundenstimme …" />
+        </Field>
+        <button
+          onClick={() => {
+            if (!draft.author.trim() || !draft.text.trim()) return;
+            setReviews((r) => [{ id: `r${Date.now()}`, ...draft, date: "Gerade eben", published: true }, ...r]);
+            setDraft({ author: "", rating: 5, text: "" });
+          }}
+          className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
+        >
+          Bewertung übernehmen
+        </button>
+        <div className="rounded-xl border border-border/60 bg-muted/30 p-4 text-xs text-muted-foreground">
+          <div className="mb-1 flex items-center gap-2 font-semibold text-foreground">
+            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" /> 4,8 / 5 · 312 Google-Bewertungen
+          </div>
+          Auto-Sync mit Google Business Profile aktiv. Manuelle Pflege überschreibt importierte Inhalte.
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {reviews.map((r) => (
+          <div key={r.id} className="rounded-2xl border border-border/60 bg-card/60 p-5 shadow-sm transition hover:border-primary/40">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <div className="grid h-8 w-8 place-items-center rounded-full bg-muted/60 text-xs font-semibold">{r.author.charAt(0)}</div>
+                  <div>
+                    <p className="text-sm font-semibold">{r.author}</p>
+                    <p className="text-[11px] text-muted-foreground">{r.date}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-0.5">
+                {Array.from({ length: r.rating }).map((_, i) => (
+                  <Star key={i} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                ))}
+              </div>
+            </div>
+            <p className="mt-3 text-sm leading-relaxed text-foreground/90">{r.text}</p>
+            <div className="mt-3 flex items-center gap-2">
+              <button
+                onClick={() => setReviews((rs) => rs.map((x) => x.id === r.id ? { ...x, published: !x.published } : x))}
+                className={`rounded-full border px-3 py-1 text-[11px] font-medium transition ${
+                  r.published ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-border/60 text-muted-foreground"
+                }`}
+              >
+                {r.published ? "Live auf Website" : "Versteckt"}
+              </button>
+              <button
+                onClick={() => setReviews((rs) => rs.filter((x) => x.id !== r.id))}
+                className="ml-auto flex items-center gap-1.5 rounded-lg border border-border/60 px-3 py-1 text-[11px] text-muted-foreground transition hover:border-primary/60 hover:text-primary"
+              >
+                <Trash2 className="h-3 w-3" /> Entfernen
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- Calendar Sync Modal ---------------- */
+
+function CalendarSyncModal({ onClose }: { onClose: () => void }) {
+  const feedUrl = "https://kalender.auto-semmel.de/werkstatt/feed.ics?token=as-langenselbold-2026";
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(feedUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      /* noop */
+    }
+  };
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+      <div
+        className="w-full max-w-lg rounded-2xl border border-border/60 bg-card p-6 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-4 flex items-start justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+              <Link2 className="h-5 w-5" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[11px] uppercase tracking-widest text-muted-foreground">Echtzeit-Feed</p>
+              <h3 className="font-display text-lg font-semibold">Kalender-Synchronisation</h3>
+            </div>
+          </div>
+          <button onClick={onClose} className="rounded-full p-1.5 text-muted-foreground transition hover:bg-muted/50 hover:text-foreground">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <p className="text-sm leading-relaxed text-foreground/85">
+          Synchronisieren Sie Ihre Werkstatt-Termine in Echtzeit mit{" "}
+          <span className="font-semibold">Apple Calendar</span>, <span className="font-semibold">Google Calendar</span> oder{" "}
+          <span className="font-semibold">Microsoft Outlook</span>. Kopieren Sie einfach diesen Feed-Link und fügen Sie
+          ihn in Ihrem Smartphone oder Desktop-Kalender als „Abonniertes Kalender" hinzu.
+        </p>
+
+        <div className="mt-5">
+          <label className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">Feed-URL (iCal)</label>
+          <div className="mt-2 flex items-stretch gap-2">
+            <input
+              readOnly
+              value={feedUrl}
+              onFocus={(e) => e.currentTarget.select()}
+              className="input flex-1 font-mono text-xs"
+            />
+            <button
+              onClick={copy}
+              className="flex shrink-0 items-center gap-1.5 rounded-lg border border-border/70 bg-card px-3 text-xs font-semibold transition hover:border-primary/40 hover:text-primary"
+            >
+              {copied ? <><Check className="h-3.5 w-3.5 text-emerald-600" /> Kopiert</> : <><Copy className="h-3.5 w-3.5" /> Kopieren</>}
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-5 grid gap-2 rounded-xl border border-border/50 bg-muted/30 p-4 text-xs text-muted-foreground">
+          <div className="flex items-start gap-2"><span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" /> Google Calendar: „Weitere Kalender → Per URL hinzufügen"</div>
+          <div className="flex items-start gap-2"><span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" /> Apple Calendar: „Ablage → Neues Kalenderabonnement"</div>
+          <div className="flex items-start gap-2"><span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" /> Outlook: „Kalender hinzufügen → Aus dem Internet abonnieren"</div>
+        </div>
+
+        <div className="mt-6 flex justify-end">
+          <button
+            onClick={onClose}
+            className="rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
+          >
+            Schließen
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- Newsletter & Marketing ---------------- */
+
+function NewsletterManager() {
+  const templates = [
+    {
+      id: "reifen",
+      title: "Reifenwechsel-Saison Einladung",
+      subject: "Jetzt Reifenwechsel-Termin sichern — Auto Semmel Langenselbold",
+      preview:
+        "Liebe Kundinnen und Kunden, die Saison startet — sichern Sie sich Ihren Wunschtermin für den Reifenwechsel inkl. kostenloser Einlagerung.",
+    },
+    {
+      id: "modell",
+      title: "Neues Modell eingetroffen",
+      subject: "Neu in unserem Showroom: Alfa Romeo Tonale & Junior",
+      preview:
+        "Erleben Sie unsere neuesten italienischen Modelle live in Langenselbold — Probefahrt jetzt unverbindlich anfragen.",
+    },
+    {
+      id: "aktion",
+      title: "Gebrauchtwagen-Aktion",
+      subject: "Hand-Selektierte Gebrauchtwagen — diese Woche mit Bonus",
+      preview:
+        "Unsere meisterlich geprüften Gebrauchtwagen — diese Woche inkl. 12 Monaten Garantie & freier Inspektion.",
+    },
+  ];
+  const [tplId, setTplId] = useState(templates[0].id);
+  const [sending, setSending] = useState(false);
+  const tpl = templates.find((t) => t.id === tplId)!;
+
+  const onSend = () => {
+    setSending(true);
+    setTimeout(() => {
+      setSending(false);
+      toast.success("Kampagne in Warteschlange", {
+        description: `„${tpl.title}" wird an 412 Abonnenten versendet.`,
+      });
+    }, 900);
+  };
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      {/* Metrics */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="rounded-2xl border border-border/60 bg-card/60 p-5 shadow-sm">
+          <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
+            <Mail className="h-3.5 w-3.5 text-primary" /> Abonnenten gesamt
+          </div>
+          <p className="mt-2 font-display text-3xl font-semibold text-foreground">412</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            <span className="font-semibold text-emerald-700">+18</span> in den letzten 30 Tagen · Double-Opt-In bestätigt
+          </p>
+        </div>
+        <div className="rounded-2xl border border-border/60 bg-card/60 p-5 shadow-sm">
+          <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
+            <TrendingUp className="h-3.5 w-3.5 text-primary" /> Letzte Kampagne
+          </div>
+          <p className="mt-2 font-display text-3xl font-semibold text-foreground">Vor 3 Wochen</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Öffnungsrate <span className="font-semibold text-foreground">64%</span> · Klickrate 12%
+          </p>
+        </div>
+      </div>
+
+      {/* Schnell-Kampagne */}
+      <div className="rounded-2xl border border-border/60 bg-card/60 p-6 shadow-sm">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h3 className="font-display text-lg font-semibold">Schnell-Kampagne starten</h3>
+            <p className="text-xs text-muted-foreground">Wählen Sie eine Vorlage — versendet an alle bestätigten Abonnenten.</p>
+          </div>
+          <span className="rounded-full border border-border/60 bg-background/60 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            Vorlagen-Modus
+          </span>
+        </div>
+
+        <div className="grid gap-5 md:grid-cols-2">
+          <div className="space-y-3">
+            <Field label="Vorlage">
+              <select className="input w-full" value={tplId} onChange={(e) => setTplId(e.target.value)}>
+                {templates.map((t) => (
+                  <option key={t.id} value={t.id}>{t.title}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Betreff">
+              <input className="input w-full" defaultValue={tpl.subject} key={tpl.subject} />
+            </Field>
+            <Field label="Empfängergruppe">
+              <select className="input w-full">
+                <option>Alle Abonnenten (412)</option>
+                <option>Region Main-Kinzig-Kreis (287)</option>
+                <option>Alfa Romeo Interessenten (134)</option>
+                <option>Fiat Professional / Gewerbe (61)</option>
+              </select>
+            </Field>
+            <button
+              onClick={onSend}
+              disabled={sending}
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-60"
+            >
+              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {sending ? "Wird versendet..." : "Kampagne starten"}
+            </button>
+          </div>
+
+          <div className="rounded-xl border border-border/60 bg-background/60 p-5">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Vorschau</p>
+            <p className="mt-2 font-display text-base font-semibold text-foreground">{tpl.subject}</p>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{tpl.preview}</p>
+            <div className="mt-4 inline-flex rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground">
+              Jetzt Termin sichern →
+            </div>
+            <p className="mt-4 border-t border-border/60 pt-3 text-[10px] text-muted-foreground">
+              Auto Semmel GmbH & Co. Siegfried Polenz KG · Gelnhäuser Straße 40, 63505 Langenselbold ·{" "}
+              <span className="underline">Abmelden</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Guide */}
+      <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5">
+        <div className="flex items-start gap-3">
+          <div className="grid h-9 w-9 flex-shrink-0 place-items-center rounded-lg bg-primary/15 text-primary">
+            <Database className="h-4 w-4" />
+          </div>
+          <div className="space-y-2 text-sm text-muted-foreground">
+            <p className="font-display text-sm font-semibold text-foreground">So funktioniert Ihr Newsletter-Center</p>
+            <p>
+              Alle Anmeldungen vom Landing-Page-Formular werden in Ihrer <span className="font-semibold text-foreground">Lovable Cloud Datenbank</span> (Tabelle <code className="rounded bg-muted/60 px-1 py-0.5 text-[11px]">newsletter_subscribers</code>) gespeichert — DSGVO-konform mit Double-Opt-In, IP-Logging und Einwilligungszeitstempel.
+            </p>
+            <p>
+              Beim Klick auf <span className="font-semibold text-foreground">„Kampagne starten"</span> liest das System nur bestätigte Abonnenten aus Ihrer Datenbank, rendert die Vorlage individuell pro Empfänger und versendet die E-Mails über den verschlüsselten Versand-Dienst (Lovable Emails / Resend). Bounces, Abmeldungen und Öffnungsraten fließen automatisch in dieses Dashboard zurück.
+            </p>
+            <p className="text-xs">
+              <span className="font-semibold text-foreground">Nächster Schritt für den Live-Betrieb:</span> Versand-Domain (z.B. <code className="rounded bg-muted/60 px-1 py-0.5 text-[11px]">news.auto-semmel.de</code>) verifizieren — danach gehen Kampagnen mit einem Klick raus.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- E-Mail-Queue Monitor ---------------- */
+
+type EQStatus = "all" | "pending" | "sent" | "failed" | "suppressed";
+
+function EmailQueueView() {
+  const [data, setData] = useState<import("@/lib/email-queue.functions").EmailQueueOverview | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState<string | null>(null);
+  const [filter, setFilter] = useState<EQStatus>("all");
+  const [query, setQuery] = useState("");
+  const [openMsg, setOpenMsg] = useState<string | null>(null);
+
+  const load = async () => {
+    setLoading(true);
+    setErr(null);
+    try {
+      const { getEmailQueueOverview } = await import("@/lib/email-queue.functions");
+      const res = await getEmailQueueOverview();
+      setData(res);
+    } catch (e: any) {
+      setErr(e?.message ?? "Konnte E-Mail-Queue nicht laden.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useMemo(() => {
+    load();
+  }, []);
+
+  const items = (data?.items ?? []).filter((it) => {
+    if (filter !== "all") {
+      const map: Record<string, EQStatus> = {
+        pending: "pending",
+        sent: "sent",
+        failed: "failed",
+        dlq: "failed",
+        bounced: "failed",
+        suppressed: "suppressed",
+        complained: "suppressed",
+      };
+      if (map[it.status] !== filter) return false;
+    }
+    if (query) {
+      const q = query.toLowerCase();
+      if (
+        !(
+          (it.recipient ?? "").toLowerCase().includes(q) ||
+          (it.subject ?? "").toLowerCase().includes(q) ||
+          (it.templateName ?? "").toLowerCase().includes(q)
+        )
+      )
+        return false;
+    }
+    return true;
+  });
+
+  return (
+    <div className="space-y-6">
+      {/* KPI-Karten */}
+      <div className="grid gap-4 sm:grid-cols-4">
+        <StatCard label="Pending" value={data?.stats.pending ?? 0} tone="amber" />
+        <StatCard label="Versendet" value={data?.stats.sent ?? 0} tone="emerald" />
+        <StatCard label="Fehler / DLQ" value={data?.stats.failed ?? 0} tone="red" />
+        <StatCard label="Unterdrückt" value={data?.stats.suppressed ?? 0} tone="slate" />
+      </div>
+
+      {data?.notice && (
+        <div className="rounded-xl border border-amber-300/60 bg-amber-50 p-4 text-sm text-amber-900">
+          <div className="flex items-start gap-3">
+            <Activity className="mt-0.5 h-4 w-4 flex-shrink-0" />
+            <div>
+              <p className="font-semibold">E-Mail-Infrastruktur noch nicht aktiv</p>
+              <p className="mt-1 text-xs leading-relaxed">{data.notice}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toolbar */}
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border/60 bg-card/60 p-3">
+        <div className="flex flex-wrap gap-1.5">
+          {(["all", "pending", "sent", "failed", "suppressed"] as EQStatus[]).map((s) => (
+            <button
+              key={s}
+              onClick={() => setFilter(s)}
+              className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                filter === s
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/70"
+              }`}
+            >
+              {s === "all" ? "Alle" : labelFor(s)}
+            </button>
+          ))}
+        </div>
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Empfänger, Betreff oder Template suchen…"
+          className="input ml-auto w-full max-w-xs"
+        />
+        <button
+          onClick={load}
+          className="rounded-lg border border-border/60 bg-background px-3 py-2 text-xs font-semibold hover:bg-muted"
+        >
+          {loading ? "Lade…" : "Aktualisieren"}
+        </button>
+      </div>
+
+      {err && (
+        <div className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-900">{err}</div>
+      )}
+
+      {/* Tabelle */}
+      <div className="overflow-hidden rounded-xl border border-border/60 bg-card/60">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[820px] border-collapse text-sm">
+            <thead className="bg-muted/50 text-left text-xs uppercase tracking-wider text-muted-foreground">
+              <tr>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Betreff</th>
+                <th className="px-4 py-3">Empfänger</th>
+                <th className="px-4 py-3">Template</th>
+                <th className="px-4 py-3">Zeit</th>
+                <th className="px-4 py-3 text-right">Verlauf</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.length === 0 && !loading && (
+                <tr>
+                  <td colSpan={6} className="px-4 py-10 text-center text-muted-foreground">
+                    Keine E-Mails im aktuellen Filter.
+                  </td>
+                </tr>
+              )}
+              {items.map((it) => (
+                <FragmentRow
+                  key={it.messageId}
+                  item={it}
+                  expanded={openMsg === it.messageId}
+                  onToggle={() => setOpenMsg(openMsg === it.messageId ? null : it.messageId)}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <p className="text-[11px] text-muted-foreground">
+        Quelle: <code className="rounded bg-muted/60 px-1">email_send_log</code> (dedupliziert nach{" "}
+        <code className="rounded bg-muted/60 px-1">message_id</code>) + pending Newsletter-Anmeldungen aus{" "}
+        <code className="rounded bg-muted/60 px-1">newsletter_subscribers</code>.
+      </p>
+    </div>
+  );
+}
+
+function FragmentRow({
+  item,
+  expanded,
+  onToggle,
+}: {
+  item: import("@/lib/email-queue.functions").EmailQueueItem;
+  expanded: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <>
+      <tr className="border-t border-border/40 hover:bg-muted/30">
+        <td className="px-4 py-3"><EQStatusBadge status={item.status} /></td>
+        <td className="px-4 py-3">
+          <div className="font-medium text-foreground line-clamp-1">{item.subject ?? "—"}</div>
+          {item.error && (
+            <div className="mt-0.5 text-[11px] text-red-700 line-clamp-1">{item.error}</div>
+          )}
+        </td>
+        <td className="px-4 py-3 text-muted-foreground">{item.recipient ?? "—"}</td>
+        <td className="px-4 py-3">
+          <code className="rounded bg-muted/60 px-1.5 py-0.5 text-[11px]">{item.templateName ?? "—"}</code>
+        </td>
+        <td className="px-4 py-3 text-xs text-muted-foreground">
+          {new Date(item.createdAt).toLocaleString("de-DE")}
+        </td>
+        <td className="px-4 py-3 text-right">
+          <button
+            onClick={onToggle}
+            className="rounded-md border border-border/60 bg-background px-2 py-1 text-[11px] font-semibold hover:bg-muted"
+          >
+            {expanded ? "Verbergen" : "Verlauf"}
+          </button>
+        </td>
+      </tr>
+      {expanded && (
+        <tr className="border-t border-border/40 bg-muted/20">
+          <td colSpan={6} className="px-4 py-4">
+            <p className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">Statusverlauf</p>
+            <ol className="space-y-1.5">
+              {(item.history ?? []).map((h, i) => (
+                <li key={i} className="flex items-center gap-3 text-xs">
+                  <EQStatusBadge status={h.status as any} />
+                  <span className="text-muted-foreground">{new Date(h.at).toLocaleString("de-DE")}</span>
+                  {h.error && <span className="text-red-700">· {h.error}</span>}
+                </li>
+              ))}
+              {(!item.history || item.history.length === 0) && (
+                <li className="text-xs text-muted-foreground">Kein Verlauf verfügbar.</li>
+              )}
+            </ol>
+            <p className="mt-3 text-[11px] text-muted-foreground">
+              message_id: <code className="rounded bg-muted/60 px-1">{item.messageId}</code>
+            </p>
+          </td>
+        </tr>
+      )}
+    </>
+  );
+}
+
+function EQStatusBadge({ status }: { status: string }) {
+  const s = status.toLowerCase();
+  const map: Record<string, { label: string; cls: string }> = {
+    pending: { label: "Pending", cls: "bg-amber-100 text-amber-900 border-amber-300" },
+    sent: { label: "Versendet", cls: "bg-emerald-100 text-emerald-900 border-emerald-300" },
+    delivered: { label: "Zugestellt", cls: "bg-emerald-100 text-emerald-900 border-emerald-300" },
+    failed: { label: "Fehler", cls: "bg-red-100 text-red-900 border-red-300" },
+    dlq: { label: "DLQ", cls: "bg-red-100 text-red-900 border-red-300" },
+    bounced: { label: "Bounce", cls: "bg-red-100 text-red-900 border-red-300" },
+    suppressed: { label: "Unterdrückt", cls: "bg-slate-200 text-slate-800 border-slate-300" },
+    complained: { label: "Beschwerde", cls: "bg-slate-200 text-slate-800 border-slate-300" },
+  };
+  const m = map[s] ?? { label: status, cls: "bg-muted text-muted-foreground border-border" };
+  return (
+    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold ${m.cls}`}>
+      {m.label}
+    </span>
+  );
+}
+
+function labelFor(s: EQStatus): string {
+  return s === "pending" ? "Pending" : s === "sent" ? "Versendet" : s === "failed" ? "Fehler" : "Unterdrückt";
+}
+
+function StatCard({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone: "amber" | "emerald" | "red" | "slate";
+}) {
+  const tones = {
+    amber: "border-amber-300/60 bg-amber-50 text-amber-900",
+    emerald: "border-emerald-300/60 bg-emerald-50 text-emerald-900",
+    red: "border-red-300/60 bg-red-50 text-red-900",
+    slate: "border-slate-300/60 bg-slate-50 text-slate-900",
+  };
+  return (
+    <div className={`rounded-xl border p-4 ${tones[tone]}`}>
+      <p className="text-[11px] font-semibold uppercase tracking-wider opacity-80">{label}</p>
+      <p className="mt-1 font-display text-3xl font-bold">{value}</p>
+    </div>
+  );
+}
+
+/* ---------------- Careers Manager ---------------- */
+
+const APPLICANT_STATUSES: ApplicantStatus[] = ["Neu", "Eingeladen", "Eingestellt", "Abgesagt"];
+
+function CareersManager() {
+  const jobs = useJobs();
+  const applicants = useApplicants();
+  const [sub, setSub] = useState<"jobs" | "applicants">("jobs");
+  const [editJob, setEditJob] = useState<JobPosting | "new" | null>(null);
+  const [selectedApplicant, setSelectedApplicant] = useState<Applicant | null>(null);
+
+  const newCount = applicants.filter((a) => a.status === "Neu").length;
+  const activeJobs = jobs.filter((j) => j.active).length;
+
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-3 sm:grid-cols-3">
+        <KpiTile label="Aktive Stellen" value={String(activeJobs)} />
+        <KpiTile label="Bewerbungen gesamt" value={String(applicants.length)} />
+        <KpiTile label="Neue Bewerbungen" value={String(newCount)} accent />
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border/60 bg-card/40 p-1.5">
+        <SubTab active={sub === "jobs"} onClick={() => setSub("jobs")} icon={<Briefcase className="h-4 w-4" />}>
+          Aktive Stellenausschreibungen
+          <span className="ml-1.5 rounded-md bg-muted/60 px-1.5 py-0.5 text-[10px]">{jobs.length}</span>
+        </SubTab>
+        <SubTab active={sub === "applicants"} onClick={() => setSub("applicants")} icon={<Users className="h-4 w-4" />}>
+          Eingegangene Bewerbungen
+          {newCount > 0 && (
+            <span className="ml-1.5 rounded-md bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
+              {newCount}
+            </span>
+          )}
+        </SubTab>
+      </div>
+
+      {sub === "jobs" && (
+        <JobsTable jobs={jobs} onCreate={() => setEditJob("new")} onEdit={(j) => setEditJob(j)} />
+      )}
+      {sub === "applicants" && (
+        <ApplicantsPanel
+          applicants={applicants}
+          selected={selectedApplicant}
+          onSelect={setSelectedApplicant}
+        />
+      )}
+
+      {editJob && (
+        <JobEditorDialog
+          initial={editJob === "new" ? null : editJob}
+          onClose={() => setEditJob(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function SubTab({
+  active,
+  onClick,
+  icon,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium transition ${
+        active
+          ? "bg-primary text-primary-foreground shadow-sm"
+          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+      }`}
+    >
+      {icon}
+      {children}
+    </button>
+  );
+}
+
+function KpiTile({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div
+      className={`rounded-xl border p-5 ${
+        accent ? "border-primary/40 bg-primary/10" : "border-border/60 bg-card/60"
+      }`}
+    >
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className="mt-1 font-display text-3xl font-semibold">{value}</p>
+    </div>
+  );
+}
+
+/* ---------------- Jobs table ---------------- */
+
+function JobsTable({
+  jobs,
+  onCreate,
+  onEdit,
+}: {
+  jobs: JobPosting[];
+  onCreate: () => void;
+  onEdit: (j: JobPosting) => void;
+}) {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/40">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 bg-card/60 px-5 py-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Stellenausschreibungen</p>
+          <h3 className="font-display text-lg font-semibold">Aktuelle Positionen verwalten</h3>
+        </div>
+        <button
+          onClick={onCreate}
+          className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-glow)] transition hover:brightness-110"
+        >
+          <Plus className="h-4 w-4" /> Neue Stelle ausschreiben
+        </button>
+      </div>
+
+      {jobs.length === 0 ? (
+        <div className="p-10 text-center text-sm text-muted-foreground">
+          Noch keine Stellen angelegt. Klicken Sie auf „Neue Stelle ausschreiben".
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/40 text-[11px] uppercase tracking-wider text-muted-foreground">
+              <tr>
+                <th className="px-5 py-3 text-left">Position</th>
+                <th className="px-5 py-3 text-left">Bereich</th>
+                <th className="px-5 py-3 text-left">Anstellung</th>
+                <th className="px-5 py-3 text-left">Status</th>
+                <th className="px-5 py-3 text-right">Aktionen</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/50">
+              {jobs.map((j) => (
+                <tr key={j.id} className="hover:bg-muted/30">
+                  <td className="px-5 py-3">
+                    <div className="font-medium text-foreground">{j.title}</div>
+                    <div className="text-xs text-muted-foreground">{j.shortPitch.slice(0, 80)}…</div>
+                  </td>
+                  <td className="px-5 py-3 text-muted-foreground">{j.department}</td>
+                  <td className="px-5 py-3 text-muted-foreground">
+                    {j.type} · {j.contract}
+                  </td>
+                  <td className="px-5 py-3">
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                        j.active
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${j.active ? "bg-emerald-500" : "bg-muted-foreground/60"}`}
+                      />
+                      {j.active ? "Aktiv (online)" : "Deaktiviert"}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3">
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        onClick={() => onEdit(j)}
+                        className="inline-flex items-center gap-1.5 rounded-md border border-border/60 px-2.5 py-1.5 text-xs transition hover:border-primary/60 hover:text-primary"
+                      >
+                        <Pencil className="h-3.5 w-3.5" /> Bearbeiten
+                      </button>
+                      <button
+                        onClick={() => {
+                          careersStore.toggleActive(j.id);
+                          toast.success(j.active ? "Stelle deaktiviert" : "Stelle aktiviert");
+                        }}
+                        className="inline-flex items-center gap-1.5 rounded-md border border-border/60 px-2.5 py-1.5 text-xs transition hover:border-primary/60 hover:text-primary"
+                      >
+                        <Power className="h-3.5 w-3.5" />
+                        {j.active ? "Deaktivieren" : "Aktivieren"}
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (confirm(`Stelle „${j.title}" wirklich löschen?`)) {
+                            careersStore.removeJob(j.id);
+                            toast.success("Stelle gelöscht");
+                          }
+                        }}
+                        className="inline-flex items-center gap-1.5 rounded-md border border-border/60 px-2.5 py-1.5 text-xs text-muted-foreground transition hover:border-destructive/60 hover:text-destructive"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------------- Job editor ---------------- */
+
+function JobEditorDialog({
+  initial,
+  onClose,
+}: {
+  initial: JobPosting | null;
+  onClose: () => void;
+}) {
+  const isNew = !initial;
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [department, setDepartment] = useState<JobPosting["department"]>(initial?.department ?? "Werkstatt");
+  const [type, setType] = useState<JobPosting["type"]>(initial?.type ?? "Vollzeit");
+  const [contract, setContract] = useState<JobPosting["contract"]>(initial?.contract ?? "Unbefristet");
+  const [pitch, setPitch] = useState(initial?.shortPitch ?? "");
+  const [highlights, setHighlights] = useState((initial?.highlights ?? []).join("\n"));
+  const [active, setActive] = useState(initial?.active ?? true);
+
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!title.trim() || !pitch.trim()) {
+      toast.error("Titel und Kurzbeschreibung sind erforderlich.");
+      return;
+    }
+    const payload = {
+      title: title.trim(),
+      department,
+      type,
+      contract,
+      shortPitch: pitch.trim(),
+      highlights: highlights
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean),
+      active,
+    };
+    if (isNew) {
+      careersStore.addJob(payload);
+      toast.success("Stelle erstellt");
+    } else if (initial) {
+      careersStore.updateJob(initial.id, payload);
+      toast.success("Stelle aktualisiert");
+    }
+    onClose();
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 px-4 backdrop-blur-sm">
+      <form
+        onSubmit={submit}
+        className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-border/70 bg-card shadow-2xl"
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-background/80 text-muted-foreground hover:text-foreground"
+        >
+          <X className="h-4 w-4" />
+        </button>
+
+        <div className="border-b border-border/60 p-6">
+          <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
+            {isNew ? "Neue Stelle" : "Stelle bearbeiten"}
+          </p>
+          <h3 className="mt-1 font-display text-2xl font-semibold">
+            {isNew ? "Neue Stelle ausschreiben" : title || "Stelle bearbeiten"}
+          </h3>
+        </div>
+
+        <div className="max-h-[60vh] space-y-4 overflow-y-auto p-6">
+          <Field label="Titel der Stelle">
+            <input
+              className="input"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="z. B. Kfz-Mechatroniker (m/w/d)"
+              required
+            />
+          </Field>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Field label="Bereich">
+              <select
+                className="input"
+                value={department}
+                onChange={(e) => setDepartment(e.target.value as JobPosting["department"])}
+              >
+                <option>Werkstatt</option>
+                <option>Verkauf</option>
+                <option>Verwaltung</option>
+              </select>
+            </Field>
+            <Field label="Anstellungsart">
+              <select className="input" value={type} onChange={(e) => setType(e.target.value as JobPosting["type"])}>
+                <option>Vollzeit</option>
+                <option>Teilzeit</option>
+                <option>Ausbildung</option>
+              </select>
+            </Field>
+            <Field label="Vertrag">
+              <select
+                className="input"
+                value={contract}
+                onChange={(e) => setContract(e.target.value as JobPosting["contract"])}
+              >
+                <option>Unbefristet</option>
+                <option>Befristet</option>
+              </select>
+            </Field>
+          </div>
+
+          <Field label="Kurzbeschreibung">
+            <textarea
+              className="input min-h-[80px] resize-y"
+              value={pitch}
+              onChange={(e) => setPitch(e.target.value)}
+              placeholder="In 1–2 Sätzen die Position beschreiben."
+              required
+            />
+          </Field>
+
+          <Field label="Highlights (eines pro Zeile)">
+            <textarea
+              className="input min-h-[110px] resize-y"
+              value={highlights}
+              onChange={(e) => setHighlights(e.target.value)}
+              placeholder={"Moderne Werkstatt\nAttraktive Vergütung\nHersteller-Schulungen"}
+            />
+          </Field>
+
+          <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border/60 bg-background/40 px-4 py-3 text-sm">
+            <input
+              type="checkbox"
+              checked={active}
+              onChange={(e) => setActive(e.target.checked)}
+              className="h-4 w-4 accent-primary"
+            />
+            <span>
+              <span className="font-medium text-foreground">Stelle aktiv anzeigen</span>
+              <span className="ml-2 text-xs text-muted-foreground">(öffentlich auf /karriere sichtbar)</span>
+            </span>
+          </label>
+        </div>
+
+        <div className="flex items-center justify-end gap-2 border-t border-border/60 bg-card/60 p-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg border border-border/60 px-4 py-2 text-sm text-muted-foreground transition hover:text-foreground"
+          >
+            Abbrechen
+          </button>
+          <button
+            type="submit"
+            className="rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-glow)] transition hover:brightness-110"
+          >
+            {isNew ? "Stelle veröffentlichen" : "Änderungen speichern"}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+/* ---------------- Applicants ---------------- */
+
+function statusBadgeClasses(s: ApplicantStatus) {
+  switch (s) {
+    case "Neu":
+      return "bg-primary/15 text-primary border-primary/30";
+    case "Eingeladen":
+      return "bg-amber-100 text-amber-700 border-amber-200";
+    case "Eingestellt":
+      return "bg-emerald-100 text-emerald-700 border-emerald-200";
+    case "Abgesagt":
+      return "bg-muted text-muted-foreground border-border/60";
+  }
+}
+
+function ApplicantsPanel({
+  applicants,
+  selected,
+  onSelect,
+}: {
+  applicants: Applicant[];
+  selected: Applicant | null;
+  onSelect: (a: Applicant | null) => void;
+}) {
+  const liveSelected = selected ? applicants.find((a) => a.id === selected.id) ?? null : null;
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-12">
+      <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/40 lg:col-span-7">
+        <div className="border-b border-border/60 bg-card/60 px-5 py-4">
+          <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Eingegangene Bewerbungen</p>
+          <h3 className="font-display text-lg font-semibold">{applicants.length} Bewerber</h3>
+        </div>
+        {applicants.length === 0 ? (
+          <div className="p-10 text-center text-sm text-muted-foreground">
+            Noch keine Bewerbungen eingegangen.
+          </div>
+        ) : (
+          <ul className="divide-y divide-border/50">
+            {applicants.map((a) => {
+              const isActive = liveSelected?.id === a.id;
+              return (
+                <li key={a.id}>
+                  <button
+                    onClick={() => onSelect(a)}
+                    className={`flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition ${
+                      isActive ? "bg-primary/5" : "hover:bg-muted/30"
+                    }`}
+                  >
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-foreground">{a.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          · {new Date(a.createdAt).toLocaleDateString("de-DE")}
+                        </span>
+                      </div>
+                      <div className="mt-0.5 truncate text-xs text-muted-foreground">{a.jobTitle}</div>
+                    </div>
+                    <span
+                      className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${statusBadgeClasses(
+                        a.status
+                      )}`}
+                    >
+                      {a.status}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+
+      <div className="lg:col-span-5">
+        {liveSelected ? (
+          <ApplicantDetail applicant={liveSelected} onClose={() => onSelect(null)} />
+        ) : (
+          <div className="grid h-full min-h-[280px] place-items-center rounded-2xl border border-dashed border-border/70 bg-card/30 p-8 text-center text-sm text-muted-foreground">
+            Wählen Sie eine Bewerbung links aus, um Details und die Status-Pipeline zu sehen.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ApplicantDetail({ applicant, onClose }: { applicant: Applicant; onClose: () => void }) {
+  return (
+    <div className="rounded-2xl border border-border/60 bg-card/60 p-6">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Bewerbungsdetails</p>
+          <h3 className="mt-1 font-display text-2xl font-semibold">{applicant.name}</h3>
+          <p className="text-sm text-muted-foreground">{applicant.jobTitle}</p>
+        </div>
+        <button
+          onClick={onClose}
+          className="grid h-8 w-8 place-items-center rounded-full border border-border/60 text-muted-foreground hover:text-foreground"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      <div className="mt-5 space-y-2 rounded-lg border border-border/60 bg-background/40 p-4 text-sm">
+        <div className="flex items-center gap-2">
+          <Mail className="h-4 w-4 text-primary" />
+          <a href={`mailto:${applicant.email}`} className="hover:underline">
+            {applicant.email}
+          </a>
+        </div>
+        <div className="flex items-center gap-2">
+          <Phone className="h-4 w-4 text-primary" />
+          <a href={`tel:${applicant.phone}`} className="hover:underline">
+            {applicant.phone}
+          </a>
+        </div>
+        {applicant.cvFileName && (
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Download className="h-4 w-4 text-primary" />
+            <span>{applicant.cvFileName}</span>
+          </div>
+        )}
+        <div className="text-xs text-muted-foreground">
+          Eingegangen: {new Date(applicant.createdAt).toLocaleString("de-DE")}
+        </div>
+      </div>
+
+      {applicant.message && (
+        <div className="mt-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nachricht</p>
+          <p className="mt-2 whitespace-pre-line rounded-lg border border-border/60 bg-background/40 p-3 text-sm text-foreground/90">
+            {applicant.message}
+          </p>
+        </div>
+      )}
+
+      <div className="mt-6">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Approval-Pipeline
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {APPLICANT_STATUSES.map((s) => {
+            const active = applicant.status === s;
+            return (
+              <button
+                key={s}
+                onClick={() => {
+                  careersStore.setApplicantStatus(applicant.id, s);
+                  toast.success(`Status: ${s}`);
+                }}
+                className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${
+                  active
+                    ? statusBadgeClasses(s)
+                    : "border-border/60 bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                }`}
+              >
+                {s}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="mt-6 flex items-center justify-between gap-2 border-t border-border/60 pt-4">
+        <button
+          onClick={() => {
+            if (confirm("Bewerbung wirklich aus dem Posteingang entfernen?")) {
+              careersStore.removeApplicant(applicant.id);
+              toast.success("Bewerbung entfernt");
+              onClose();
+            }
+          }}
+          className="inline-flex items-center gap-1.5 rounded-md border border-border/60 px-3 py-1.5 text-xs text-muted-foreground transition hover:border-destructive/60 hover:text-destructive"
+        >
+          <Trash2 className="h-3.5 w-3.5" /> Löschen
+        </button>
+        <a
+          href={`mailto:${applicant.email}?subject=Ihre Bewerbung bei Auto Semmel`}
+          className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-[var(--shadow-glow)] transition hover:brightness-110"
+        >
+          <Send className="h-3.5 w-3.5" /> E-Mail an Bewerber
+        </a>
+      </div>
+    </div>
+  );
+}
