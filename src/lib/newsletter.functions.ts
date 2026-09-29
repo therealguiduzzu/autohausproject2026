@@ -128,20 +128,14 @@ export const subscribeNewsletter = createServerFn({ method: "POST" })
         </div>`;
       const text = `Bitte bestätigen Sie Ihre Newsletter-Anmeldung: ${confirmUrl}${unsubscribeUrl ? `\n\nAbmelden: ${unsubscribeUrl}` : ""}`;
 
-      const { error: queueErr } = await supabaseAdmin.rpc(
-        "enqueue_email" as never,
-        {
-          queue_name: "transactional_emails",
-          payload: {
-            to: data.email,
-            subject,
-            html,
-            text,
-            template_name: "newsletter-confirm",
-          },
-        } as never,
-      );
-      if (!queueErr) queued = true;
+      const { enqueueEmail } = await import("./mail.server");
+      queued = await enqueueEmail({
+        to: data.email,
+        subject,
+        html,
+        text,
+        template: "newsletter-confirm",
+      });
     } catch {
       // Email-Infrastruktur (noch) nicht eingerichtet – Anmeldung bleibt pending,
       // Admin kann sie in der Inbox sehen und manuell anstoßen.
@@ -292,20 +286,14 @@ export const resendNewsletterConfirmation = createServerFn({ method: "POST" })
         </div>`;
       const text = `Bestätigen Sie Ihre Newsletter-Anmeldung: ${confirmUrl}${unsubscribeUrl ? `\n\nAbmelden: ${unsubscribeUrl}` : ""}`;
 
-      const { error: queueErr } = await supabaseAdmin.rpc(
-        "enqueue_email" as never,
-        {
-          queue_name: "transactional_emails",
-          payload: {
-            to: data.email,
-            subject,
-            html,
-            text,
-            template_name: "newsletter-confirm-resend",
-          },
-        } as never,
-      );
-      if (!queueErr) queued = true;
+      const { enqueueEmail } = await import("./mail.server");
+      queued = await enqueueEmail({
+        to: data.email,
+        subject,
+        html,
+        text,
+        template: "newsletter-confirm-resend",
+      });
     } catch {
       // Email-Infrastruktur (noch) nicht aktiv – Token ist trotzdem erneuert.
     }

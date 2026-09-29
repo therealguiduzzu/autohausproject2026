@@ -174,7 +174,7 @@ export const getEmailQueueOverview = createServerFn({ method: "GET" })
 
     if (!overview.infraReady) {
       overview.notice =
-        "Die E-Mail-Infrastruktur ist noch nicht aktiviert. Sobald die Sender-Domain eingerichtet ist, erscheinen hier alle ausgehenden Mails inkl. Statusverlauf aus email_send_log.";
+        "Das E-Mail-Protokoll ist noch nicht eingerichtet (Migration email_send_log). Danach erscheinen hier alle ausgehenden Mails inkl. Status.";
     }
 
     return overview;

@@ -61,12 +61,9 @@ function notifyResult(res: { mailed: boolean }, hasEmail: boolean) {
   if (res.mailed) toast.success("Gespeichert – Kunde per E-Mail informiert.");
   else if (!hasEmail) toast.success("Gespeichert (keine Kunden-E-Mail hinterlegt).");
   else
-    toast.warning(
-      "Gespeichert, aber die E-Mail konnte nicht in die Warteschlange gestellt werden.",
-      {
-        description: "Ist die E-Mail-Infrastruktur eingerichtet?",
-      },
-    );
+    toast.warning("Gespeichert, aber die E-Mail konnte nicht gesendet werden.", {
+      description: "Ist SMTP eingerichtet? (siehe „E-Mail-Queue“)",
+    });
 }
 
 export default function WerkstattPlaner() {

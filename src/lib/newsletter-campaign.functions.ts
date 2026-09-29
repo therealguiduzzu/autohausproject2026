@@ -63,7 +63,8 @@ const CampaignInput = z.object({
   testTo: z.string().trim().email().optional(),
 });
 
-const MAX_RECIPIENTS = 2000;
+const MAX_RECIPIENTS = 1000;
+const CONCURRENCY = 8;
 
 /**
  * Newsletter versenden: nur an bestätigte Abonnenten (Double-Opt-In), jede Mail mit
@@ -99,7 +100,7 @@ export const sendNewsletterCampaign = createServerFn({ method: "POST" })
       .join("");
 
     let queued = 0;
-    for (const r of recipients) {
+    const sendOne = async (r: { email: string; unsubscribe_token: string }) => {
       const unsub = `${site}/newsletter/abmelden?token=${r.unsubscribe_token}`;
       const html = mailLayout(
         data.subject,
@@ -115,6 +116,10 @@ export const sendNewsletterCampaign = createServerFn({ method: "POST" })
         template: "newsletter-campaign",
       });
       if (ok) queued++;
+    };
+    // Begrenzte Parallelität, damit der SMTP-Server nicht überlastet wird
+    for (let i = 0; i < recipients.length; i += CONCURRENCY) {
+      await Promise.all(recipients.slice(i, i + CONCURRENCY).map(sendOne));
     }
 
     if (!data.testTo) {

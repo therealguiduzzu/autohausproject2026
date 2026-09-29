@@ -58,7 +58,7 @@ CREATE TRIGGER workshop_capacity_trg
 
 CREATE TRIGGER workshop_appointments_touch_updated_at
   BEFORE UPDATE ON public.workshop_appointments
-  FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
+  FOR EACH ROW EXECUTE FUNCTION private.touch_updated_at();
 
 ALTER TABLE public.workshop_appointments ENABLE ROW LEVEL SECURITY;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.workshop_appointments TO authenticated;

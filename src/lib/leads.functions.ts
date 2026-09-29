@@ -82,24 +82,15 @@ export const submitLead = createServerFn({ method: "POST" })
       ].join("\n");
 
       for (const to of recipients) {
-        try {
-          const { error: qErr } = await supabaseAdmin.rpc(
-            "enqueue_email" as never,
-            {
-              queue_name: "transactional_emails",
-              payload: {
-                to,
-                subject: `Neue Anfrage: ${data.subject}`,
-                html,
-                text,
-                template_name: "lead-notification",
-              },
-            } as never,
-          );
-          if (!qErr) notified = true;
-        } catch {
-          /* Mail-Infrastruktur noch nicht aktiv – Anfrage bleibt im Admin-Bereich sichtbar. */
-        }
+        const { enqueueEmail } = await import("./mail.server");
+        const ok = await enqueueEmail({
+          to,
+          subject: `Neue Anfrage: ${data.subject}`,
+          html,
+          text,
+          template: "lead-notification",
+        });
+        if (ok) notified = true;
       }
     }
 

@@ -157,6 +157,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      email_send_log: {
+        Row: {
+          created_at: string;
+          error_message: string | null;
+          id: string;
+          message_id: string | null;
+          metadata: Json | null;
+          recipient_email: string | null;
+          status: string;
+          template_name: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          error_message?: string | null;
+          id?: string;
+          message_id?: string | null;
+          metadata?: Json | null;
+          recipient_email?: string | null;
+          status: string;
+          template_name?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          error_message?: string | null;
+          id?: string;
+          message_id?: string | null;
+          metadata?: Json | null;
+          recipient_email?: string | null;
+          status?: string;
+          template_name?: string | null;
+        };
+        Relationships: [];
+      };
       newsletter_campaigns: {
         Row: {
           id: string;

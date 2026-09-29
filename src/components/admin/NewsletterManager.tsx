@@ -44,10 +44,13 @@ export default function NewsletterManager() {
       if (!res.ok) return toast.error("Keine bestätigten Empfänger vorhanden.");
       toast.success(
         test
-          ? `Testmail ${res.queued ? "in Warteschlange gestellt" : "konnte nicht gestellt werden"}.`
-          : `${res.queued} von ${res.recipients} Mails in der Warteschlange.`,
+          ? `Testmail ${res.queued ? "gesendet" : "konnte nicht gesendet werden"}.`
+          : `${res.queued} von ${res.recipients} Mails versendet.`,
         res.queued < res.recipients
-          ? { description: "Ist die E-Mail-Infrastruktur (Absender-Domain) eingerichtet?" }
+          ? {
+              description:
+                "Ist SMTP eingerichtet (SMTP_HOST, MAIL_FROM)? Details unter „E-Mail-Queue“.",
+            }
           : undefined,
       );
       qc.invalidateQueries({ queryKey: ["nl-stats"] });
@@ -81,7 +84,7 @@ export default function NewsletterManager() {
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
                 {new Date(stats.lastCampaign.createdAt).toLocaleString("de-DE")} ·{" "}
-                {stats.lastCampaign.queued}/{stats.lastCampaign.recipients} Mails versandbereit
+                {stats.lastCampaign.queued}/{stats.lastCampaign.recipients} Mails versendet
               </p>
             </>
           ) : (
