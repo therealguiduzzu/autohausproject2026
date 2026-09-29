@@ -42,9 +42,12 @@ import {
   Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 import VehicleImportPanel from "@/components/admin/VehicleImportPanel";
 import WerkstattPlaner from "@/components/admin/WerkstattPlaner";
 import ReviewsManager from "@/components/admin/ReviewsManager";
+import { getBuybackPhotoUrls, deleteBuybackPhotos } from "@/lib/buyback-photos.functions";
+import { PHOTO_DETAIL_KEY, photoPathsFromDetails } from "@/lib/buyback-photos";
 import NewsletterManager from "@/components/admin/NewsletterManager";
 import TeamManager from "@/components/admin/TeamManager";
 import {
@@ -1432,9 +1435,39 @@ function LeadsInbox({ leads }: { leads: Lead[] }) {
   );
 }
 
+function LeadPhotos({ paths }: { paths: string[] }) {
+  const { data: urls = [], isLoading } = useQuery({
+    queryKey: ["lead-photos", paths.join("|")],
+    queryFn: () => getBuybackPhotoUrls({ data: { paths } }),
+    staleTime: 30 * 60_000,
+  });
+  if (paths.length === 0) return null;
+  return (
+    <div className="mt-5">
+      <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        Fotos vom Kunden
+      </div>
+      {isLoading && <p className="text-xs text-muted-foreground">Lade Fotos …</p>}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {urls.map((u, i) => (
+          <a key={u} href={u} target="_blank" rel="noopener noreferrer">
+            <img
+              src={u}
+              alt={`Kundenfoto ${i + 1}`}
+              loading="lazy"
+              className="aspect-[4/3] w-full rounded-lg border border-border/60 object-cover"
+            />
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function LeadDetail({ lead }: { lead: Lead }) {
   const meta = LEAD_TYPE_META[lead.type];
   const Icon = meta.icon;
+  const photoPaths = photoPathsFromDetails(lead.details);
   return (
     <div className="rounded-2xl border border-border/60 bg-card/40 p-6 lg:p-8">
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border/60 pb-5">
@@ -1496,19 +1529,23 @@ function LeadDetail({ lead }: { lead: Lead }) {
           Details
         </div>
         <dl className="overflow-hidden rounded-lg border border-border/60 bg-background/40 text-sm">
-          {Object.entries(lead.details).map(([k, v], i, arr) => (
-            <div
-              key={k}
-              className={`grid grid-cols-[140px_1fr] gap-2 px-4 py-2.5 ${
-                i < arr.length - 1 ? "border-b border-border/40" : ""
-              }`}
-            >
-              <dt className="text-muted-foreground">{k}</dt>
-              <dd className="text-foreground">{v}</dd>
-            </div>
-          ))}
+          {Object.entries(lead.details)
+            .filter(([k]) => k !== PHOTO_DETAIL_KEY)
+            .map(([k, v], i, arr) => (
+              <div
+                key={k}
+                className={`grid grid-cols-[140px_1fr] gap-2 px-4 py-2.5 ${
+                  i < arr.length - 1 ? "border-b border-border/40" : ""
+                }`}
+              >
+                <dt className="text-muted-foreground">{k}</dt>
+                <dd className="text-foreground">{v}</dd>
+              </div>
+            ))}
         </dl>
       </div>
+
+      <LeadPhotos paths={photoPaths} />
 
       <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-border/60 pt-5">
         <span className="text-xs text-muted-foreground">Status ändern:</span>
@@ -1528,7 +1565,10 @@ function LeadDetail({ lead }: { lead: Lead }) {
         ))}
         <button
           onClick={() => {
-            if (confirm("Anfrage wirklich löschen?")) leadsStore.remove(lead.id);
+            if (!confirm("Anfrage wirklich löschen?")) return;
+            if (photoPaths.length)
+              deleteBuybackPhotos({ data: { paths: photoPaths } }).catch(() => {});
+            leadsStore.remove(lead.id);
           }}
           className="ml-auto flex items-center gap-1.5 rounded-lg border border-border/60 px-3 py-1.5 text-xs text-muted-foreground transition hover:border-primary/60 hover:text-primary"
         >

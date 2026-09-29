@@ -54,6 +54,11 @@ import { toast } from "sonner";
 import HoneypotField from "@/components/HoneypotField";
 import ConsentMap from "@/components/ConsentMap";
 import OpeningStatus from "@/components/OpeningStatus";
+import BuybackPhotoPicker from "@/components/BuybackPhotoPicker";
+import { resizeToJpeg } from "@/lib/image-resize";
+import { createBuybackUploadUrls } from "@/lib/buyback-photos.functions";
+import { BUYBACK_BUCKET, PHOTO_DETAIL_KEY } from "@/lib/buyback-photos";
+import { supabase } from "@/integrations/supabase/client";
 import { averageRating, usePublishedReviews } from "@/lib/reviews-store";
 import { isHoneypotFilled } from "@/lib/honeypot";
 import {
@@ -1584,6 +1589,7 @@ function AnkaufSection() {
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
   const [form, setForm] = useState<AnkaufForm>(emptyAnkauf);
+  const [photos, setPhotos] = useState<File[]>([]);
 
   function update<K extends keyof AnkaufForm>(k: K, v: AnkaufForm[K]) {
     setForm((f) => ({ ...f, [k]: v }));
@@ -1614,9 +1620,34 @@ function AnkaufSection() {
     if (step > 0) setStep((s) => s - 1);
   }
 
+  /** Verkleinert (entfernt EXIF) und lädt die Fotos über signierte URLs hoch; liefert die Pfade. */
+  async function uploadPhotos(): Promise<string[]> {
+    if (photos.length === 0) return [];
+    const targets = await createBuybackUploadUrls({ data: { count: photos.length } });
+    await Promise.all(
+      targets.map(async (t, i) => {
+        const blob = await resizeToJpeg(photos[i]!);
+        const { error } = await supabase.storage
+          .from(BUYBACK_BUCKET)
+          .uploadToSignedUrl(t.path, t.token, blob, { contentType: "image/jpeg" });
+        if (error) throw error;
+      }),
+    );
+    return targets.map((t) => t.path);
+  }
+
   async function submit() {
     setSubmitting(true);
     try {
+      let photoPaths: string[] = [];
+      try {
+        photoPaths = await uploadPhotos();
+      } catch {
+        toast.error(
+          "Die Fotos konnten nicht hochgeladen werden. Bitte entfernen Sie sie oder versuchen Sie es erneut.",
+        );
+        return;
+      }
       await leadsStore.add({
         type: "Fahrzeugankauf",
         name: form.name || "Unbekannt",
@@ -1630,6 +1661,7 @@ function AnkaufSection() {
           Kilometerstand: form.mileage ? `${form.mileage} km` : "—",
           Unfallfrei: form.condition,
           Wunschpreis: form.notes ? `${form.notes} €` : "—",
+          ...(photoPaths.length ? { [PHOTO_DETAIL_KEY]: photoPaths.join("|") } : {}),
         },
       });
       setSent(true);
@@ -1642,6 +1674,7 @@ function AnkaufSection() {
 
   function reset() {
     setForm(emptyAnkauf);
+    setPhotos([]);
     setStep(0);
     setSent(false);
     setSubmitting(false);
@@ -1775,6 +1808,7 @@ function AnkaufSection() {
                           </option>
                         </Select>
                       </Field>
+                      <BuybackPhotoPicker files={photos} onChange={setPhotos} />
                     </>
                   )}
 
