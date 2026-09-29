@@ -7,7 +7,10 @@ export const Route = createFileRoute("/datenschutz")({
   head: () => ({
     meta: [
       { title: "Datenschutz — Auto Semmel Langenselbold" },
-      { name: "description", content: "Datenschutzerklärung der Auto Semmel GmbH & Co. Siegfried Polenz KG gemäß DSGVO." },
+      {
+        name: "description",
+        content: "Datenschutzerklärung der Auto Semmel GmbH & Co. Siegfried Polenz KG gemäß DSGVO.",
+      },
       { property: "og:title", content: "Datenschutz — Auto Semmel" },
       { property: "og:url", content: `${SITE_URL}/datenschutz` },
     ],
@@ -30,9 +33,7 @@ function DatenschutzPage() {
         <h1 className="mt-8 font-display text-4xl font-semibold tracking-tight">
           Datenschutzerklärung
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Informationen gemäß Art. 13 / 14 DSGVO
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">Informationen gemäß Art. 13 / 14 DSGVO</p>
 
         <Section title="1. Verantwortlicher">
           <p>
@@ -40,7 +41,17 @@ function DatenschutzPage() {
             <br />
             Gelnhäuser Straße 40, 63505 Langenselbold
             <br />
-            Telefon: <a href="tel:+4961842633" className="hover:text-primary transition-colors">06184 / 2633</a> · E-Mail: <a href="mailto:datenschutz@auto-semmel.de" className="hover:text-primary transition-colors">datenschutz@auto-semmel.de</a>
+            Telefon:{" "}
+            <a href="tel:+4961842633" className="hover:text-primary transition-colors">
+              06184 / 2633
+            </a>{" "}
+            · E-Mail:{" "}
+            <a
+              href="mailto:datenschutz@auto-semmel.de"
+              className="hover:text-primary transition-colors"
+            >
+              datenschutz@auto-semmel.de
+            </a>
           </p>
         </Section>
 
@@ -57,15 +68,15 @@ function DatenschutzPage() {
           <p>
             Bei Probefahrt-Anfragen, Werkstattterminen und Ankaufanfragen verarbeiten wir Ihre
             Angaben (Name, E-Mail, Telefon, Fahrzeugdaten) zur Bearbeitung Ihrer Anfrage auf
-            Grundlage von Art. 6 Abs. 1 lit. b DSGVO. Die Daten werden gelöscht, sobald sie für
-            den Zweck der Verarbeitung nicht mehr erforderlich sind.
+            Grundlage von Art. 6 Abs. 1 lit. b DSGVO. Die Daten werden gelöscht, sobald sie für den
+            Zweck der Verarbeitung nicht mehr erforderlich sind.
           </p>
         </Section>
 
         <Section title="4. Cookies & Einwilligungen">
           <p>
-            Wir verwenden technisch notwendige Cookies sowie — mit Ihrer Einwilligung — Cookies
-            zur Reichweitenmessung und Marketing. Sie können Ihre Auswahl jederzeit ändern:
+            Wir verwenden technisch notwendige Cookies sowie — mit Ihrer Einwilligung — Cookies zur
+            Reichweitenmessung und Marketing. Sie können Ihre Auswahl jederzeit ändern:
           </p>
           <button
             onClick={openCookieSettings}

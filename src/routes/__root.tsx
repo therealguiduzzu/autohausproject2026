@@ -47,7 +47,8 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
           Diese Seite konnte nicht geladen werden
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Bei uns ist etwas schiefgelaufen. Bitte laden Sie die Seite neu oder kehren Sie zur Startseite zurück.
+          Bei uns ist etwas schiefgelaufen. Bitte laden Sie die Seite neu oder kehren Sie zur
+          Startseite zurück.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -184,7 +185,9 @@ function RootComponent() {
         if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
       });
       // store unsubscribe on the cleanup-less effect via window for HMR
-      (window as unknown as { __asAuthSub?: { unsubscribe: () => void } }).__asAuthSub?.unsubscribe();
+      (
+        window as unknown as { __asAuthSub?: { unsubscribe: () => void } }
+      ).__asAuthSub?.unsubscribe();
       (window as unknown as { __asAuthSub?: { unsubscribe: () => void } }).__asAuthSub =
         data.subscription;
     });

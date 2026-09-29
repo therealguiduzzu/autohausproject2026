@@ -20,9 +20,6 @@ const ResendInput = z.object({
   email: z.string().trim().toLowerCase().email().max(255),
 });
 
-
-
-
 function randomToken(): string {
   const bytes = new Uint8Array(32);
   crypto.getRandomValues(bytes);
@@ -50,9 +47,7 @@ export const subscribeNewsletter = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const headers =
-      typeof globalThis !== "undefined" && "Headers" in globalThis
-        ? new Headers()
-        : new Headers();
+      typeof globalThis !== "undefined" && "Headers" in globalThis ? new Headers() : new Headers();
     // Note: TanStack server fns don't expose req headers by default; we use env/default site URL.
     const origin = siteOrigin(headers);
 
@@ -133,17 +128,19 @@ export const subscribeNewsletter = createServerFn({ method: "POST" })
         </div>`;
       const text = `Bitte bestätigen Sie Ihre Newsletter-Anmeldung: ${confirmUrl}${unsubscribeUrl ? `\n\nAbmelden: ${unsubscribeUrl}` : ""}`;
 
-
-      const { error: queueErr } = await supabaseAdmin.rpc("enqueue_email" as never, {
-        queue_name: "transactional_emails",
-        payload: {
-          to: data.email,
-          subject,
-          html,
-          text,
-          template_name: "newsletter-confirm",
-        },
-      } as never);
+      const { error: queueErr } = await supabaseAdmin.rpc(
+        "enqueue_email" as never,
+        {
+          queue_name: "transactional_emails",
+          payload: {
+            to: data.email,
+            subject,
+            html,
+            text,
+            template_name: "newsletter-confirm",
+          },
+        } as never,
+      );
       if (!queueErr) queued = true;
     } catch {
       // Email-Infrastruktur (noch) nicht eingerichtet – Anmeldung bleibt pending,
@@ -295,16 +292,19 @@ export const resendNewsletterConfirmation = createServerFn({ method: "POST" })
         </div>`;
       const text = `Bestätigen Sie Ihre Newsletter-Anmeldung: ${confirmUrl}${unsubscribeUrl ? `\n\nAbmelden: ${unsubscribeUrl}` : ""}`;
 
-      const { error: queueErr } = await supabaseAdmin.rpc("enqueue_email" as never, {
-        queue_name: "transactional_emails",
-        payload: {
-          to: data.email,
-          subject,
-          html,
-          text,
-          template_name: "newsletter-confirm-resend",
-        },
-      } as never);
+      const { error: queueErr } = await supabaseAdmin.rpc(
+        "enqueue_email" as never,
+        {
+          queue_name: "transactional_emails",
+          payload: {
+            to: data.email,
+            subject,
+            html,
+            text,
+            template_name: "newsletter-confirm-resend",
+          },
+        } as never,
+      );
       if (!queueErr) queued = true;
     } catch {
       // Email-Infrastruktur (noch) nicht aktiv – Token ist trotzdem erneuert.
@@ -319,5 +319,3 @@ export const resendNewsletterConfirmation = createServerFn({ method: "POST" })
     const exposeLink = !queued && process.env.NODE_ENV !== "production";
     return { ok: true, queued, confirmUrl: exposeLink ? confirmUrl : undefined } as const;
   });
-
-

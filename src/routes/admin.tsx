@@ -172,8 +172,8 @@ function NoAccessScreen({ email, onLogout }: { email: string; onLogout: () => vo
         </div>
         <h1 className="font-display text-2xl font-semibold">Kein Zugriff</h1>
         <p className="mt-3 text-sm text-muted-foreground">
-          Ihr Konto <span className="text-foreground">{email}</span> hat keine Berechtigung für
-          das Händler-Dashboard.
+          Ihr Konto <span className="text-foreground">{email}</span> hat keine Berechtigung für das
+          Händler-Dashboard.
         </p>
         <button
           onClick={claim}
@@ -188,8 +188,8 @@ function NoAccessScreen({ email, onLogout }: { email: string; onLogout: () => vo
           </p>
         )}
         <p className="mt-3 text-[11px] text-muted-foreground">
-          Funktioniert nur einmalig, solange noch kein Administrator existiert. Weitere
-          Mitarbeiter werden anschließend über das Backend angelegt.
+          Funktioniert nur einmalig, solange noch kein Administrator existiert. Weitere Mitarbeiter
+          werden anschließend über das Backend angelegt.
         </p>
         <div className="mt-6 flex justify-center gap-2">
           <button
@@ -212,12 +212,15 @@ function NoAccessScreen({ email, onLogout }: { email: string; onLogout: () => vo
 
 /* ---------------- Dashboard ---------------- */
 
-type Tab = "list" | "new" | "leads" | "api" | "calendar" | "reviews" | "newsletter" | "emailq" | "careers";
+type Tab =
+  "list" | "new" | "leads" | "api" | "calendar" | "reviews" | "newsletter" | "emailq" | "careers";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</span>
+      <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
       {children}
     </label>
   );
@@ -240,7 +243,9 @@ function Dashboard({ onLogout, userEmail }: { onLogout: () => void; userEmail: s
             </div>
             <div>
               <p className="font-display text-sm font-semibold leading-tight">Auto Semmel</p>
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Dashboard</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Dashboard
+              </p>
             </div>
           </Link>
           <button
@@ -253,14 +258,28 @@ function Dashboard({ onLogout, userEmail }: { onLogout: () => void; userEmail: s
         </div>
 
         <nav className="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-col lg:gap-1 lg:px-3 lg:pb-6">
-          <NavBtn icon={<Car className="h-4 w-4" />} active={tab === "list"} onClick={() => setTab("list")}>
+          <NavBtn
+            icon={<Car className="h-4 w-4" />}
+            active={tab === "list"}
+            onClick={() => setTab("list")}
+          >
             Fahrzeugliste
-            <span className="ml-auto rounded-md bg-muted/60 px-1.5 py-0.5 text-[10px]">{vehicles.length}</span>
+            <span className="ml-auto rounded-md bg-muted/60 px-1.5 py-0.5 text-[10px]">
+              {vehicles.length}
+            </span>
           </NavBtn>
-          <NavBtn icon={<PlusCircle className="h-4 w-4" />} active={tab === "new"} onClick={() => setTab("new")}>
+          <NavBtn
+            icon={<PlusCircle className="h-4 w-4" />}
+            active={tab === "new"}
+            onClick={() => setTab("new")}
+          >
             Neues Fahrzeug
           </NavBtn>
-          <NavBtn icon={<Inbox className="h-4 w-4" />} active={tab === "leads"} onClick={() => setTab("leads")}>
+          <NavBtn
+            icon={<Inbox className="h-4 w-4" />}
+            active={tab === "leads"}
+            onClick={() => setTab("leads")}
+          >
             Posteingang / Leads
             {newLeadCount > 0 && (
               <span className="relative ml-auto inline-flex">
@@ -271,22 +290,46 @@ function Dashboard({ onLogout, userEmail }: { onLogout: () => void; userEmail: s
               </span>
             )}
           </NavBtn>
-          <NavBtn icon={<CalendarDays className="h-4 w-4" />} active={tab === "calendar"} onClick={() => setTab("calendar")}>
+          <NavBtn
+            icon={<CalendarDays className="h-4 w-4" />}
+            active={tab === "calendar"}
+            onClick={() => setTab("calendar")}
+          >
             Werkstatt-Planer
           </NavBtn>
-          <NavBtn icon={<Star className="h-4 w-4" />} active={tab === "reviews"} onClick={() => setTab("reviews")}>
+          <NavBtn
+            icon={<Star className="h-4 w-4" />}
+            active={tab === "reviews"}
+            onClick={() => setTab("reviews")}
+          >
             Google Bewertungen
           </NavBtn>
-          <NavBtn icon={<Mail className="h-4 w-4" />} active={tab === "newsletter"} onClick={() => setTab("newsletter")}>
+          <NavBtn
+            icon={<Mail className="h-4 w-4" />}
+            active={tab === "newsletter"}
+            onClick={() => setTab("newsletter")}
+          >
             Newsletter & Marketing
           </NavBtn>
-          <NavBtn icon={<Inbox className="h-4 w-4" />} active={tab === "emailq"} onClick={() => setTab("emailq")}>
+          <NavBtn
+            icon={<Inbox className="h-4 w-4" />}
+            active={tab === "emailq"}
+            onClick={() => setTab("emailq")}
+          >
             E-Mail-Queue
           </NavBtn>
-          <NavBtn icon={<Briefcase className="h-4 w-4" />} active={tab === "careers"} onClick={() => setTab("careers")}>
+          <NavBtn
+            icon={<Briefcase className="h-4 w-4" />}
+            active={tab === "careers"}
+            onClick={() => setTab("careers")}
+          >
             Stellen & Bewerber
           </NavBtn>
-          <NavBtn icon={<Plug className="h-4 w-4" />} active={tab === "api"} onClick={() => setTab("api")}>
+          <NavBtn
+            icon={<Plug className="h-4 w-4" />}
+            active={tab === "api"}
+            onClick={() => setTab("api")}
+          >
             Schnittstellen-Status
           </NavBtn>
         </nav>
@@ -348,7 +391,10 @@ function Dashboard({ onLogout, userEmail }: { onLogout: () => void; userEmail: s
 
         <footer className="mt-12 border-t border-border/60 pt-5 text-[11px] text-muted-foreground">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-            <div>© 2026 Auto Semmel Langenselbold — Offizieller Stellantis-Partner für Alfa Romeo, Fiat &amp; Abarth</div>
+            <div>
+              © 2026 Auto Semmel Langenselbold — Offizieller Stellantis-Partner für Alfa Romeo, Fiat
+              &amp; Abarth
+            </div>
             <div>Gelnhäuser Straße 40 · 63505 Langenselbold</div>
           </div>
         </footer>
@@ -389,7 +435,9 @@ function VehicleList({ vehicles }: { vehicles: AdminVehicle[] }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/40">
       {vehicles.length === 0 && (
-        <div className="p-10 text-center text-sm text-muted-foreground">Keine Fahrzeuge im Bestand.</div>
+        <div className="p-10 text-center text-sm text-muted-foreground">
+          Keine Fahrzeuge im Bestand.
+        </div>
       )}
 
       <ul className="divide-y divide-border/40">
@@ -475,11 +523,7 @@ function VehicleListRow({ v }: { v: AdminVehicle }) {
         >
           Reserviert
         </QuickToggle>
-        <QuickToggle
-          active={isReduced}
-          tone="red"
-          onClick={toggleReduced}
-        >
+        <QuickToggle active={isReduced} tone="red" onClick={toggleReduced}>
           Preis reduziert
         </QuickToggle>
         {showDiscount && !isReduced && (
@@ -653,11 +697,18 @@ function NewVehicleForm({ onCreated }: { onCreated: () => void }) {
       fuelType: form.fuelType,
       transmission: form.transmission,
       imageUrls: images,
-      features: form.features.split(",").map((s) => s.trim()).filter(Boolean),
+      features: form.features
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
       badge: null,
       co2Class: form.co2Class || null,
-      consumptionCombined: !isElectric && form.consumptionCombined ? Number(form.consumptionCombined) : null,
-      powerConsumption: (isElectric || form.fuelType === "Hybrid") && form.powerConsumption ? Number(form.powerConsumption) : null,
+      consumptionCombined:
+        !isElectric && form.consumptionCombined ? Number(form.consumptionCombined) : null,
+      powerConsumption:
+        (isElectric || form.fuelType === "Hybrid") && form.powerConsumption
+          ? Number(form.powerConsumption)
+          : null,
       co2Emissions: form.co2Emissions ? Number(form.co2Emissions) : null,
     });
     setForm(initialForm);
@@ -676,7 +727,11 @@ function NewVehicleForm({ onCreated }: { onCreated: () => void }) {
         {step === 0 && (
           <div className="grid gap-5 md:grid-cols-2">
             <Field label="Marke">
-              <select className="input" value={form.brand} onChange={(e) => set("brand", e.target.value as Brand)}>
+              <select
+                className="input"
+                value={form.brand}
+                onChange={(e) => set("brand", e.target.value as Brand)}
+              >
                 {BRANDS.map((b) => (
                   <option key={b}>{b}</option>
                 ))}
@@ -705,7 +760,11 @@ function NewVehicleForm({ onCreated }: { onCreated: () => void }) {
               />
             </Field>
             <Field label="Zustand">
-              <select className="input" value={form.condition} onChange={(e) => set("condition", e.target.value as Condition)}>
+              <select
+                className="input"
+                value={form.condition}
+                onChange={(e) => set("condition", e.target.value as Condition)}
+              >
                 {CONDITIONS.map((c) => (
                   <option key={c}>{c}</option>
                 ))}
@@ -743,14 +802,22 @@ function NewVehicleForm({ onCreated }: { onCreated: () => void }) {
               />
             </Field>
             <Field label="Kraftstoff">
-              <select className="input" value={form.fuelType} onChange={(e) => set("fuelType", e.target.value as FuelType)}>
+              <select
+                className="input"
+                value={form.fuelType}
+                onChange={(e) => set("fuelType", e.target.value as FuelType)}
+              >
                 {FUELS.map((f) => (
                   <option key={f}>{f}</option>
                 ))}
               </select>
             </Field>
             <Field label="Getriebe">
-              <select className="input" value={form.transmission} onChange={(e) => set("transmission", e.target.value as Transmission)}>
+              <select
+                className="input"
+                value={form.transmission}
+                onChange={(e) => set("transmission", e.target.value as Transmission)}
+              >
                 {GEARS.map((g) => (
                   <option key={g}>{g}</option>
                 ))}
@@ -774,10 +841,16 @@ function NewVehicleForm({ onCreated }: { onCreated: () => void }) {
               Pflichtangaben gemäß Pkw-EnVKV (WLTP)
             </div>
             <Field label="CO₂-Effizienzklasse">
-              <select className="input" value={form.co2Class} onChange={(e) => set("co2Class", e.target.value)}>
+              <select
+                className="input"
+                value={form.co2Class}
+                onChange={(e) => set("co2Class", e.target.value)}
+              >
                 <option value="">— bitte wählen —</option>
                 {["A", "B", "C", "D", "E", "F", "G"].map((c) => (
-                  <option key={c} value={c}>Klasse {c}</option>
+                  <option key={c} value={c}>
+                    Klasse {c}
+                  </option>
                 ))}
               </select>
             </Field>
@@ -819,10 +892,6 @@ function NewVehicleForm({ onCreated }: { onCreated: () => void }) {
 
         {step === 1 && <AiInseratAssistant form={form} />}
 
-
-
-
-
         {step === 2 && (
           <div className="space-y-6">
             <div className="grid gap-5 md:grid-cols-3">
@@ -862,7 +931,9 @@ function NewVehicleForm({ onCreated }: { onCreated: () => void }) {
               <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border/60 bg-background/40 px-6 py-10 text-center transition hover:border-primary/60 hover:bg-primary/5">
                 <ImageIcon className="h-8 w-8 text-muted-foreground" />
                 <span className="text-sm font-medium">Bilder hochladen</span>
-                <span className="text-xs text-muted-foreground">PNG, JPG bis 10 MB · Mehrfachauswahl möglich</span>
+                <span className="text-xs text-muted-foreground">
+                  PNG, JPG bis 10 MB · Mehrfachauswahl möglich
+                </span>
                 <input
                   type="file"
                   multiple
@@ -875,8 +946,15 @@ function NewVehicleForm({ onCreated }: { onCreated: () => void }) {
               {images.length > 0 && (
                 <div className="mt-4 grid grid-cols-3 gap-3 md:grid-cols-6">
                   {images.map((src, i) => (
-                    <div key={i} className="relative aspect-square overflow-hidden rounded-lg border border-border/60">
-                      <img src={src} alt={`Vorschau Fahrzeugbild ${i + 1}`} className="h-full w-full object-cover" />
+                    <div
+                      key={i}
+                      className="relative aspect-square overflow-hidden rounded-lg border border-border/60"
+                    >
+                      <img
+                        src={src}
+                        alt={`Vorschau Fahrzeugbild ${i + 1}`}
+                        className="h-full w-full object-cover"
+                      />
                       <button
                         onClick={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
                         className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-background/80 text-foreground"
@@ -962,7 +1040,8 @@ function AiInseratAssistant({ form }: { form: FormState }) {
               </span>
             </div>
             <p className="mt-1 max-w-md text-sm text-muted-foreground">
-              Emotionalen, suchmaschinenoptimierten deutschen Verkaufstext aus den Fahrzeugdaten erzeugen.
+              Emotionalen, suchmaschinenoptimierten deutschen Verkaufstext aus den Fahrzeugdaten
+              erzeugen.
             </p>
           </div>
         </div>
@@ -973,7 +1052,11 @@ function AiInseratAssistant({ form }: { form: FormState }) {
           style={{ minWidth: "22rem" }}
           className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-wider text-primary-foreground shadow-[var(--shadow-glow)] transition hover:brightness-110 disabled:cursor-wait disabled:opacity-80"
         >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Sparkles className="h-4 w-4" />
+          )}
           {loading ? "KI generiert…" : "Verkaufstext generieren"}
         </button>
       </div>
@@ -999,14 +1082,19 @@ function AiInseratAssistant({ form }: { form: FormState }) {
       {text && !loading && (
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">
-            Tipp: Bitte vor Veröffentlichung kurz prüfen – die KI generiert auf Basis Ihrer Eingaben.
+            Tipp: Bitte vor Veröffentlichung kurz prüfen – die KI generiert auf Basis Ihrer
+            Eingaben.
           </p>
           <button
             type="button"
             onClick={copyText}
             className="inline-flex items-center gap-1.5 rounded-lg border border-border/70 bg-background px-3 py-1.5 text-xs font-semibold transition hover:border-primary hover:text-primary"
           >
-            {copied ? <Check className="h-3.5 w-3.5 text-primary" /> : <Copy className="h-3.5 w-3.5" />}
+            {copied ? (
+              <Check className="h-3.5 w-3.5 text-primary" />
+            ) : (
+              <Copy className="h-3.5 w-3.5" />
+            )}
             {copied ? "Kopiert" : "Text kopieren"}
           </button>
         </div>
@@ -1020,11 +1108,18 @@ function buildInseratText(f: FormState): string {
   const model = f.model || "Modell";
   const version = f.version ? ` ${f.version}` : "";
   const ps = f.powerHp ? `${f.powerHp} PS` : "kraftvoller Motorisierung";
-  const km = f.mileage ? `${Number(f.mileage).toLocaleString("de-DE")} km` : "geringer Laufleistung";
+  const km = f.mileage
+    ? `${Number(f.mileage).toLocaleString("de-DE")} km`
+    : "geringer Laufleistung";
   const fuel = f.fuelType;
   const gear = f.transmission;
   const features = f.features
-    ? f.features.split(",").map((s) => s.trim()).filter(Boolean).slice(0, 4).join(", ")
+    ? f.features
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .slice(0, 4)
+        .join(", ")
     : "Matrix-LED, edle Alufelgen und ein Interieur, das Luxus neu definiert";
 
   if (brand === "Alfa Romeo") {
@@ -1039,7 +1134,6 @@ function buildInseratText(f: FormState): string {
   return `Pure italienische Lebensfreude: Der ${brand} ${model}${version} bringt mediterranen Charme auf deutsche Straßen. ${ps} ${fuel}, ${gear}, gepflegte ${km} – ein echtes Lifestyle-Statement aus Turin. Highlights: ${features}. Jetzt entdecken bei Auto Semmel in Langenselbold – Ihrem Partner für italienische Automobil-Kultur im Main-Kinzig-Kreis. Vereinbaren Sie heute Ihre Probefahrt!`;
 }
 
-
 function Stepper({ step, labels }: { step: number; labels: string[] }) {
   return (
     <ol className="flex items-center gap-3">
@@ -1053,13 +1147,15 @@ function Stepper({ step, labels }: { step: number; labels: string[] }) {
                 active
                   ? "border-primary bg-primary text-primary-foreground"
                   : done
-                  ? "border-emerald-500/60 bg-emerald-500/15 text-emerald-700"
-                  : "border-border/60 bg-card text-muted-foreground"
+                    ? "border-emerald-500/60 bg-emerald-500/15 text-emerald-700"
+                    : "border-border/60 bg-card text-muted-foreground"
               }`}
             >
               {done ? <CheckCircle2 className="h-4 w-4" /> : i + 1}
             </div>
-            <span className={`hidden text-sm md:inline ${active ? "text-foreground" : "text-muted-foreground"}`}>
+            <span
+              className={`hidden text-sm md:inline ${active ? "text-foreground" : "text-muted-foreground"}`}
+            >
               {label}
             </span>
             {i < labels.length - 1 && <div className="h-px flex-1 bg-border/60" />}
@@ -1114,7 +1210,9 @@ function ApiStatus() {
                 key={m.label}
                 className="rounded-xl border border-border/60 bg-background/40 p-4 transition hover:border-primary/40 hover:shadow-sm"
               >
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{m.label}</p>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  {m.label}
+                </p>
                 <p className={`mt-1 font-display text-2xl font-semibold ${m.tone}`}>{m.value}</p>
               </div>
             ))}
@@ -1163,8 +1261,8 @@ function ApiStatus() {
             <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
             <p className="leading-relaxed text-foreground/90">
               <span className="font-semibold text-primary">Vorteil für Auto Semmel: </span>
-              Sobald Ihr Mobile.de-Händler-Key hinterlegt ist, werden alle Fahrzeuge
-              vollautomatisch synchronisiert. Manuelle Pflege entfällt.
+              Sobald Ihr Mobile.de-Händler-Key hinterlegt ist, werden alle Fahrzeuge vollautomatisch
+              synchronisiert. Manuelle Pflege entfällt.
             </p>
           </div>
 
@@ -1226,7 +1324,10 @@ function ApiStatus() {
               ok: true,
             },
           ].map((entry, i) => (
-            <li key={i} className="flex flex-wrap items-start gap-4 px-6 py-4 transition hover:bg-muted/30">
+            <li
+              key={i}
+              className="flex flex-wrap items-start gap-4 px-6 py-4 transition hover:bg-muted/30"
+            >
               <span
                 className={`mt-1 h-2 w-2 shrink-0 rounded-full ${
                   entry.ok ? "bg-emerald-500" : "bg-amber-500"
@@ -1247,7 +1348,6 @@ function ApiStatus() {
           Händler-Key hinterlegt ist.
         </div>
       </div>
-
 
       {/* Secondary integrations */}
       <div className="grid gap-4 lg:grid-cols-3">
@@ -1305,21 +1405,25 @@ function StatusCard({
   desc: string;
 }) {
   const cls =
-    status === "ready"
-      ? "bg-emerald-500/15 text-emerald-700"
-      : "bg-amber-500/15 text-amber-700";
+    status === "ready" ? "bg-emerald-500/15 text-emerald-700" : "bg-amber-500/15 text-amber-700";
   const dot = status === "ready" ? "bg-emerald-400" : "bg-amber-400";
   return (
     <div className="rounded-2xl border border-border/60 bg-card/40 p-5">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-lg bg-muted/50 text-foreground">{icon}</div>
+          <div className="grid h-10 w-10 place-items-center rounded-lg bg-muted/50 text-foreground">
+            {icon}
+          </div>
           <div>
-            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{subtitle}</p>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              {subtitle}
+            </p>
             <p className="font-medium">{title}</p>
           </div>
         </div>
-        <span className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${cls}`}>
+        <span
+          className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${cls}`}
+        >
           <span className={`h-1.5 w-1.5 rounded-full ${dot}`} /> {statusLabel}
         </span>
       </div>
@@ -1396,7 +1500,8 @@ function LeadsInbox({ leads }: { leads: Lead[] }) {
               const meta = LEAD_TYPE_META[l.type];
               const Icon = meta.icon;
               const active = selected?.id === l.id;
-              const isTopNew = l.status === "Neu" && filtered.find((x) => x.status === "Neu")?.id === l.id;
+              const isTopNew =
+                l.status === "Neu" && filtered.find((x) => x.status === "Neu")?.id === l.id;
               return (
                 <li
                   key={l.id}
@@ -1412,10 +1517,16 @@ function LeadsInbox({ leads }: { leads: Lead[] }) {
                   <button
                     onClick={() => setSelectedId(l.id)}
                     className={`flex w-full items-start gap-3 px-4 py-4 text-left transition-colors duration-200 ${
-                      active && !isTopNew ? "bg-primary/5" : !isTopNew ? "hover:bg-muted/30" : "hover:bg-primary/10"
+                      active && !isTopNew
+                        ? "bg-primary/5"
+                        : !isTopNew
+                          ? "hover:bg-muted/30"
+                          : "hover:bg-primary/10"
                     }`}
                   >
-                    <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg ${meta.tint}`}>
+                    <span
+                      className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg ${meta.tint}`}
+                    >
                       <Icon className="h-4 w-4" />
                     </span>
                     <div className="min-w-0 flex-1">
@@ -1428,14 +1539,24 @@ function LeadsInbox({ leads }: { leads: Lead[] }) {
                           )}
                           {l.name}
                         </p>
-                        <span className="shrink-0 text-[10px] text-muted-foreground">{formatAgo(l.createdAt)}</span>
+                        <span className="shrink-0 text-[10px] text-muted-foreground">
+                          {formatAgo(l.createdAt)}
+                        </span>
                       </div>
-                      <p className={`mt-0.5 truncate text-xs ${isTopNew ? "text-foreground/80 font-medium" : "text-muted-foreground"}`}>{l.subject}</p>
+                      <p
+                        className={`mt-0.5 truncate text-xs ${isTopNew ? "text-foreground/80 font-medium" : "text-muted-foreground"}`}
+                      >
+                        {l.subject}
+                      </p>
                       <div className="mt-2 flex items-center gap-2">
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${STATUS_META[l.status]}`}>
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${STATUS_META[l.status]}`}
+                        >
                           {l.status}
                         </span>
-                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{meta.label}</span>
+                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                          {meta.label}
+                        </span>
                       </div>
                     </div>
                   </button>
@@ -1474,7 +1595,9 @@ function LeadDetail({ lead }: { lead: Lead }) {
             <h3 className="font-display text-xl font-semibold">{lead.subject}</h3>
           </div>
         </div>
-        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_META[lead.status]}`}>
+        <span
+          className={`rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_META[lead.status]}`}
+        >
           {lead.status}
         </span>
       </div>
@@ -1491,7 +1614,9 @@ function LeadDetail({ lead }: { lead: Lead }) {
           >
             <Phone className="h-4 w-4 text-primary" />
             <div>
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Telefon</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Telefon
+              </div>
               <div className="text-sm font-medium">{lead.phone}</div>
             </div>
           </a>
@@ -1503,7 +1628,9 @@ function LeadDetail({ lead }: { lead: Lead }) {
           >
             <Mail className="h-4 w-4 text-primary" />
             <div>
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">E-Mail</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                E-Mail
+              </div>
               <div className="text-sm font-medium">{lead.email}</div>
             </div>
           </a>
@@ -1560,7 +1687,13 @@ function LeadDetail({ lead }: { lead: Lead }) {
 
 /* ---------------- KPI Header ---------------- */
 
-function KpiHeader({ vehicleCount: _vehicleCount, openLeads }: { vehicleCount: number; openLeads: number }) {
+function KpiHeader({
+  vehicleCount: _vehicleCount,
+  openLeads,
+}: {
+  vehicleCount: number;
+  openLeads: number;
+}) {
   // Static demo values for the pitch; openLeads still reflects live data when > 0
   const leadsValue = openLeads > 0 ? openLeads : 5;
   return (
@@ -1605,7 +1738,9 @@ function KpiCard({
     <div className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card/60 p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md">
       <div className="mb-3 flex items-center justify-between text-xs uppercase tracking-widest text-muted-foreground">
         <span className="flex items-center gap-2">
-          <span className="grid h-7 w-7 place-items-center rounded-lg bg-muted/60 text-foreground/80">{icon}</span>
+          <span className="grid h-7 w-7 place-items-center rounded-lg bg-muted/60 text-foreground/80">
+            {icon}
+          </span>
           {label}
         </span>
         {pulse && (
@@ -1636,7 +1771,8 @@ type Appointment = {
   customerEmail?: string;
 };
 
-type NotificationKind = "created" | "rescheduled" | "cancelled" | "reactivated" | "deleted" | "updated";
+type NotificationKind =
+  "created" | "rescheduled" | "cancelled" | "reactivated" | "deleted" | "updated";
 type NotificationEntry = {
   id: string;
   kind: NotificationKind;
@@ -1687,9 +1823,36 @@ const emptyDraft = (): Omit<Appointment, "id"> => ({
 
 function WerkstattPlaner() {
   const [appointments, setAppointments] = useState<Appointment[]>([
-    { id: "a1", day: 0, time: "08:00", title: "Inspektion & Ölwechsel", sub: "Fiat 500 · MKK-AS 120", color: "blue", customerName: "Markus Becker", customerEmail: "m.becker@example.de" },
-    { id: "a2", day: 1, time: "15:00", title: "HU/AU Hauptuntersuchung", sub: "Alfa Romeo Stelvio", color: "purple", customerName: "Sabine Schulz", customerEmail: "sabine.s@example.de" },
-    { id: "a3", day: 3, time: "10:00", title: "Reifenwechsel (Winter/Sommer)", sub: "Fiat Ducato", color: "green", customerName: "Thomas Klein", customerEmail: "t.klein@example.de" },
+    {
+      id: "a1",
+      day: 0,
+      time: "08:00",
+      title: "Inspektion & Ölwechsel",
+      sub: "Fiat 500 · MKK-AS 120",
+      color: "blue",
+      customerName: "Markus Becker",
+      customerEmail: "m.becker@example.de",
+    },
+    {
+      id: "a2",
+      day: 1,
+      time: "15:00",
+      title: "HU/AU Hauptuntersuchung",
+      sub: "Alfa Romeo Stelvio",
+      color: "purple",
+      customerName: "Sabine Schulz",
+      customerEmail: "sabine.s@example.de",
+    },
+    {
+      id: "a3",
+      day: 3,
+      time: "10:00",
+      title: "Reifenwechsel (Winter/Sommer)",
+      sub: "Fiat Ducato",
+      color: "green",
+      customerName: "Thomas Klein",
+      customerEmail: "t.klein@example.de",
+    },
   ]);
   const [notifications, setNotifications] = useState<NotificationEntry[]>([]);
   const [editorOpen, setEditorOpen] = useState(false);
@@ -1744,7 +1907,6 @@ function WerkstattPlaner() {
 
   const findApt = (day: number, time: string) =>
     appointments.find((a) => a.day === day && a.time === time);
-
 
   const openCreate = (day = 0, time = "08:00") => {
     setEditingId(null);
@@ -1820,8 +1982,11 @@ function WerkstattPlaner() {
 
   const toggleCancel = (id: string) => {
     const apt = appointments.find((a) => a.id === id);
-    setAppointments((list) => list.map((a) => (a.id === id ? { ...a, cancelled: !a.cancelled } : a)));
-    if (apt) notify({ ...apt, cancelled: !apt.cancelled }, apt.cancelled ? "reactivated" : "cancelled");
+    setAppointments((list) =>
+      list.map((a) => (a.id === id ? { ...a, cancelled: !a.cancelled } : a)),
+    );
+    if (apt)
+      notify({ ...apt, cancelled: !apt.cancelled }, apt.cancelled ? "reactivated" : "cancelled");
   };
 
   const moveApt = (id: string, deltaDay: number, deltaSlot: number) => {
@@ -1833,7 +1998,9 @@ function WerkstattPlaner() {
     const newTime = SLOTS[newSlot];
     if (newDay === apt.day && newTime === apt.time) return;
     if (appointments.some((a) => a.id !== id && a.day === newDay && a.time === newTime)) {
-      toast.error("Slot belegt", { description: `${DAYS[newDay]} ${newTime} ist bereits vergeben.` });
+      toast.error("Slot belegt", {
+        description: `${DAYS[newDay]} ${newTime} ist bereits vergeben.`,
+      });
       return;
     }
     const oldSlot = `${DAYS[apt.day]}, ${apt.time} Uhr`;
@@ -1842,14 +2009,18 @@ function WerkstattPlaner() {
     notify(moved, "rescheduled", { oldSlot });
   };
 
-
   const activeCount = appointments.filter((a) => !a.cancelled).length;
 
   const exportICS = () => {
     const pad = (n: number) => String(n).padStart(2, "0");
     const fmt = (d: Date) =>
       `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}00Z`;
-    const esc = (s: string) => (s || "").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+    const esc = (s: string) =>
+      (s || "")
+        .replace(/\\/g, "\\\\")
+        .replace(/;/g, "\\;")
+        .replace(/,/g, "\\,")
+        .replace(/\n/g, "\\n");
     // Anker: Montag der aktuellen Woche
     const now = new Date();
     const monday = new Date(now);
@@ -1866,25 +2037,27 @@ function WerkstattPlaner() {
       "X-WR-CALNAME:Auto Semmel Werkstatt",
       "X-WR-TIMEZONE:Europe/Berlin",
     ];
-    appointments.filter((a) => !a.cancelled).forEach((a) => {
-      const [h, m] = a.time.split(":").map(Number);
-      const start = new Date(monday);
-      start.setDate(monday.getDate() + a.day);
-      start.setHours(h, m, 0, 0);
-      const end = new Date(start.getTime() + 90 * 60 * 1000);
-      lines.push(
-        "BEGIN:VEVENT",
-        `UID:${a.id}@auto-semmel.de`,
-        `DTSTAMP:${stamp}`,
-        `DTSTART:${fmt(start)}`,
-        `DTEND:${fmt(end)}`,
-        `SUMMARY:${esc(a.title)}`,
-        `DESCRIPTION:${esc(`${a.sub}${a.customerName ? ` · Kunde: ${a.customerName}` : ""}${a.customerEmail ? ` <${a.customerEmail}>` : ""}`)}`,
-        "LOCATION:Auto Semmel · Gelnhäuser Straße 40, 63505 Langenselbold",
-        "STATUS:CONFIRMED",
-        "END:VEVENT",
-      );
-    });
+    appointments
+      .filter((a) => !a.cancelled)
+      .forEach((a) => {
+        const [h, m] = a.time.split(":").map(Number);
+        const start = new Date(monday);
+        start.setDate(monday.getDate() + a.day);
+        start.setHours(h, m, 0, 0);
+        const end = new Date(start.getTime() + 90 * 60 * 1000);
+        lines.push(
+          "BEGIN:VEVENT",
+          `UID:${a.id}@auto-semmel.de`,
+          `DTSTAMP:${stamp}`,
+          `DTSTART:${fmt(start)}`,
+          `DTEND:${fmt(end)}`,
+          `SUMMARY:${esc(a.title)}`,
+          `DESCRIPTION:${esc(`${a.sub}${a.customerName ? ` · Kunde: ${a.customerName}` : ""}${a.customerEmail ? ` <${a.customerEmail}>` : ""}`)}`,
+          "LOCATION:Auto Semmel · Gelnhäuser Straße 40, 63505 Langenselbold",
+          "STATUS:CONFIRMED",
+          "END:VEVENT",
+        );
+      });
     lines.push("END:VCALENDAR");
     const blob = new Blob([lines.join("\r\n")], { type: "text/calendar;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -1895,15 +2068,17 @@ function WerkstattPlaner() {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
-    toast.success("Kalender exportiert", { description: `${activeCount} Termine als .ics-Datei heruntergeladen.` });
+    toast.success("Kalender exportiert", {
+      description: `${activeCount} Termine als .ics-Datei heruntergeladen.`,
+    });
   };
-
 
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-3 py-1.5 text-xs text-muted-foreground">
-          <CalendarDays className="h-3.5 w-3.5" /> KW {Math.ceil(new Date().getDate() / 7)} · Werkstatt Langenselbold ·{" "}
+          <CalendarDays className="h-3.5 w-3.5" /> KW {Math.ceil(new Date().getDate() / 7)} ·
+          Werkstatt Langenselbold ·{" "}
           <span className="font-semibold text-foreground">{activeCount}</span> aktive Termine
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -1941,46 +2116,95 @@ function WerkstattPlaner() {
                 {editingId ? draft.title || "Termin" : "Werkstattermin eintragen"}
               </h3>
             </div>
-            <button onClick={closeEditor} className="rounded-full p-1.5 text-muted-foreground transition hover:bg-muted/50 hover:text-foreground">
+            <button
+              onClick={closeEditor}
+              className="rounded-full p-1.5 text-muted-foreground transition hover:bg-muted/50 hover:text-foreground"
+            >
               <X className="h-4 w-4" />
             </button>
           </div>
           <div className="grid gap-3 md:grid-cols-5">
             <Field label="Tag">
-              <select className="input" value={draft.day} onChange={(e) => setDraft({ ...draft, day: Number(e.target.value) })}>
-                {DAYS.map((d, i) => <option key={d} value={i}>{d}</option>)}
+              <select
+                className="input"
+                value={draft.day}
+                onChange={(e) => setDraft({ ...draft, day: Number(e.target.value) })}
+              >
+                {DAYS.map((d, i) => (
+                  <option key={d} value={i}>
+                    {d}
+                  </option>
+                ))}
               </select>
             </Field>
             <Field label="Uhrzeit">
-              <select className="input" value={draft.time} onChange={(e) => setDraft({ ...draft, time: e.target.value })}>
-                {SLOTS.map((s) => <option key={s}>{s}</option>)}
+              <select
+                className="input"
+                value={draft.time}
+                onChange={(e) => setDraft({ ...draft, time: e.target.value })}
+              >
+                {SLOTS.map((s) => (
+                  <option key={s}>{s}</option>
+                ))}
               </select>
             </Field>
             <Field label="Service">
-              <input className="input" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} placeholder="z.B. Inspektion" />
+              <input
+                className="input"
+                value={draft.title}
+                onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+                placeholder="z.B. Inspektion"
+              />
             </Field>
             <Field label="Fahrzeug / Kennzeichen">
-              <input className="input" value={draft.sub} onChange={(e) => setDraft({ ...draft, sub: e.target.value })} placeholder="z.B. Fiat 500 · MKK-AS 120" />
+              <input
+                className="input"
+                value={draft.sub}
+                onChange={(e) => setDraft({ ...draft, sub: e.target.value })}
+                placeholder="z.B. Fiat 500 · MKK-AS 120"
+              />
             </Field>
             <Field label="Kategorie">
-              <select className="input" value={draft.color} onChange={(e) => setDraft({ ...draft, color: e.target.value as SlotColor })}>
-                {COLOR_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              <select
+                className="input"
+                value={draft.color}
+                onChange={(e) => setDraft({ ...draft, color: e.target.value as SlotColor })}
+              >
+                {COLOR_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
               </select>
             </Field>
           </div>
           <div className="mt-3 grid gap-3 md:grid-cols-2">
             <Field label="Kunde (Name)">
-              <input className="input" value={draft.customerName ?? ""} onChange={(e) => setDraft({ ...draft, customerName: e.target.value })} placeholder="z.B. Markus Becker" />
+              <input
+                className="input"
+                value={draft.customerName ?? ""}
+                onChange={(e) => setDraft({ ...draft, customerName: e.target.value })}
+                placeholder="z.B. Markus Becker"
+              />
             </Field>
             <Field label="Kunde (E-Mail für Benachrichtigung)">
-              <input type="email" className="input" value={draft.customerEmail ?? ""} onChange={(e) => setDraft({ ...draft, customerEmail: e.target.value })} placeholder="kunde@example.de" />
+              <input
+                type="email"
+                className="input"
+                value={draft.customerEmail ?? ""}
+                onChange={(e) => setDraft({ ...draft, customerEmail: e.target.value })}
+                placeholder="kunde@example.de"
+              />
             </Field>
           </div>
           <p className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-            <Bell className="h-3 w-3 text-primary" /> Bei Erstellen, Verschieben und Absagen wird automatisch eine E-Mail an den Kunden ausgelöst.
+            <Bell className="h-3 w-3 text-primary" /> Bei Erstellen, Verschieben und Absagen wird
+            automatisch eine E-Mail an den Kunden ausgelöst.
           </p>
           {conflictError && (
-            <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">{conflictError}</p>
+            <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+              {conflictError}
+            </p>
           )}
 
           <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
@@ -2003,10 +2227,16 @@ function WerkstattPlaner() {
               )}
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={closeEditor} className="rounded-lg border border-border/60 px-4 py-2 text-sm font-medium transition hover:bg-muted/50">
+              <button
+                onClick={closeEditor}
+                className="rounded-lg border border-border/60 px-4 py-2 text-sm font-medium transition hover:bg-muted/50"
+              >
                 Abbrechen
               </button>
-              <button onClick={save} className="rounded-lg bg-foreground px-4 py-2 text-sm font-semibold text-background transition hover:opacity-90">
+              <button
+                onClick={save}
+                className="rounded-lg bg-foreground px-4 py-2 text-sm font-semibold text-background transition hover:opacity-90"
+              >
                 {editingId ? "Änderungen speichern" : "Eintragen"}
               </button>
             </div>
@@ -2020,14 +2250,18 @@ function WerkstattPlaner() {
             <tr className="border-b border-border/60 text-xs uppercase tracking-widest text-muted-foreground">
               <th className="w-24 p-4 text-left font-medium">Uhrzeit</th>
               {DAYS.map((d) => (
-                <th key={d} className="p-4 text-left font-medium">{d}</th>
+                <th key={d} className="p-4 text-left font-medium">
+                  {d}
+                </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {SLOTS.map((time) => (
               <tr key={time} className="border-b border-border/40 last:border-0">
-                <td className="p-4 align-top text-sm font-semibold text-muted-foreground">{time}</td>
+                <td className="p-4 align-top text-sm font-semibold text-muted-foreground">
+                  {time}
+                </td>
                 {DAYS.map((_, day) => {
                   const a = findApt(day, time);
                   return (
@@ -2036,11 +2270,12 @@ function WerkstattPlaner() {
                         <div
                           className={`group relative rounded-xl border px-3 py-2 text-xs shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${COLOR_CLASSES[a.color]} ${a.cancelled ? "opacity-60" : ""}`}
                         >
-                          <button
-                            onClick={() => openEdit(a)}
-                            className="block w-full text-left"
-                          >
-                            <p className={`font-semibold leading-tight ${a.cancelled ? "line-through" : ""}`}>{a.title}</p>
+                          <button onClick={() => openEdit(a)} className="block w-full text-left">
+                            <p
+                              className={`font-semibold leading-tight ${a.cancelled ? "line-through" : ""}`}
+                            >
+                              {a.title}
+                            </p>
                             <p className="mt-1 opacity-80">{a.sub}</p>
                             {a.cancelled && (
                               <span className="mt-1 inline-block rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-red-700">
@@ -2054,34 +2289,46 @@ function WerkstattPlaner() {
                                 title="Slot früher"
                                 onClick={() => moveApt(a.id, 0, -1)}
                                 className="rounded p-1 hover:bg-white/60"
-                              ><ArrowLeft className="h-3 w-3 rotate-90" /></button>
+                              >
+                                <ArrowLeft className="h-3 w-3 rotate-90" />
+                              </button>
                               <button
                                 title="Slot später"
                                 onClick={() => moveApt(a.id, 0, 1)}
                                 className="rounded p-1 hover:bg-white/60"
-                              ><ArrowRight className="h-3 w-3 rotate-90" /></button>
+                              >
+                                <ArrowRight className="h-3 w-3 rotate-90" />
+                              </button>
                               <button
                                 title="Tag zurück"
                                 onClick={() => moveApt(a.id, -1, 0)}
                                 className="rounded p-1 hover:bg-white/60"
-                              ><ArrowLeft className="h-3 w-3" /></button>
+                              >
+                                <ArrowLeft className="h-3 w-3" />
+                              </button>
                               <button
                                 title="Tag vor"
                                 onClick={() => moveApt(a.id, 1, 0)}
                                 className="rounded p-1 hover:bg-white/60"
-                              ><ArrowRight className="h-3 w-3" /></button>
+                              >
+                                <ArrowRight className="h-3 w-3" />
+                              </button>
                             </div>
                             <div className="flex items-center gap-0.5">
                               <button
                                 title={a.cancelled ? "Reaktivieren" : "Absagen"}
                                 onClick={() => toggleCancel(a.id)}
                                 className="rounded p-1 hover:bg-white/60"
-                              ><X className="h-3 w-3" /></button>
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
                               <button
                                 title="Löschen"
                                 onClick={() => removeApt(a.id)}
                                 className="rounded p-1 text-red-700 hover:bg-white/60"
-                              ><Trash2 className="h-3 w-3" /></button>
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -2105,15 +2352,22 @@ function WerkstattPlaner() {
       <div className="rounded-2xl border border-border/60 bg-card/60 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-5 py-4">
           <div className="flex items-center gap-2">
-            <div className="rounded-lg bg-primary/10 p-2 text-primary"><Bell className="h-4 w-4" /></div>
+            <div className="rounded-lg bg-primary/10 p-2 text-primary">
+              <Bell className="h-4 w-4" />
+            </div>
             <div>
-              <h3 className="font-display text-base font-semibold leading-tight">Kunden-Benachrichtigungen</h3>
-              <p className="text-xs text-muted-foreground">Automatische E-Mails bei Erstellen · Verschieben · Absagen</p>
+              <h3 className="font-display text-base font-semibold leading-tight">
+                Kunden-Benachrichtigungen
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Automatische E-Mails bei Erstellen · Verschieben · Absagen
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-700">
-              <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500 align-middle" /> Prototyp · Live-Versand bereit
+              <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500 align-middle" />{" "}
+              Prototyp · Live-Versand bereit
             </span>
             {notifications.length > 0 && (
               <button
@@ -2127,17 +2381,23 @@ function WerkstattPlaner() {
         </div>
         {notifications.length === 0 ? (
           <div className="px-5 py-10 text-center text-sm text-muted-foreground">
-            Noch keine Benachrichtigungen versendet. Erstelle, verschiebe oder sage einen Termin ab — die E-Mail an den Kunden erscheint hier.
+            Noch keine Benachrichtigungen versendet. Erstelle, verschiebe oder sage einen Termin ab
+            — die E-Mail an den Kunden erscheint hier.
           </div>
         ) : (
           <ul className="divide-y divide-border/50">
             {notifications.map((n) => {
               const meta = KIND_META[n.kind];
               return (
-                <li key={n.id} className="flex flex-col gap-2 px-5 py-4 md:flex-row md:items-start md:gap-4">
+                <li
+                  key={n.id}
+                  className="flex flex-col gap-2 px-5 py-4 md:flex-row md:items-start md:gap-4"
+                >
                   <div className="flex items-center gap-2 md:w-44 md:shrink-0">
                     <span className={`h-2 w-2 rounded-full ${meta.dot}`} />
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{meta.label}</span>
+                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      {meta.label}
+                    </span>
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
@@ -2147,10 +2407,16 @@ function WerkstattPlaner() {
                       <span className="font-mono text-xs text-muted-foreground">{n.to}</span>
                     </div>
                     <p className="mt-1 text-sm font-semibold text-foreground">{n.subject}</p>
-                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{n.preview}</p>
+                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                      {n.preview}
+                    </p>
                   </div>
                   <div className="text-[11px] text-muted-foreground md:w-32 md:text-right">
-                    {new Date(n.when).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })} Uhr
+                    {new Date(n.when).toLocaleTimeString("de-DE", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}{" "}
+                    Uhr
                   </div>
                 </li>
               );
@@ -2164,13 +2430,41 @@ function WerkstattPlaner() {
 
 /* ---------------- Google Bewertungen ---------------- */
 
-type Review = { id: string; author: string; rating: number; text: string; date: string; published: boolean };
+type Review = {
+  id: string;
+  author: string;
+  rating: number;
+  text: string;
+  date: string;
+  published: boolean;
+};
 
 function ReviewsManager() {
   const [reviews, setReviews] = useState<Review[]>([
-    { id: "r1", author: "Markus B.", rating: 5, text: "Top Beratung beim Kauf meines Alfa Romeo Tonale. Sehr persönlich.", date: "Vor 2 Wochen", published: true },
-    { id: "r2", author: "Sabine S.", rating: 5, text: "Seit Jahren Kundin mit meinem Fiat 500. Ehrlich, fair, transparent.", date: "Vor 1 Monat", published: true },
-    { id: "r3", author: "Thomas K.", rating: 5, text: "Reibungsloser Ankauf meines Altfahrzeugs und faire Verrechnung.", date: "Vor 1 Monat", published: true },
+    {
+      id: "r1",
+      author: "Markus B.",
+      rating: 5,
+      text: "Top Beratung beim Kauf meines Alfa Romeo Tonale. Sehr persönlich.",
+      date: "Vor 2 Wochen",
+      published: true,
+    },
+    {
+      id: "r2",
+      author: "Sabine S.",
+      rating: 5,
+      text: "Seit Jahren Kundin mit meinem Fiat 500. Ehrlich, fair, transparent.",
+      date: "Vor 1 Monat",
+      published: true,
+    },
+    {
+      id: "r3",
+      author: "Thomas K.",
+      rating: 5,
+      text: "Reibungsloser Ankauf meines Altfahrzeugs und faire Verrechnung.",
+      date: "Vor 1 Monat",
+      published: true,
+    },
   ]);
   const [draft, setDraft] = useState({ author: "", rating: 5, text: "" });
 
@@ -2182,20 +2476,41 @@ function ReviewsManager() {
           <h3 className="font-display text-lg font-semibold">Neue Bewertung hinzufügen</h3>
         </div>
         <Field label="Kunde">
-          <input className="input" value={draft.author} onChange={(e) => setDraft({ ...draft, author: e.target.value })} placeholder="z.B. Markus B." />
+          <input
+            className="input"
+            value={draft.author}
+            onChange={(e) => setDraft({ ...draft, author: e.target.value })}
+            placeholder="z.B. Markus B."
+          />
         </Field>
         <Field label="Sterne">
-          <select className="input" value={draft.rating} onChange={(e) => setDraft({ ...draft, rating: Number(e.target.value) })}>
-            {[5, 4, 3, 2, 1].map((n) => <option key={n} value={n}>{n} Sterne</option>)}
+          <select
+            className="input"
+            value={draft.rating}
+            onChange={(e) => setDraft({ ...draft, rating: Number(e.target.value) })}
+          >
+            {[5, 4, 3, 2, 1].map((n) => (
+              <option key={n} value={n}>
+                {n} Sterne
+              </option>
+            ))}
           </select>
         </Field>
         <Field label="Bewertung">
-          <textarea className="input min-h-[100px]" value={draft.text} onChange={(e) => setDraft({ ...draft, text: e.target.value })} placeholder="Kundenstimme …" />
+          <textarea
+            className="input min-h-[100px]"
+            value={draft.text}
+            onChange={(e) => setDraft({ ...draft, text: e.target.value })}
+            placeholder="Kundenstimme …"
+          />
         </Field>
         <button
           onClick={() => {
             if (!draft.author.trim() || !draft.text.trim()) return;
-            setReviews((r) => [{ id: `r${Date.now()}`, ...draft, date: "Gerade eben", published: true }, ...r]);
+            setReviews((r) => [
+              { id: `r${Date.now()}`, ...draft, date: "Gerade eben", published: true },
+              ...r,
+            ]);
             setDraft({ author: "", rating: 5, text: "" });
           }}
           className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
@@ -2204,19 +2519,26 @@ function ReviewsManager() {
         </button>
         <div className="rounded-xl border border-border/60 bg-muted/30 p-4 text-xs text-muted-foreground">
           <div className="mb-1 flex items-center gap-2 font-semibold text-foreground">
-            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" /> 4,8 / 5 · 312 Google-Bewertungen
+            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" /> 4,8 / 5 · 312
+            Google-Bewertungen
           </div>
-          Auto-Sync mit Google Business Profile aktiv. Manuelle Pflege überschreibt importierte Inhalte.
+          Auto-Sync mit Google Business Profile aktiv. Manuelle Pflege überschreibt importierte
+          Inhalte.
         </div>
       </div>
 
       <div className="space-y-3">
         {reviews.map((r) => (
-          <div key={r.id} className="rounded-2xl border border-border/60 bg-card/60 p-5 shadow-sm transition hover:border-primary/40">
+          <div
+            key={r.id}
+            className="rounded-2xl border border-border/60 bg-card/60 p-5 shadow-sm transition hover:border-primary/40"
+          >
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <div className="grid h-8 w-8 place-items-center rounded-full bg-muted/60 text-xs font-semibold">{r.author.charAt(0)}</div>
+                  <div className="grid h-8 w-8 place-items-center rounded-full bg-muted/60 text-xs font-semibold">
+                    {r.author.charAt(0)}
+                  </div>
                   <div>
                     <p className="text-sm font-semibold">{r.author}</p>
                     <p className="text-[11px] text-muted-foreground">{r.date}</p>
@@ -2232,9 +2554,15 @@ function ReviewsManager() {
             <p className="mt-3 text-sm leading-relaxed text-foreground/90">{r.text}</p>
             <div className="mt-3 flex items-center gap-2">
               <button
-                onClick={() => setReviews((rs) => rs.map((x) => x.id === r.id ? { ...x, published: !x.published } : x))}
+                onClick={() =>
+                  setReviews((rs) =>
+                    rs.map((x) => (x.id === r.id ? { ...x, published: !x.published } : x)),
+                  )
+                }
                 className={`rounded-full border px-3 py-1 text-[11px] font-medium transition ${
-                  r.published ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-border/60 text-muted-foreground"
+                  r.published
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    : "border-border/60 text-muted-foreground"
                 }`}
               >
                 {r.published ? "Live auf Website" : "Versteckt"}
@@ -2268,7 +2596,10 @@ function CalendarSyncModal({ onClose }: { onClose: () => void }) {
     }
   };
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm animate-fade-in"
+      onClick={onClose}
+    >
       <div
         className="w-full max-w-lg rounded-2xl border border-border/60 bg-card p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
@@ -2279,24 +2610,33 @@ function CalendarSyncModal({ onClose }: { onClose: () => void }) {
               <Link2 className="h-5 w-5" />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] uppercase tracking-widest text-muted-foreground">Echtzeit-Feed</p>
+              <p className="text-[11px] uppercase tracking-widest text-muted-foreground">
+                Echtzeit-Feed
+              </p>
               <h3 className="font-display text-lg font-semibold">Kalender-Synchronisation</h3>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-full p-1.5 text-muted-foreground transition hover:bg-muted/50 hover:text-foreground">
+          <button
+            onClick={onClose}
+            className="rounded-full p-1.5 text-muted-foreground transition hover:bg-muted/50 hover:text-foreground"
+          >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         <p className="text-sm leading-relaxed text-foreground/85">
           Synchronisieren Sie Ihre Werkstatt-Termine in Echtzeit mit{" "}
-          <span className="font-semibold">Apple Calendar</span>, <span className="font-semibold">Google Calendar</span> oder{" "}
-          <span className="font-semibold">Microsoft Outlook</span>. Kopieren Sie einfach diesen Feed-Link und fügen Sie
-          ihn in Ihrem Smartphone oder Desktop-Kalender als „Abonniertes Kalender" hinzu.
+          <span className="font-semibold">Apple Calendar</span>,{" "}
+          <span className="font-semibold">Google Calendar</span> oder{" "}
+          <span className="font-semibold">Microsoft Outlook</span>. Kopieren Sie einfach diesen
+          Feed-Link und fügen Sie ihn in Ihrem Smartphone oder Desktop-Kalender als „Abonniertes
+          Kalender" hinzu.
         </p>
 
         <div className="mt-5">
-          <label className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">Feed-URL (iCal)</label>
+          <label className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
+            Feed-URL (iCal)
+          </label>
           <div className="mt-2 flex items-stretch gap-2">
             <input
               readOnly
@@ -2308,15 +2648,32 @@ function CalendarSyncModal({ onClose }: { onClose: () => void }) {
               onClick={copy}
               className="flex shrink-0 items-center gap-1.5 rounded-lg border border-border/70 bg-card px-3 text-xs font-semibold transition hover:border-primary/40 hover:text-primary"
             >
-              {copied ? <><Check className="h-3.5 w-3.5 text-emerald-600" /> Kopiert</> : <><Copy className="h-3.5 w-3.5" /> Kopieren</>}
+              {copied ? (
+                <>
+                  <Check className="h-3.5 w-3.5 text-emerald-600" /> Kopiert
+                </>
+              ) : (
+                <>
+                  <Copy className="h-3.5 w-3.5" /> Kopieren
+                </>
+              )}
             </button>
           </div>
         </div>
 
         <div className="mt-5 grid gap-2 rounded-xl border border-border/50 bg-muted/30 p-4 text-xs text-muted-foreground">
-          <div className="flex items-start gap-2"><span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" /> Google Calendar: „Weitere Kalender → Per URL hinzufügen"</div>
-          <div className="flex items-start gap-2"><span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" /> Apple Calendar: „Ablage → Neues Kalenderabonnement"</div>
-          <div className="flex items-start gap-2"><span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" /> Outlook: „Kalender hinzufügen → Aus dem Internet abonnieren"</div>
+          <div className="flex items-start gap-2">
+            <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" /> Google
+            Calendar: „Weitere Kalender → Per URL hinzufügen"
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" /> Apple Calendar:
+            „Ablage → Neues Kalenderabonnement"
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" /> Outlook:
+            „Kalender hinzufügen → Aus dem Internet abonnieren"
+          </div>
         </div>
 
         <div className="mt-6 flex justify-end">
@@ -2382,7 +2739,8 @@ function NewsletterManager() {
           </div>
           <p className="mt-2 font-display text-3xl font-semibold text-foreground">412</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            <span className="font-semibold text-emerald-700">+18</span> in den letzten 30 Tagen · Double-Opt-In bestätigt
+            <span className="font-semibold text-emerald-700">+18</span> in den letzten 30 Tagen ·
+            Double-Opt-In bestätigt
           </p>
         </div>
         <div className="rounded-2xl border border-border/60 bg-card/60 p-5 shadow-sm">
@@ -2401,7 +2759,9 @@ function NewsletterManager() {
         <div className="mb-4 flex items-center justify-between">
           <div>
             <h3 className="font-display text-lg font-semibold">Schnell-Kampagne starten</h3>
-            <p className="text-xs text-muted-foreground">Wählen Sie eine Vorlage — versendet an alle bestätigten Abonnenten.</p>
+            <p className="text-xs text-muted-foreground">
+              Wählen Sie eine Vorlage — versendet an alle bestätigten Abonnenten.
+            </p>
           </div>
           <span className="rounded-full border border-border/60 bg-background/60 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
             Vorlagen-Modus
@@ -2411,9 +2771,15 @@ function NewsletterManager() {
         <div className="grid gap-5 md:grid-cols-2">
           <div className="space-y-3">
             <Field label="Vorlage">
-              <select className="input w-full" value={tplId} onChange={(e) => setTplId(e.target.value)}>
+              <select
+                className="input w-full"
+                value={tplId}
+                onChange={(e) => setTplId(e.target.value)}
+              >
                 {templates.map((t) => (
-                  <option key={t.id} value={t.id}>{t.title}</option>
+                  <option key={t.id} value={t.id}>
+                    {t.title}
+                  </option>
                 ))}
               </select>
             </Field>
@@ -2433,21 +2799,29 @@ function NewsletterManager() {
               disabled={sending}
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-60"
             >
-              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {sending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
               {sending ? "Wird versendet..." : "Kampagne starten"}
             </button>
           </div>
 
           <div className="rounded-xl border border-border/60 bg-background/60 p-5">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Vorschau</p>
-            <p className="mt-2 font-display text-base font-semibold text-foreground">{tpl.subject}</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Vorschau
+            </p>
+            <p className="mt-2 font-display text-base font-semibold text-foreground">
+              {tpl.subject}
+            </p>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{tpl.preview}</p>
             <div className="mt-4 inline-flex rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground">
               Jetzt Termin sichern →
             </div>
             <p className="mt-4 border-t border-border/60 pt-3 text-[10px] text-muted-foreground">
-              Auto Semmel GmbH & Co. Siegfried Polenz KG · Gelnhäuser Straße 40, 63505 Langenselbold ·{" "}
-              <span className="underline">Abmelden</span>
+              Auto Semmel GmbH & Co. Siegfried Polenz KG · Gelnhäuser Straße 40, 63505 Langenselbold
+              · <span className="underline">Abmelden</span>
             </p>
           </div>
         </div>
@@ -2460,15 +2834,35 @@ function NewsletterManager() {
             <Database className="h-4 w-4" />
           </div>
           <div className="space-y-2 text-sm text-muted-foreground">
-            <p className="font-display text-sm font-semibold text-foreground">So funktioniert Ihr Newsletter-Center</p>
-            <p>
-              Alle Anmeldungen vom Landing-Page-Formular werden in Ihrer <span className="font-semibold text-foreground">Datenbank</span> (Tabelle <code className="rounded bg-muted/60 px-1 py-0.5 text-[11px]">newsletter_subscribers</code>) gespeichert — DSGVO-konform mit Double-Opt-In, IP-Logging und Einwilligungszeitstempel.
+            <p className="font-display text-sm font-semibold text-foreground">
+              So funktioniert Ihr Newsletter-Center
             </p>
             <p>
-              Beim Klick auf <span className="font-semibold text-foreground">„Kampagne starten"</span> liest das System nur bestätigte Abonnenten aus Ihrer Datenbank, rendert die Vorlage individuell pro Empfänger und versendet die E-Mails über den verschlüsselten Versand-Dienst (Lovable Emails / Resend). Bounces, Abmeldungen und Öffnungsraten fließen automatisch in dieses Dashboard zurück.
+              Alle Anmeldungen vom Landing-Page-Formular werden in Ihrer{" "}
+              <span className="font-semibold text-foreground">Datenbank</span> (Tabelle{" "}
+              <code className="rounded bg-muted/60 px-1 py-0.5 text-[11px]">
+                newsletter_subscribers
+              </code>
+              ) gespeichert — DSGVO-konform mit Double-Opt-In, IP-Logging und
+              Einwilligungszeitstempel.
+            </p>
+            <p>
+              Beim Klick auf{" "}
+              <span className="font-semibold text-foreground">„Kampagne starten"</span> liest das
+              System nur bestätigte Abonnenten aus Ihrer Datenbank, rendert die Vorlage individuell
+              pro Empfänger und versendet die E-Mails über den verschlüsselten Versand-Dienst
+              (Lovable Emails / Resend). Bounces, Abmeldungen und Öffnungsraten fließen automatisch
+              in dieses Dashboard zurück.
             </p>
             <p className="text-xs">
-              <span className="font-semibold text-foreground">Nächster Schritt für den Live-Betrieb:</span> Versand-Domain (z.B. <code className="rounded bg-muted/60 px-1 py-0.5 text-[11px]">news.auto-semmel.de</code>) verifizieren — danach gehen Kampagnen mit einem Klick raus.
+              <span className="font-semibold text-foreground">
+                Nächster Schritt für den Live-Betrieb:
+              </span>{" "}
+              Versand-Domain (z.B.{" "}
+              <code className="rounded bg-muted/60 px-1 py-0.5 text-[11px]">
+                news.auto-semmel.de
+              </code>
+              ) verifizieren — danach gehen Kampagnen mit einem Klick raus.
             </p>
           </div>
         </div>
@@ -2482,7 +2876,9 @@ function NewsletterManager() {
 type EQStatus = "all" | "pending" | "sent" | "failed" | "suppressed";
 
 function EmailQueueView() {
-  const [data, setData] = useState<import("@/lib/email-queue.functions").EmailQueueOverview | null>(null);
+  const [data, setData] = useState<import("@/lib/email-queue.functions").EmailQueueOverview | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [filter, setFilter] = useState<EQStatus>("all");
@@ -2496,8 +2892,8 @@ function EmailQueueView() {
       const { getEmailQueueOverview } = await import("@/lib/email-queue.functions");
       const res = await getEmailQueueOverview();
       setData(res);
-    } catch (e: any) {
-      setErr(e?.message ?? "Konnte E-Mail-Queue nicht laden.");
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : "Konnte E-Mail-Queue nicht laden.");
     } finally {
       setLoading(false);
     }
@@ -2522,13 +2918,11 @@ function EmailQueueView() {
     }
     if (query) {
       const q = query.toLowerCase();
-      if (
-        !(
-          (it.recipient ?? "").toLowerCase().includes(q) ||
-          (it.subject ?? "").toLowerCase().includes(q) ||
-          (it.templateName ?? "").toLowerCase().includes(q)
-        )
-      )
+      if (!(
+        (it.recipient ?? "").toLowerCase().includes(q) ||
+        (it.subject ?? "").toLowerCase().includes(q) ||
+        (it.templateName ?? "").toLowerCase().includes(q)
+      ))
         return false;
     }
     return true;
@@ -2588,7 +2982,9 @@ function EmailQueueView() {
       </div>
 
       {err && (
-        <div className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-900">{err}</div>
+        <div className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-900">
+          {err}
+        </div>
       )}
 
       {/* Tabelle */}
@@ -2628,7 +3024,8 @@ function EmailQueueView() {
 
       <p className="text-[11px] text-muted-foreground">
         Quelle: <code className="rounded bg-muted/60 px-1">email_send_log</code> (dedupliziert nach{" "}
-        <code className="rounded bg-muted/60 px-1">message_id</code>) + pending Newsletter-Anmeldungen aus{" "}
+        <code className="rounded bg-muted/60 px-1">message_id</code>) + pending
+        Newsletter-Anmeldungen aus{" "}
         <code className="rounded bg-muted/60 px-1">newsletter_subscribers</code>.
       </p>
     </div>
@@ -2647,7 +3044,9 @@ function FragmentRow({
   return (
     <>
       <tr className="border-t border-border/40 hover:bg-muted/30">
-        <td className="px-4 py-3"><EQStatusBadge status={item.status} /></td>
+        <td className="px-4 py-3">
+          <EQStatusBadge status={item.status} />
+        </td>
         <td className="px-4 py-3">
           <div className="font-medium text-foreground line-clamp-1">{item.subject ?? "—"}</div>
           {item.error && (
@@ -2656,7 +3055,9 @@ function FragmentRow({
         </td>
         <td className="px-4 py-3 text-muted-foreground">{item.recipient ?? "—"}</td>
         <td className="px-4 py-3">
-          <code className="rounded bg-muted/60 px-1.5 py-0.5 text-[11px]">{item.templateName ?? "—"}</code>
+          <code className="rounded bg-muted/60 px-1.5 py-0.5 text-[11px]">
+            {item.templateName ?? "—"}
+          </code>
         </td>
         <td className="px-4 py-3 text-xs text-muted-foreground">
           {new Date(item.createdAt).toLocaleString("de-DE")}
@@ -2673,12 +3074,20 @@ function FragmentRow({
       {expanded && (
         <tr className="border-t border-border/40 bg-muted/20">
           <td colSpan={6} className="px-4 py-4">
-            <p className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">Statusverlauf</p>
+            <p className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">
+              Statusverlauf
+            </p>
             <ol className="space-y-1.5">
               {(item.history ?? []).map((h, i) => (
                 <li key={i} className="flex items-center gap-3 text-xs">
-                  <EQStatusBadge status={h.status as any} />
-                  <span className="text-muted-foreground">{new Date(h.at).toLocaleString("de-DE")}</span>
+                  <EQStatusBadge
+                    status={
+                      h.status as import("@/lib/email-queue.functions").EmailQueueItem["status"]
+                    }
+                  />
+                  <span className="text-muted-foreground">
+                    {new Date(h.at).toLocaleString("de-DE")}
+                  </span>
                   {h.error && <span className="text-red-700">· {h.error}</span>}
                 </li>
               ))}
@@ -2710,14 +3119,22 @@ function EQStatusBadge({ status }: { status: string }) {
   };
   const m = map[s] ?? { label: status, cls: "bg-muted text-muted-foreground border-border" };
   return (
-    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold ${m.cls}`}>
+    <span
+      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold ${m.cls}`}
+    >
       {m.label}
     </span>
   );
 }
 
 function labelFor(s: EQStatus): string {
-  return s === "pending" ? "Pending" : s === "sent" ? "Versendet" : s === "failed" ? "Fehler" : "Unterdrückt";
+  return s === "pending"
+    ? "Pending"
+    : s === "sent"
+      ? "Versendet"
+      : s === "failed"
+        ? "Fehler"
+        : "Unterdrückt";
 }
 
 function StatCard({
@@ -2766,11 +3183,21 @@ function CareersManager() {
       </div>
 
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border/60 bg-card/40 p-1.5">
-        <SubTab active={sub === "jobs"} onClick={() => setSub("jobs")} icon={<Briefcase className="h-4 w-4" />}>
+        <SubTab
+          active={sub === "jobs"}
+          onClick={() => setSub("jobs")}
+          icon={<Briefcase className="h-4 w-4" />}
+        >
           Aktive Stellenausschreibungen
-          <span className="ml-1.5 rounded-md bg-muted/60 px-1.5 py-0.5 text-[10px]">{jobs.length}</span>
+          <span className="ml-1.5 rounded-md bg-muted/60 px-1.5 py-0.5 text-[10px]">
+            {jobs.length}
+          </span>
         </SubTab>
-        <SubTab active={sub === "applicants"} onClick={() => setSub("applicants")} icon={<Users className="h-4 w-4" />}>
+        <SubTab
+          active={sub === "applicants"}
+          onClick={() => setSub("applicants")}
+          icon={<Users className="h-4 w-4" />}
+        >
           Eingegangene Bewerbungen
           {newCount > 0 && (
             <span className="ml-1.5 rounded-md bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
@@ -2834,7 +3261,9 @@ function KpiTile({ label, value, accent }: { label: string; value: string; accen
         accent ? "border-primary/40 bg-primary/10" : "border-border/60 bg-card/60"
       }`}
     >
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </p>
       <p className="mt-1 font-display text-3xl font-semibold">{value}</p>
     </div>
   );
@@ -2855,7 +3284,9 @@ function JobsTable({
     <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/40">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 bg-card/60 px-5 py-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Stellenausschreibungen</p>
+          <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
+            Stellenausschreibungen
+          </p>
           <h3 className="font-display text-lg font-semibold">Aktuelle Positionen verwalten</h3>
         </div>
         <button
@@ -2887,7 +3318,9 @@ function JobsTable({
                 <tr key={j.id} className="hover:bg-muted/30">
                   <td className="px-5 py-3">
                     <div className="font-medium text-foreground">{j.title}</div>
-                    <div className="text-xs text-muted-foreground">{j.shortPitch.slice(0, 80)}…</div>
+                    <div className="text-xs text-muted-foreground">
+                      {j.shortPitch.slice(0, 80)}…
+                    </div>
                   </td>
                   <td className="px-5 py-3 text-muted-foreground">{j.department}</td>
                   <td className="px-5 py-3 text-muted-foreground">
@@ -2959,9 +3392,13 @@ function JobEditorDialog({
 }) {
   const isNew = !initial;
   const [title, setTitle] = useState(initial?.title ?? "");
-  const [department, setDepartment] = useState<JobPosting["department"]>(initial?.department ?? "Werkstatt");
+  const [department, setDepartment] = useState<JobPosting["department"]>(
+    initial?.department ?? "Werkstatt",
+  );
   const [type, setType] = useState<JobPosting["type"]>(initial?.type ?? "Vollzeit");
-  const [contract, setContract] = useState<JobPosting["contract"]>(initial?.contract ?? "Unbefristet");
+  const [contract, setContract] = useState<JobPosting["contract"]>(
+    initial?.contract ?? "Unbefristet",
+  );
   const [pitch, setPitch] = useState(initial?.shortPitch ?? "");
   const [highlights, setHighlights] = useState((initial?.highlights ?? []).join("\n"));
   const [active, setActive] = useState(initial?.active ?? true);
@@ -3041,7 +3478,11 @@ function JobEditorDialog({
               </select>
             </Field>
             <Field label="Anstellungsart">
-              <select className="input" value={type} onChange={(e) => setType(e.target.value as JobPosting["type"])}>
+              <select
+                className="input"
+                value={type}
+                onChange={(e) => setType(e.target.value as JobPosting["type"])}
+              >
                 <option>Vollzeit</option>
                 <option>Teilzeit</option>
                 <option>Ausbildung</option>
@@ -3087,7 +3528,9 @@ function JobEditorDialog({
             />
             <span>
               <span className="font-medium text-foreground">Stelle aktiv anzeigen</span>
-              <span className="ml-2 text-xs text-muted-foreground">(öffentlich auf /karriere sichtbar)</span>
+              <span className="ml-2 text-xs text-muted-foreground">
+                (öffentlich auf /karriere sichtbar)
+              </span>
             </span>
           </label>
         </div>
@@ -3136,13 +3579,15 @@ function ApplicantsPanel({
   selected: Applicant | null;
   onSelect: (a: Applicant | null) => void;
 }) {
-  const liveSelected = selected ? applicants.find((a) => a.id === selected.id) ?? null : null;
+  const liveSelected = selected ? (applicants.find((a) => a.id === selected.id) ?? null) : null;
 
   return (
     <div className="grid gap-4 lg:grid-cols-12">
       <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/40 lg:col-span-7">
         <div className="border-b border-border/60 bg-card/60 px-5 py-4">
-          <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Eingegangene Bewerbungen</p>
+          <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
+            Eingegangene Bewerbungen
+          </p>
           <h3 className="font-display text-lg font-semibold">{applicants.length} Bewerber</h3>
         </div>
         {applicants.length === 0 ? (
@@ -3168,11 +3613,13 @@ function ApplicantsPanel({
                           · {new Date(a.createdAt).toLocaleDateString("de-DE")}
                         </span>
                       </div>
-                      <div className="mt-0.5 truncate text-xs text-muted-foreground">{a.jobTitle}</div>
+                      <div className="mt-0.5 truncate text-xs text-muted-foreground">
+                        {a.jobTitle}
+                      </div>
                     </div>
                     <span
                       className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${statusBadgeClasses(
-                        a.status
+                        a.status,
                       )}`}
                     >
                       {a.status}
@@ -3203,7 +3650,9 @@ function ApplicantDetail({ applicant, onClose }: { applicant: Applicant; onClose
     <div className="rounded-2xl border border-border/60 bg-card/60 p-6">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Bewerbungsdetails</p>
+          <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
+            Bewerbungsdetails
+          </p>
           <h3 className="mt-1 font-display text-2xl font-semibold">{applicant.name}</h3>
           <p className="text-sm text-muted-foreground">{applicant.jobTitle}</p>
         </div>
@@ -3241,7 +3690,9 @@ function ApplicantDetail({ applicant, onClose }: { applicant: Applicant; onClose
 
       {applicant.message && (
         <div className="mt-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nachricht</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Nachricht
+          </p>
           <p className="mt-2 whitespace-pre-line rounded-lg border border-border/60 bg-background/40 p-3 text-sm text-foreground/90">
             {applicant.message}
           </p>

@@ -61,8 +61,8 @@ function ConfirmShell({ status }: { status: Status }) {
               <CheckCircle2 className="mx-auto mb-4 h-12 w-12 text-primary" />
               <h1 className="font-display text-2xl font-bold">Anmeldung bestätigt 🎉</h1>
               <p className="mt-3 text-sm text-muted-foreground">
-                Vielen Dank! Sie erhalten ab sofort exklusive Angebote und Einladungen aus dem
-                Hause Auto Semmel in Langenselbold.
+                Vielen Dank! Sie erhalten ab sofort exklusive Angebote und Einladungen aus dem Hause
+                Auto Semmel in Langenselbold.
               </p>
             </>
           )}

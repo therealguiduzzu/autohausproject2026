@@ -127,7 +127,8 @@ function AuthPage() {
           </form>
 
           <div className="my-5 flex items-center gap-3 text-[11px] uppercase tracking-widest text-muted-foreground">
-            <span className="h-px flex-1 bg-border/60" /> oder <span className="h-px flex-1 bg-border/60" />
+            <span className="h-px flex-1 bg-border/60" /> oder{" "}
+            <span className="h-px flex-1 bg-border/60" />
           </div>
 
           <button
@@ -139,8 +140,8 @@ function AuthPage() {
           </button>
 
           <p className="mt-6 text-xs leading-relaxed text-muted-foreground">
-            Zugang nur für Auto Semmel Mitarbeiter. Neue Accounts werden durch die
-            Geschäftsführung freigegeben.
+            Zugang nur für Auto Semmel Mitarbeiter. Neue Accounts werden durch die Geschäftsführung
+            freigegeben.
           </p>
         </div>
       </div>

@@ -7,7 +7,9 @@ const LeadInput = z.object({
   email: z.string().trim().email().max(255).optional().or(z.literal("")),
   phone: z.string().trim().max(50).optional(),
   subject: z.string().trim().min(1).max(300),
-  details: z.record(z.string().max(500)).refine((d) => Object.keys(d).length <= 30, "zu viele Felder"),
+  details: z
+    .record(z.string().max(500))
+    .refine((d) => Object.keys(d).length <= 30, "zu viele Felder"),
   vehicleId: z.string().uuid().optional(),
   sourceUrl: z.string().max(2000).optional(),
   consent: z.literal(true),
@@ -56,7 +58,10 @@ export const submitLead = createServerFn({ method: "POST" })
     let notified = false;
     if (recipients.length > 0) {
       const rows = Object.entries(data.details)
-        .map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#666">${esc(k)}</td><td>${esc(v)}</td></tr>`)
+        .map(
+          ([k, v]) =>
+            `<tr><td style="padding:4px 12px 4px 0;color:#666">${esc(k)}</td><td>${esc(v)}</td></tr>`,
+        )
         .join("");
       const html = `
         <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#1a1a1a">
@@ -78,10 +83,19 @@ export const submitLead = createServerFn({ method: "POST" })
 
       for (const to of recipients) {
         try {
-          const { error: qErr } = await supabaseAdmin.rpc("enqueue_email" as never, {
-            queue_name: "transactional_emails",
-            payload: { to, subject: `Neue Anfrage: ${data.subject}`, html, text, template_name: "lead-notification" },
-          } as never);
+          const { error: qErr } = await supabaseAdmin.rpc(
+            "enqueue_email" as never,
+            {
+              queue_name: "transactional_emails",
+              payload: {
+                to,
+                subject: `Neue Anfrage: ${data.subject}`,
+                html,
+                text,
+                template_name: "lead-notification",
+              },
+            } as never,
+          );
           if (!qErr) notified = true;
         } catch {
           /* Mail-Infrastruktur noch nicht aktiv – Anfrage bleibt im Admin-Bereich sichtbar. */

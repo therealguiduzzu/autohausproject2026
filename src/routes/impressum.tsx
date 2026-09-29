@@ -6,7 +6,11 @@ export const Route = createFileRoute("/impressum")({
   head: () => ({
     meta: [
       { title: "Impressum — Auto Semmel Langenselbold" },
-      { name: "description", content: "Impressum und rechtliche Angaben der Auto Semmel GmbH & Co. Siegfried Polenz KG in Langenselbold." },
+      {
+        name: "description",
+        content:
+          "Impressum und rechtliche Angaben der Auto Semmel GmbH & Co. Siegfried Polenz KG in Langenselbold.",
+      },
       { property: "og:title", content: "Impressum — Auto Semmel" },
       { property: "og:url", content: `${SITE_URL}/impressum` },
     ],
@@ -45,7 +49,10 @@ function ImpressumPage() {
 
         <Section title="Kontakt">
           <p>
-            Telefon: <a href="tel:+4961842633" className="hover:text-primary transition-colors">06184 / 2633</a>
+            Telefon:{" "}
+            <a href="tel:+4961842633" className="hover:text-primary transition-colors">
+              06184 / 2633
+            </a>
             <br />
             E-Mail: info@auto-semmel.de
             <br />
@@ -100,8 +107,8 @@ function ImpressumPage() {
         <Section title="Haftungsausschluss">
           <p>
             Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte
-            externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren
-            Betreiber verantwortlich.
+            externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber
+            verantwortlich.
           </p>
         </Section>
       </div>

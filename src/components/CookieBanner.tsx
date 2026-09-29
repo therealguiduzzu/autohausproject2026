@@ -89,10 +89,10 @@ export default function CookieBanner() {
                 Wir respektieren Ihre Privatsphäre
               </h2>
               <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                Wir verwenden Cookies, um Ihr Erlebnis auf unserer Website zu verbessern,
-                den Datenverkehr zu analysieren und unsere Angebote individuell auf Sie
-                zuzuschneiden. Sie können selbst entscheiden, welche Kategorien Sie zulassen.
-                Weitere Informationen finden Sie in unserer{" "}
+                Wir verwenden Cookies, um Ihr Erlebnis auf unserer Website zu verbessern, den
+                Datenverkehr zu analysieren und unsere Angebote individuell auf Sie zuzuschneiden.
+                Sie können selbst entscheiden, welche Kategorien Sie zulassen. Weitere Informationen
+                finden Sie in unserer{" "}
                 <Link to="/datenschutz" className="text-primary hover:underline">
                   Datenschutzerklärung
                 </Link>

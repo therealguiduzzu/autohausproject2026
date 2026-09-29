@@ -30,10 +30,7 @@ export function useAuth() {
 
 async function fetchMyRoles(userId: string | null): Promise<AppRole[]> {
   if (!userId) return [];
-  const { data, error } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId);
+  const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
   if (error) return [];
   return (data ?? []).map((r) => r.role as AppRole);
 }

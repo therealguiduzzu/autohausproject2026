@@ -14,13 +14,9 @@ export function useVehiclesRealtime() {
   useEffect(() => {
     const channel = supabase
       .channel("public:vehicles")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "vehicles" },
-        () => {
-          queryClient.invalidateQueries({ queryKey: VEHICLES_QUERY_KEY });
-        },
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "vehicles" }, () => {
+        queryClient.invalidateQueries({ queryKey: VEHICLES_QUERY_KEY });
+      })
       .subscribe();
 
     return () => {

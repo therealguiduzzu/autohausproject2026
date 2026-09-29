@@ -28,7 +28,6 @@ import {
   Truck,
   Package,
   Users,
-
   Mail,
   Send,
   CheckCircle2,
@@ -87,23 +86,20 @@ export const Route = createFileRoute("/")({
             "@type": "SearchAction",
             target: {
               "@type": "EntryPoint",
-              urlTemplate:
-                `${SITE_URL}/?condition={condition}&brand={brand}&price_max={price_max}&transmission={transmission}`,
+              urlTemplate: `${SITE_URL}/?condition={condition}&brand={brand}&price_max={price_max}&transmission={transmission}`,
             },
             "query-input": [
               {
                 "@type": "PropertyValueSpecification",
                 valueName: "condition",
                 valueRequired: false,
-                description:
-                  "Fahrzeugzustand: Neuwagen, Tageszulassung oder Gebrauchtwagen",
+                description: "Fahrzeugzustand: Neuwagen, Tageszulassung oder Gebrauchtwagen",
               },
               {
                 "@type": "PropertyValueSpecification",
                 valueName: "brand",
                 valueRequired: false,
-                description:
-                  "Marke: Alfa Romeo, Fiat, Abarth oder Fiat Professional",
+                description: "Marke: Alfa Romeo, Fiat, Abarth oder Fiat Professional",
               },
               {
                 "@type": "PropertyValueSpecification",
@@ -174,17 +170,12 @@ function Index() {
       <ServiceCtaBanner />
       <Footer />
 
-
-      <TestDriveDialog
-        vehicle={testDriveVehicle}
-        onClose={() => setTestDriveVehicle(null)}
-      />
+      <TestDriveDialog vehicle={testDriveVehicle} onClose={() => setTestDriveVehicle(null)} />
       <VehicleItemListSchema vehicles={results} />
       <AutoDealerSchema vehicles={availableVehicles} />
     </div>
   );
 }
-
 
 /* ------------------------------------------------------------------ */
 /* Top bar + Nav                                                        */
@@ -205,7 +196,8 @@ function TopBar() {
           </span>
         </div>
         <a href="tel:+4961842633" className="flex items-center gap-1.5 hover:text-foreground">
-          <Phone className="h-3.5 w-3.5 text-primary" />06184 / 2633
+          <Phone className="h-3.5 w-3.5 text-primary" />
+          06184 / 2633
         </a>
       </div>
     </div>
@@ -232,12 +224,24 @@ function Nav() {
         </a>
 
         <nav className="hidden items-center gap-8 text-sm font-medium text-muted-foreground lg:flex">
-          <a href="#fahrzeuge" className="transition hover:text-foreground">Fahrzeugbestand</a>
-          <a href="#service" className="transition hover:text-foreground">Werkstatt-Service</a>
-          <a href="#ueber-uns" className="transition hover:text-foreground">Über uns</a>
-          <Link to="/karriere" className="transition hover:text-foreground">Karriere</Link>
-          <a href="#kontakt" className="transition hover:text-foreground">Kontakt</a>
-          <a href="/admin" className="transition hover:text-primary">Händler-Login</a>
+          <a href="#fahrzeuge" className="transition hover:text-foreground">
+            Fahrzeugbestand
+          </a>
+          <a href="#service" className="transition hover:text-foreground">
+            Werkstatt-Service
+          </a>
+          <a href="#ueber-uns" className="transition hover:text-foreground">
+            Über uns
+          </a>
+          <Link to="/karriere" className="transition hover:text-foreground">
+            Karriere
+          </Link>
+          <a href="#kontakt" className="transition hover:text-foreground">
+            Kontakt
+          </a>
+          <a href="/admin" className="transition hover:text-primary">
+            Händler-Login
+          </a>
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
@@ -245,7 +249,8 @@ function Nav() {
             href="tel:+4961842633"
             className="flex items-center gap-2 rounded-full border border-border/60 px-4 py-2 text-sm text-foreground/90 transition hover:border-primary/60 hover:text-primary"
           >
-            <Phone className="h-4 w-4" />06184 / 2633
+            <Phone className="h-4 w-4" />
+            06184 / 2633
           </a>
           <a
             href="#service"
@@ -267,13 +272,24 @@ function Nav() {
       {open && (
         <div className="border-t border-border/60 bg-background/95 px-6 py-4 lg:hidden">
           <nav className="flex flex-col gap-3 text-sm">
-            <a href="#fahrzeuge" onClick={() => setOpen(false)}>Fahrzeugbestand</a>
-            <a href="#service" onClick={() => setOpen(false)}>Werkstatt-Service</a>
-            <a href="#ueber-uns" onClick={() => setOpen(false)}>Über uns</a>
-            <Link to="/karriere" onClick={() => setOpen(false)}>Karriere</Link>
-            <a href="#kontakt" onClick={() => setOpen(false)}>Kontakt</a>
+            <a href="#fahrzeuge" onClick={() => setOpen(false)}>
+              Fahrzeugbestand
+            </a>
+            <a href="#service" onClick={() => setOpen(false)}>
+              Werkstatt-Service
+            </a>
+            <a href="#ueber-uns" onClick={() => setOpen(false)}>
+              Über uns
+            </a>
+            <Link to="/karriere" onClick={() => setOpen(false)}>
+              Karriere
+            </Link>
+            <a href="#kontakt" onClick={() => setOpen(false)}>
+              Kontakt
+            </a>
             <a href="tel:+4961842633" className="flex items-center gap-2 text-primary">
-              <Phone className="h-4 w-4" />06184 / 2633
+              <Phone className="h-4 w-4" />
+              06184 / 2633
             </a>
           </nav>
         </div>
@@ -320,8 +336,8 @@ function Hero() {
           </h1>
 
           <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-            Seit über 40 Jahren Ihr offizieller Partner für Alfa Romeo, Fiat, Abarth und
-            Fiat Professional — direkt an der A66, mit Meisterwerkstatt für alle Marken.
+            Seit über 40 Jahren Ihr offizieller Partner für Alfa Romeo, Fiat, Abarth und Fiat
+            Professional — direkt an der A66, mit Meisterwerkstatt für alle Marken.
           </p>
 
           <div className="mt-10 flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
@@ -499,10 +515,7 @@ function TrustBar() {
               >
                 <Check className="h-5 w-5" strokeWidth={3} />
               </span>
-              <span
-                className="min-w-0 text-sm font-semibold"
-                style={{ color: "#006b35" }}
-              >
+              <span className="min-w-0 text-sm font-semibold" style={{ color: "#006b35" }}>
                 {label}
               </span>
             </div>
@@ -523,7 +536,6 @@ function TrustBar() {
     </section>
   );
 }
-
 
 /* ------------------------------------------------------------------ */
 /* Vehicle grid                                                         */
@@ -553,11 +565,7 @@ function VehicleGrid({
       {vehicles.length > 0 ? (
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {vehicles.map((v) => (
-            <VehicleCard
-              key={v.id}
-              vehicle={v}
-              onTestDrive={() => onTestDrive(v)}
-            />
+            <VehicleCard key={v.id} vehicle={v} onTestDrive={() => onTestDrive(v)} />
           ))}
         </div>
       ) : (
@@ -602,13 +610,7 @@ function SectionHeader({
   );
 }
 
-function VehicleCard({
-  vehicle: v,
-  onTestDrive,
-}: {
-  vehicle: Vehicle;
-  onTestDrive: () => void;
-}) {
+function VehicleCard({ vehicle: v, onTestDrive }: { vehicle: Vehicle; onTestDrive: () => void }) {
   const year = new Date(v.firstRegistration).getFullYear();
   const slugOrId = v.slug ?? v.id;
   return (
@@ -654,10 +656,16 @@ function VehicleCard({
 
         <div className="mt-4 grid grid-cols-5 gap-2 text-[11px] text-muted-foreground">
           <Spec icon={<Calendar className="h-4 w-4" />} v={`${year}`} />
-          <Spec icon={<Gauge className="h-4 w-4" />} v={`${v.mileage.toLocaleString("de-DE")} km`} />
+          <Spec
+            icon={<Gauge className="h-4 w-4" />}
+            v={`${v.mileage.toLocaleString("de-DE")} km`}
+          />
           <Spec icon={<Zap className="h-4 w-4" />} v={`${v.powerHp} PS`} />
           <Spec icon={<Fuel className="h-4 w-4" />} v={v.fuelType} />
-          <Spec icon={<Cog className="h-4 w-4" />} v={v.transmission === "Automatik" ? "Aut." : "Schalt."} />
+          <Spec
+            icon={<Cog className="h-4 w-4" />}
+            v={v.transmission === "Automatik" ? "Aut." : "Schalt."}
+          />
         </div>
 
         <div className="mt-auto flex items-end justify-between border-t border-border/60 pt-4">
@@ -761,11 +769,7 @@ function ModalShell({
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-[100] flex items-end justify-center overflow-y-auto bg-black/70 px-0 py-0 backdrop-blur-md sm:items-center sm:px-6 sm:py-10">
-      <div
-        className="absolute inset-0"
-        onClick={onClose}
-        aria-hidden="true"
-      />
+      <div className="absolute inset-0" onClick={onClose} aria-hidden="true" />
       <div
         className={`relative w-full ${maxWidth} overflow-hidden rounded-t-2xl border border-border/70 bg-surface-elevated shadow-[var(--shadow-card)] sm:rounded-2xl`}
       >
@@ -795,9 +799,17 @@ function VehicleDetailDialog({
   const v = vehicle;
   const year = new Date(v.firstRegistration).getFullYear();
   const specs = [
-    { icon: Calendar, label: "Erstzulassung", value: new Date(v.firstRegistration).toLocaleDateString("de-DE") },
+    {
+      icon: Calendar,
+      label: "Erstzulassung",
+      value: new Date(v.firstRegistration).toLocaleDateString("de-DE"),
+    },
     { icon: Gauge, label: "Kilometerstand", value: `${v.mileage.toLocaleString("de-DE")} km` },
-    { icon: Zap, label: "Leistung", value: `${v.powerHp} PS (${Math.round(v.powerHp * 0.7355)} kW)` },
+    {
+      icon: Zap,
+      label: "Leistung",
+      value: `${v.powerHp} PS (${Math.round(v.powerHp * 0.7355)} kW)`,
+    },
     { icon: Fuel, label: "Kraftstoff", value: v.fuelType },
     { icon: Cog, label: "Getriebe", value: v.transmission },
     { icon: ShieldCheck, label: "Zustand", value: v.condition },
@@ -807,7 +819,11 @@ function VehicleDetailDialog({
     <ModalShell open={!!vehicle} onClose={onClose} maxWidth="max-w-4xl">
       <div className="grid gap-0 lg:grid-cols-2">
         <div className="relative aspect-[4/3] overflow-hidden bg-background lg:aspect-auto">
-          <img src={v.images[0]} alt={`${v.brand} ${v.model}`} className="h-full w-full object-cover" />
+          <img
+            src={v.images[0]}
+            alt={`${v.brand} ${v.model}`}
+            className="h-full w-full object-cover"
+          />
           <div className="absolute left-4 top-4 flex flex-wrap gap-2">
             <Badge tone="primary">{v.condition}</Badge>
             {v.fuelType === "Elektro" && <Badge tone="green">Elektro</Badge>}
@@ -816,16 +832,21 @@ function VehicleDetailDialog({
         </div>
 
         <div className="flex flex-col overflow-y-auto p-6 sm:p-8 lg:max-h-[80vh]">
-          <div className="text-[11px] uppercase tracking-[0.25em] text-primary">{v.brand} · {year}</div>
+          <div className="text-[11px] uppercase tracking-[0.25em] text-primary">
+            {v.brand} · {year}
+          </div>
           <h3 className="mt-2 font-display text-2xl font-semibold leading-tight sm:text-3xl">
             {v.model} <span className="text-foreground/80">{v.version}</span>
           </h3>
 
           <div className="mt-5 flex items-end gap-4 border-y border-border/60 py-4">
             <div>
-              <div className="font-display text-3xl font-bold">{v.price.toLocaleString("de-DE")} €</div>
+              <div className="font-display text-3xl font-bold">
+                {v.price.toLocaleString("de-DE")} €
+              </div>
               <div className="text-xs text-muted-foreground">
-                Finanzierung ab <span className="text-foreground">{v.financingMonthly} €</span> / Monat
+                Finanzierung ab <span className="text-foreground">{v.financingMonthly} €</span> /
+                Monat
               </div>
             </div>
             <div className="ml-auto rounded-md bg-background/60 px-2 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -883,13 +904,7 @@ function VehicleDetailDialog({
 /* Test Drive Dialog                                                    */
 /* ------------------------------------------------------------------ */
 
-function TestDriveDialog({
-  vehicle,
-  onClose,
-}: {
-  vehicle: Vehicle | null;
-  onClose: () => void;
-}) {
+function TestDriveDialog({ vehicle, onClose }: { vehicle: Vehicle | null; onClose: () => void }) {
   const [brand, setBrand] = useState("");
   const [model, setModel] = useState("");
   const [name, setName] = useState("");
@@ -904,7 +919,11 @@ function TestDriveDialog({
       setBrand(vehicle.brand);
       setModel(`${vehicle.model} ${vehicle.version}`);
       setSent(false);
-      setName(""); setPhone(""); setEmail(""); setDate(""); setNote("");
+      setName("");
+      setPhone("");
+      setEmail("");
+      setDate("");
+      setNote("");
     }
   }, [vehicle]);
 
@@ -913,17 +932,17 @@ function TestDriveDialog({
     if (!vehicle) return;
     try {
       await leadsStore.add({
-      type: "Probefahrt",
-      name: name || "Unbekannt",
-      email,
-      phone,
-      subject: `Probefahrt · ${brand} ${model}`,
-      details: {
-        Fahrzeug: `${brand} ${model}`,
-        "Wunsch-Termin": date || "Flexibel",
-        Anmerkung: note || "—",
-      },
-    });
+        type: "Probefahrt",
+        name: name || "Unbekannt",
+        email,
+        phone,
+        subject: `Probefahrt · ${brand} ${model}`,
+        details: {
+          Fahrzeug: `${brand} ${model}`,
+          "Wunsch-Termin": date || "Flexibel",
+          Anmerkung: note || "—",
+        },
+      });
       setSent(true);
     } catch (err) {
       toast.error(leadErrorMessage(err));
@@ -940,7 +959,10 @@ function TestDriveDialog({
           <h3 className="mt-4 font-display text-2xl font-semibold">Anfrage übermittelt</h3>
           <p className="mt-2 text-sm text-muted-foreground">
             Wir melden uns innerhalb von 24 Std. zur Terminbestätigung für Ihren{" "}
-            <span className="text-foreground">{brand} {model}</span>.
+            <span className="text-foreground">
+              {brand} {model}
+            </span>
+            .
           </p>
           <button
             onClick={onClose}
@@ -952,7 +974,9 @@ function TestDriveDialog({
       ) : (
         <form onSubmit={submit} className="relative p-6 sm:p-8">
           <HoneypotField />
-          <div className="text-[11px] uppercase tracking-[0.25em] text-primary">Probefahrt anfragen</div>
+          <div className="text-[11px] uppercase tracking-[0.25em] text-primary">
+            Probefahrt anfragen
+          </div>
           <h3 className="mt-1 font-display text-2xl font-semibold leading-tight">
             {vehicle.brand} {vehicle.model}
           </h3>
@@ -968,20 +992,46 @@ function TestDriveDialog({
               <Input value={model} onChange={(e) => setModel(e.target.value)} readOnly />
             </Field>
             <Field label="Ihr Name">
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Vor- und Nachname" required />
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Vor- und Nachname"
+                required
+              />
             </Field>
             <Field label="Telefon">
-              <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+49 …" required />
+              <Input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+49 …"
+                required
+              />
             </Field>
             <Field label="E-Mail">
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ihre@email.de" required />
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="ihre@email.de"
+                required
+              />
             </Field>
             <Field label="Wunsch-Termin">
-              <Input value={date} onChange={(e) => setDate(e.target.value)} placeholder="z.B. Samstag vormittag" />
+              <Input
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                placeholder="z.B. Samstag vormittag"
+              />
             </Field>
             <div className="sm:col-span-2">
               <Field label="Anmerkung (optional)">
-                <Textarea rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Sonderwünsche, Routenfragen …" />
+                <Textarea
+                  rows={3}
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="Sonderwünsche, Routenfragen …"
+                />
               </Field>
             </div>
           </div>
@@ -1030,18 +1080,18 @@ function WerkstattHub() {
   async function submit() {
     try {
       await leadsStore.add({
-      type: "Werkstattermin",
-      name: contact.name || "Unbekannt",
-      email: contact.email,
-      phone: contact.phone,
-      subject: `Werkstattermin · ${brand} (${service})`,
-      details: {
-        Service: service,
-        Marke: brand,
-        Kennzeichen: plate || "—",
-        Wunschtermin: `${date ?? "Flexibel"} · ${time}`,
-      },
-    });
+        type: "Werkstattermin",
+        name: contact.name || "Unbekannt",
+        email: contact.email,
+        phone: contact.phone,
+        subject: `Werkstattermin · ${brand} (${service})`,
+        details: {
+          Service: service,
+          Marke: brand,
+          Kennzeichen: plate || "—",
+          Wunschtermin: `${date ?? "Flexibel"} · ${time}`,
+        },
+      });
       setSent(true);
     } catch (err) {
       toast.error(leadErrorMessage(err));
@@ -1049,8 +1099,13 @@ function WerkstattHub() {
   }
 
   function reset() {
-    setStep(0); setService("Inspektion"); setBrand("Fiat"); setPlate("");
-    setDate(null); setTime("vormittags"); setContact({ name: "", phone: "", email: "" });
+    setStep(0);
+    setService("Inspektion");
+    setBrand("Fiat");
+    setPlate("");
+    setDate(null);
+    setTime("vormittags");
+    setContact({ name: "", phone: "", email: "" });
     setSent(false);
   }
 
@@ -1061,7 +1116,10 @@ function WerkstattHub() {
     (step === 3 && contact.name && contact.phone && contact.email);
 
   return (
-    <section id="service" className="relative border-y border-border/60 bg-surface/60 py-24 sm:py-32">
+    <section
+      id="service"
+      className="relative border-y border-border/60 bg-surface/60 py-24 sm:py-32"
+    >
       <HoneypotField />
       <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-2 lg:gap-16">
         <div>
@@ -1123,7 +1181,6 @@ function WerkstattHub() {
           </div>
         </div>
 
-
         <div className="rounded-2xl border border-border/70 bg-background/70 p-6 shadow-[var(--shadow-card)] sm:p-8">
           {sent ? (
             <div className="grid place-items-center py-10 text-center">
@@ -1165,7 +1222,9 @@ function WerkstattHub() {
                                 : "border-border hover:border-primary/50"
                             }`}
                           >
-                            <Icon className={`h-5 w-5 ${active ? "text-primary" : "text-muted-foreground"}`} />
+                            <Icon
+                              className={`h-5 w-5 ${active ? "text-primary" : "text-muted-foreground"}`}
+                            />
                             <div className="mt-2 text-sm font-semibold">{s.label}</div>
                             <div className="text-xs text-muted-foreground">{s.desc}</div>
                           </button>
@@ -1323,8 +1382,8 @@ function Stepper({ step, labels }: { step: number; labels: string[] }) {
                 done
                   ? "border-primary bg-primary text-primary-foreground"
                   : active
-                  ? "border-primary text-primary"
-                  : "border-border text-muted-foreground"
+                    ? "border-primary text-primary"
+                    : "border-border text-muted-foreground"
               }`}
             >
               {done ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
@@ -1346,10 +1405,7 @@ function Stepper({ step, labels }: { step: number; labels: string[] }) {
   );
 }
 
-function Input({
-  className = "",
-  ...props
-}: React.InputHTMLAttributes<HTMLInputElement>) {
+function Input({ className = "", ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
@@ -1358,10 +1414,7 @@ function Input({
   );
 }
 
-function Textarea({
-  className = "",
-  ...props
-}: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+function Textarea({ className = "", ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <textarea
       {...props}
@@ -1390,9 +1443,18 @@ interface AnkaufForm {
 }
 
 const emptyAnkauf: AnkaufForm = {
-  brand: "", model: "", year: "", mileage: "",
-  fuel: "Benzin", gearbox: "Schaltgetriebe", condition: "",
-  name: "", city: "", phone: "", email: "", notes: "",
+  brand: "",
+  model: "",
+  year: "",
+  mileage: "",
+  fuel: "Benzin",
+  gearbox: "Schaltgetriebe",
+  condition: "",
+  name: "",
+  city: "",
+  phone: "",
+  email: "",
+  notes: "",
 };
 
 function AnkaufSection() {
@@ -1505,9 +1567,8 @@ function AnkaufSection() {
                 </div>
                 <h3 className="mt-4 font-display text-2xl font-semibold">Vielen Dank!</h3>
                 <p className="mt-3 max-w-md text-sm text-muted-foreground mx-auto">
-                  Die Verkaufsleitung von Auto Semmel prüft Ihre Daten und meldet sich
-                  innerhalb von 24 Stunden mit einem fairen Angebot für Ihren
-                  {" "}{form.brand} {form.model}.
+                  Die Verkaufsleitung von Auto Semmel prüft Ihre Daten und meldet sich innerhalb von
+                  24 Stunden mit einem fairen Angebot für Ihren {form.brand} {form.model}.
                 </p>
                 <button
                   onClick={reset}
@@ -1520,14 +1581,18 @@ function AnkaufSection() {
               <div className="m-auto text-center animate-fade-in">
                 <Loader2 className="mx-auto h-10 w-10 animate-spin text-primary" />
                 <p className="mt-4 font-display text-lg">Anfrage wird übermittelt…</p>
-                <p className="mt-1 text-sm text-muted-foreground">Wir bereiten Ihre Bewertung vor.</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Wir bereiten Ihre Bewertung vor.
+                </p>
               </div>
             ) : (
               <>
                 {/* Progress */}
                 <div>
                   <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                    <span>Schritt {step + 1} von {totalSteps}</span>
+                    <span>
+                      Schritt {step + 1} von {totalSteps}
+                    </span>
                     <span className="text-primary">{steps[step].label}</span>
                   </div>
                   <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-border/60">
@@ -1544,14 +1609,26 @@ function AnkaufSection() {
                   {step === 0 && (
                     <>
                       <Field label="Marke">
-                        <Input value={form.brand} onChange={(e) => update("brand", e.target.value)} placeholder="z.B. Alfa Romeo" />
+                        <Input
+                          value={form.brand}
+                          onChange={(e) => update("brand", e.target.value)}
+                          placeholder="z.B. Alfa Romeo"
+                        />
                       </Field>
                       <Field label="Modell">
-                        <Input value={form.model} onChange={(e) => update("model", e.target.value)} placeholder="z.B. Giulia" />
+                        <Input
+                          value={form.model}
+                          onChange={(e) => update("model", e.target.value)}
+                          placeholder="z.B. Giulia"
+                        />
                       </Field>
                       <div className="sm:col-span-2">
                         <Field label="Baujahr / Erstzulassung">
-                          <Input value={form.year} onChange={(e) => update("year", e.target.value)} placeholder="MM / JJJJ" />
+                          <Input
+                            value={form.year}
+                            onChange={(e) => update("year", e.target.value)}
+                            placeholder="MM / JJJJ"
+                          />
                         </Field>
                       </div>
                     </>
@@ -1560,14 +1637,20 @@ function AnkaufSection() {
                   {step === 1 && (
                     <>
                       <Field label="Kilometerstand">
-                        <Input value={form.mileage} onChange={(e) => update("mileage", e.target.value)} placeholder="z.B. 45.000" />
+                        <Input
+                          value={form.mileage}
+                          onChange={(e) => update("mileage", e.target.value)}
+                          placeholder="z.B. 45.000"
+                        />
                       </Field>
                       <Field label="Unfallfrei?">
                         <Select value={form.condition} onChange={(v) => update("condition", v)}>
                           <option value="">Bitte wählen</option>
                           <option value="Ja, unfallfrei">Ja, unfallfrei</option>
                           <option value="Nein, Vorschäden">Nein, Vorschäden vorhanden</option>
-                          <option value="Reparierter Unfallschaden">Reparierter Unfallschaden</option>
+                          <option value="Reparierter Unfallschaden">
+                            Reparierter Unfallschaden
+                          </option>
                         </Select>
                       </Field>
                     </>
@@ -1593,14 +1676,28 @@ function AnkaufSection() {
                   {step === 3 && (
                     <>
                       <Field label="Ihr Name">
-                        <Input value={form.name} onChange={(e) => update("name", e.target.value)} placeholder="Vor- und Nachname" />
+                        <Input
+                          value={form.name}
+                          onChange={(e) => update("name", e.target.value)}
+                          placeholder="Vor- und Nachname"
+                        />
                       </Field>
                       <Field label="Telefon">
-                        <Input type="tel" value={form.phone} onChange={(e) => update("phone", e.target.value)} placeholder="+49 …" />
+                        <Input
+                          type="tel"
+                          value={form.phone}
+                          onChange={(e) => update("phone", e.target.value)}
+                          placeholder="+49 …"
+                        />
                       </Field>
                       <div className="sm:col-span-2">
                         <Field label="E-Mail (optional)">
-                          <Input type="email" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="ihre@email.de" />
+                          <Input
+                            type="email"
+                            value={form.email}
+                            onChange={(e) => update("email", e.target.value)}
+                            placeholder="ihre@email.de"
+                          />
                         </Field>
                       </div>
                     </>
@@ -1668,8 +1765,8 @@ function Footer() {
             </div>
           </div>
           <p className="mt-5 max-w-md text-sm text-muted-foreground">
-            Ihr offizieller Stellantis-Partner für Alfa Romeo, Fiat, Abarth und
-            Fiat Professional — seit über 40 Jahren in Langenselbold.
+            Ihr offizieller Stellantis-Partner für Alfa Romeo, Fiat, Abarth und Fiat Professional —
+            seit über 40 Jahren in Langenselbold.
           </p>
 
           <div className="mt-6 overflow-hidden rounded-2xl border border-border/70 shadow-[var(--shadow-soft)]">
@@ -1696,11 +1793,15 @@ function Footer() {
             </li>
             <li className="flex items-center gap-2">
               <Phone className="h-4 w-4 text-primary" />
-              <a href="tel:+4961842633" className="hover:text-foreground">06184 / 2633</a>
+              <a href="tel:+4961842633" className="hover:text-foreground">
+                06184 / 2633
+              </a>
             </li>
             <li className="flex items-center gap-2">
               <Mail className="h-4 w-4 text-primary" />
-              <a href="mailto:info@auto-semmel.de" className="hover:text-foreground">info@auto-semmel.de</a>
+              <a href="mailto:info@auto-semmel.de" className="hover:text-foreground">
+                info@auto-semmel.de
+              </a>
             </li>
           </ul>
         </div>
@@ -1710,9 +1811,18 @@ function Footer() {
             Verkauf
           </h5>
           <ul className="space-y-1.5 text-sm text-muted-foreground">
-            <li className="flex justify-between gap-3"><span>Mo–Fr</span><span className="text-foreground">7:30–17:30</span></li>
-            <li className="flex justify-between gap-3"><span>Samstag</span><span className="text-foreground">9:00–14:00</span></li>
-            <li className="flex justify-between gap-3"><span>Sonntag</span><span>geschlossen</span></li>
+            <li className="flex justify-between gap-3">
+              <span>Mo–Fr</span>
+              <span className="text-foreground">7:30–17:30</span>
+            </li>
+            <li className="flex justify-between gap-3">
+              <span>Samstag</span>
+              <span className="text-foreground">9:00–14:00</span>
+            </li>
+            <li className="flex justify-between gap-3">
+              <span>Sonntag</span>
+              <span>geschlossen</span>
+            </li>
           </ul>
         </div>
 
@@ -1721,9 +1831,18 @@ function Footer() {
             Werkstatt
           </h5>
           <ul className="space-y-1.5 text-sm text-muted-foreground">
-            <li className="flex justify-between gap-3"><span>Mo–Fr</span><span className="text-foreground">7:30–17:00</span></li>
-            <li className="flex justify-between gap-3"><span>Samstag</span><span>nach Termin</span></li>
-            <li className="flex justify-between gap-3"><span>Sonntag</span><span>geschlossen</span></li>
+            <li className="flex justify-between gap-3">
+              <span>Mo–Fr</span>
+              <span className="text-foreground">7:30–17:00</span>
+            </li>
+            <li className="flex justify-between gap-3">
+              <span>Samstag</span>
+              <span>nach Termin</span>
+            </li>
+            <li className="flex justify-between gap-3">
+              <span>Sonntag</span>
+              <span>geschlossen</span>
+            </li>
           </ul>
         </div>
       </div>
@@ -1744,13 +1863,29 @@ function Footer() {
 
       <div className="border-t border-border/60">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-6 py-5 text-xs text-muted-foreground sm:flex-row">
-          <div>© 2026 Auto Semmel Langenselbold — Offizieller Stellantis-Partner für Alfa Romeo, Fiat &amp; Abarth</div>
+          <div>
+            © 2026 Auto Semmel Langenselbold — Offizieller Stellantis-Partner für Alfa Romeo, Fiat
+            &amp; Abarth
+          </div>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-            <Link to="/karriere" className="transition-colors hover:text-foreground">Karriere</Link>
-            <Link to="/impressum" className="transition-colors hover:text-foreground">Impressum</Link>
-            <Link to="/datenschutz" className="transition-colors hover:text-foreground">Datenschutz</Link>
-            <button onClick={openCookieSettings} className="transition-colors hover:text-foreground">Cookie-Einstellungen</button>
-            <a href="#" className="transition-colors hover:text-foreground">AGB</a>
+            <Link to="/karriere" className="transition-colors hover:text-foreground">
+              Karriere
+            </Link>
+            <Link to="/impressum" className="transition-colors hover:text-foreground">
+              Impressum
+            </Link>
+            <Link to="/datenschutz" className="transition-colors hover:text-foreground">
+              Datenschutz
+            </Link>
+            <button
+              onClick={openCookieSettings}
+              className="transition-colors hover:text-foreground"
+            >
+              Cookie-Einstellungen
+            </button>
+            <a href="#" className="transition-colors hover:text-foreground">
+              AGB
+            </a>
           </div>
         </div>
         <div className="tricolore-bar h-[2px] w-full opacity-50" />
@@ -1853,7 +1988,9 @@ function Highlights() {
 
                 <div className="flex flex-1 flex-col gap-4 p-6">
                   <div>
-                    <div className="text-[11px] uppercase tracking-[0.2em] text-primary">{v.brand}</div>
+                    <div className="text-[11px] uppercase tracking-[0.2em] text-primary">
+                      {v.brand}
+                    </div>
                     <h3 className="mt-1 font-serif text-lg leading-tight">
                       {v.model} {v.version}
                     </h3>
@@ -1919,8 +2056,8 @@ function BrandSplitter() {
               Alfa Romeo – Die Symbiose aus Luxus und Performance.
             </h3>
             <p className="mt-4 text-sm leading-relaxed text-white/75">
-              Vom Giulia Quadrifoglio bis zum neuen Tonale Plug-in Hybrid:
-              entdecken Sie die kompromisslose Ingenieurskunst aus Arese.
+              Vom Giulia Quadrifoglio bis zum neuen Tonale Plug-in Hybrid: entdecken Sie die
+              kompromisslose Ingenieurskunst aus Arese.
             </p>
             <a
               href="#fahrzeuge"
@@ -1947,8 +2084,8 @@ function BrandSplitter() {
               Fiat &amp; Abarth – Urbaner Fahrspaß und italienisches Lebensgefühl.
             </h3>
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-              Vom elektrischen 500e bis zum kompromisslos sportlichen Abarth 595 –
-              kleine Autos mit großem Charakter, gemacht für jeden Tag.
+              Vom elektrischen 500e bis zum kompromisslos sportlichen Abarth 595 – kleine Autos mit
+              großem Charakter, gemacht für jeden Tag.
             </p>
             <a
               href="#fahrzeuge"
@@ -1983,8 +2120,8 @@ function ServiceCtaBanner() {
                 Ihr Partner für Service &amp; Werkstatt im Main-Kinzig-Kreis.
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-white/75">
-                Jetzt online Termin vereinbaren – Inspektion, Reifenwechsel,
-                HU/AU oder Reparatur. Stellantis-zertifiziert in Langenselbold.
+                Jetzt online Termin vereinbaren – Inspektion, Reifenwechsel, HU/AU oder Reparatur.
+                Stellantis-zertifiziert in Langenselbold.
               </p>
             </div>
             <a
@@ -2028,9 +2165,9 @@ function FiatProfessionalSection() {
               Fiat Professional — Starke Nutzfahrzeuge für Ihr Unternehmen.
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              Für Handwerk, Handel und Lieferdienste aus Langenselbold, Hanau und dem
-              gesamten Main-Kinzig-Kreis. Persönliche Beratung, attraktives Gewerbe-Leasing
-              und Service direkt vor Ort.
+              Für Handwerk, Handel und Lieferdienste aus Langenselbold, Hanau und dem gesamten
+              Main-Kinzig-Kreis. Persönliche Beratung, attraktives Gewerbe-Leasing und Service
+              direkt vor Ort.
             </p>
           </div>
           <a
@@ -2105,9 +2242,7 @@ function FiatProfessionalSection() {
           {/* B2B benefits + CTA */}
           <aside className="lg:col-span-2 flex flex-col gap-4">
             <div className="rounded-2xl border border-border/70 bg-surface p-6 shadow-sm">
-              <h3 className="font-display text-lg font-semibold">
-                Ihre Vorteile als Gewerbekunde
-              </h3>
+              <h3 className="font-display text-lg font-semibold">Ihre Vorteile als Gewerbekunde</h3>
               <ul className="mt-4 space-y-3 text-sm">
                 {[
                   "Individuelle Leasing- & Finanzierungskonzepte",
@@ -2132,8 +2267,8 @@ function FiatProfessionalSection() {
                 Gewerbliches Leasingangebot anfordern
               </h3>
               <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
-                Wir kalkulieren Ihre Wunschrate auf Basis von Laufzeit und Laufleistung —
-                inklusive Service-Paket auf Anfrage.
+                Wir kalkulieren Ihre Wunschrate auf Basis von Laufzeit und Laufleistung — inklusive
+                Service-Paket auf Anfrage.
               </p>
               <a
                 href="tel:+4961842633"
@@ -2197,11 +2332,11 @@ function AboutTeamSection() {
               Über 40 Jahre Auto Semmel in Langenselbold.
             </h2>
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-              Als inhabergeführtes Familienunternehmen aus dem Main-Kinzig-Kreis verbinden
-              wir seit vier Jahrzehnten persönliche Beratung mit echter italienischer
-              Auto-Leidenschaft. Als offizieller Stellantis-Partner für Alfa Romeo, Fiat,
-              Abarth und Fiat Professional sind wir Ihr verlässlicher Ansprechpartner —
-              vom ersten Probefahrt-Termin bis zur Werkstatt nach vielen treuen Jahren.
+              Als inhabergeführtes Familienunternehmen aus dem Main-Kinzig-Kreis verbinden wir seit
+              vier Jahrzehnten persönliche Beratung mit echter italienischer Auto-Leidenschaft. Als
+              offizieller Stellantis-Partner für Alfa Romeo, Fiat, Abarth und Fiat Professional sind
+              wir Ihr verlässlicher Ansprechpartner — vom ersten Probefahrt-Termin bis zur Werkstatt
+              nach vielen treuen Jahren.
             </p>
             <ul className="mt-5 space-y-2.5 text-sm">
               {[
@@ -2295,7 +2430,8 @@ function NewsletterSection() {
           email: email.trim().toLowerCase(),
           consent: true,
           source: "landing-newsletter-banner",
-          userAgent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 512) : undefined,
+          userAgent:
+            typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 512) : undefined,
         },
       });
       setSubmitted(true);
@@ -2356,13 +2492,20 @@ function NewsletterSection() {
                 Bleiben Sie startklar — Der Auto Semmel Newsletter
               </h2>
               <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-                Erhalten Sie exklusive Angebote zu Werkstatt-Aktionen (z.B. Reifenwechsel),
-                neuen Alfa Romeo & Fiat Modellen und Einladungen zu unseren Hof-Events in Langenselbold.
+                Erhalten Sie exklusive Angebote zu Werkstatt-Aktionen (z.B. Reifenwechsel), neuen
+                Alfa Romeo & Fiat Modellen und Einladungen zu unseren Hof-Events in Langenselbold.
               </p>
               <ul className="mt-5 grid gap-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" /> Maximal 1 E-Mail pro Monat</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" /> Jederzeit per 1-Klick abbestellbar</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" /> DSGVO-konformes Double-Opt-In</li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-primary" /> Maximal 1 E-Mail pro Monat
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-primary" /> Jederzeit per 1-Klick
+                  abbestellbar
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-primary" /> DSGVO-konformes Double-Opt-In
+                </li>
               </ul>
             </div>
 
@@ -2373,12 +2516,14 @@ function NewsletterSection() {
                 </div>
                 <h3 className="font-display text-xl font-semibold text-foreground">Fast fertig!</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Wir haben Ihnen eine Bestätigungs-E-Mail an <span className="font-semibold text-foreground">{email}</span> geschickt.
-                  Bitte klicken Sie auf den Link, um Ihre Anmeldung abzuschließen.
+                  Wir haben Ihnen eine Bestätigungs-E-Mail an{" "}
+                  <span className="font-semibold text-foreground">{email}</span> geschickt. Bitte
+                  klicken Sie auf den Link, um Ihre Anmeldung abzuschließen.
                 </p>
                 <div className="mt-5 border-t border-primary/20 pt-4">
                   <p className="text-xs text-muted-foreground">
-                    Keine E-Mail erhalten? Prüfen Sie Ihren Spam-Ordner oder fordern Sie den Link erneut an.
+                    Keine E-Mail erhalten? Prüfen Sie Ihren Spam-Ordner oder fordern Sie den Link
+                    erneut an.
                   </p>
                   <button
                     type="button"
@@ -2403,9 +2548,11 @@ function NewsletterSection() {
                   )}
                 </div>
               </div>
-
             ) : (
-              <form onSubmit={onSubmit} className="space-y-4 rounded-2xl border border-border/60 bg-background/60 p-6">
+              <form
+                onSubmit={onSubmit}
+                className="space-y-4 rounded-2xl border border-border/60 bg-background/60 p-6"
+              >
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     E-Mail-Adresse
@@ -2428,7 +2575,11 @@ function NewsletterSection() {
                     className="mt-0.5 h-4 w-4 flex-shrink-0 accent-primary"
                   />
                   <span>
-                    Ich stimme den <a href="/datenschutz" className="font-semibold text-primary hover:underline">Datenschutzbestimmungen</a> zu (Double-Opt-In).
+                    Ich stimme den{" "}
+                    <a href="/datenschutz" className="font-semibold text-primary hover:underline">
+                      Datenschutzbestimmungen
+                    </a>{" "}
+                    zu (Double-Opt-In).
                   </span>
                 </label>
                 {error && <p className="text-xs font-semibold text-primary">{error}</p>}
@@ -2509,15 +2660,10 @@ function GoogleReviewsSection() {
             </svg>
             <div className="flex items-center gap-1">
               {Array.from({ length: 5 }).map((_, i) => (
-                <Star
-                  key={i}
-                  className="h-4 w-4 fill-amber-500 text-amber-500"
-                />
+                <Star key={i} className="h-4 w-4 fill-amber-500 text-amber-500" />
               ))}
             </div>
-            <span className="text-sm font-semibold text-foreground">
-              4.8 / 5 Sterne
-            </span>
+            <span className="text-sm font-semibold text-foreground">4.8 / 5 Sterne</span>
           </div>
         </div>
 
@@ -2544,7 +2690,8 @@ function GoogleReviewsSection() {
                       )}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {r.location ? `${r.location} · ` : ""}{r.date}
+                      {r.location ? `${r.location} · ` : ""}
+                      {r.date}
                     </div>
                   </div>
                 </div>
@@ -2570,16 +2717,11 @@ function GoogleReviewsSection() {
 
               <div className="mt-3 flex items-center gap-0.5">
                 {Array.from({ length: r.rating }).map((_, i) => (
-                  <Star
-                    key={i}
-                    className="h-4 w-4 fill-amber-500 text-amber-500"
-                  />
+                  <Star key={i} className="h-4 w-4 fill-amber-500 text-amber-500" />
                 ))}
               </div>
 
-              <p className="mt-3 text-sm leading-relaxed text-foreground/90">
-                {r.text}
-              </p>
+              <p className="mt-3 text-sm leading-relaxed text-foreground/90">{r.text}</p>
             </article>
           ))}
         </div>

@@ -3,8 +3,7 @@
  * Umgebungsvariable VITE_SITE_URL setzen (z. B. https://www.auto-semmel.de).
  */
 const rawSiteUrl =
-  (import.meta.env?.VITE_SITE_URL as string | undefined) ??
-  "http://localhost:3000";
+  (import.meta.env?.VITE_SITE_URL as string | undefined) ?? "http://localhost:3000";
 
 export const SITE_URL = rawSiteUrl.replace(/\/+$/, "");
 

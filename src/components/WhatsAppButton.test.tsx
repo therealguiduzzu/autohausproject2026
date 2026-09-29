@@ -23,9 +23,7 @@ describe("WhatsAppButton – kein Ping/Pulse-Effekt", () => {
     expect((cta as HTMLElement).style.transition).toBe("none");
 
     // 2) Auch kein Kind-Element (z. B. Overlay-Span) darf pulsen/pingen
-    const animated = cta!.querySelectorAll(
-      PING_CLASSES.map((c) => `.${c}`).join(","),
-    );
+    const animated = cta!.querySelectorAll(PING_CLASSES.map((c) => `.${c}`).join(","));
     expect(animated.length).toBe(0);
 
     for (const child of cta!.querySelectorAll<HTMLElement>("[style]")) {

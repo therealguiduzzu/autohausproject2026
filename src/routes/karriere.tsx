@@ -11,11 +11,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import {
-  careersStore,
-  useActiveJobs,
-  type JobPosting,
-} from "@/lib/careers-store";
+import { careersStore, useActiveJobs, type JobPosting } from "@/lib/careers-store";
 
 export const Route = createFileRoute("/karriere")({
   head: () => ({
@@ -81,11 +77,13 @@ function KarrierePage() {
             <Briefcase className="h-3.5 w-3.5" /> Stellenangebote · La Famiglia
           </div>
           <h1 className="mt-6 max-w-3xl font-display text-4xl font-semibold leading-tight md:text-5xl lg:text-6xl">
-            Ihre Karriere bei Auto Semmel — <span className="italic text-primary">Werden Sie Teil des Teams</span>
+            Ihre Karriere bei Auto Semmel —{" "}
+            <span className="italic text-primary">Werden Sie Teil des Teams</span>
           </h1>
           <p className="mt-6 max-w-2xl text-base text-muted-foreground md:text-lg">
-            Seit über 40 Jahren stehen wir für Qualität und italienische Leidenschaft in Langenselbold.
-            Um weiter zu wachsen, suchen wir Verstärkung für unsere Werkstatt und den Verkauf.
+            Seit über 40 Jahren stehen wir für Qualität und italienische Leidenschaft in
+            Langenselbold. Um weiter zu wachsen, suchen wir Verstärkung für unsere Werkstatt und den
+            Verkauf.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
             <span className="inline-flex items-center gap-2">
@@ -102,7 +100,9 @@ function KarrierePage() {
       <section className="mx-auto max-w-7xl px-6 py-20">
         <div className="mb-10 flex items-end justify-between gap-6">
           <div>
-            <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Aktuelle Stellen</p>
+            <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
+              Aktuelle Stellen
+            </p>
             <h2 className="mt-2 font-display text-3xl font-semibold md:text-4xl">
               {jobs.length} offene {jobs.length === 1 ? "Position" : "Positionen"}
             </h2>
@@ -111,7 +111,8 @@ function KarrierePage() {
 
         {jobs.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border/70 bg-card/40 p-12 text-center text-sm text-muted-foreground">
-            Aktuell sind keine Stellen ausgeschrieben. Initiativbewerbungen sind jederzeit willkommen unter{" "}
+            Aktuell sind keine Stellen ausgeschrieben. Initiativbewerbungen sind jederzeit
+            willkommen unter{" "}
             <a href="mailto:bewerbung@auto-semmel.de" className="text-primary hover:underline">
               bewerbung@auto-semmel.de
             </a>
@@ -128,10 +129,15 @@ function KarrierePage() {
         <div className="mt-16 rounded-2xl border border-border/60 bg-card/40 p-8 md:p-10">
           <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
             <div>
-              <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Keine passende Stelle?</p>
-              <h3 className="mt-2 font-display text-2xl font-semibold">Initiativbewerbung senden</h3>
+              <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
+                Keine passende Stelle?
+              </p>
+              <h3 className="mt-2 font-display text-2xl font-semibold">
+                Initiativbewerbung senden
+              </h3>
               <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-                Wir freuen uns über engagierte Persönlichkeiten — auch außerhalb aktueller Ausschreibungen.
+                Wir freuen uns über engagierte Persönlichkeiten — auch außerhalb aktueller
+                Ausschreibungen.
               </p>
             </div>
             <a
@@ -234,10 +240,12 @@ function ApplyDialog({ job, onClose }: { job: JobPosting; onClose: () => void })
             <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-primary/10 text-primary">
               <CheckCircle2 className="h-7 w-7" />
             </div>
-            <h3 className="mt-5 font-display text-2xl font-semibold">Ihre Bewerbung ist eingegangen!</h3>
+            <h3 className="mt-5 font-display text-2xl font-semibold">
+              Ihre Bewerbung ist eingegangen!
+            </h3>
             <p className="mt-3 text-sm text-muted-foreground">
-              Vielen Dank, {name.split(" ")[0] || "vielen Dank"}. Wir melden uns innerhalb von 5 Werktagen telefonisch oder
-              per E-Mail bei Ihnen.
+              Vielen Dank, {name.split(" ")[0] || "vielen Dank"}. Wir melden uns innerhalb von 5
+              Werktagen telefonisch oder per E-Mail bei Ihnen.
             </p>
             <button
               onClick={onClose}
@@ -248,7 +256,9 @@ function ApplyDialog({ job, onClose }: { job: JobPosting; onClose: () => void })
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="p-7">
-            <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Schnell-Bewerbung</p>
+            <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
+              Schnell-Bewerbung
+            </p>
             <h3 className="mt-2 font-display text-2xl font-semibold leading-tight">{job.title}</h3>
             <p className="mt-1 text-xs text-muted-foreground">
               {job.department} · {job.type} · {job.contract}

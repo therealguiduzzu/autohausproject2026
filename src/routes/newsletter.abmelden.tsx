@@ -66,7 +66,13 @@ function UnsubShell({ status, email }: { status: Status; email?: string | null }
               <MailX className="mx-auto mb-4 h-12 w-12 text-primary" />
               <h1 className="font-display text-2xl font-bold">Abmeldung erfolgreich</h1>
               <p className="mt-3 text-sm text-muted-foreground">
-                {email ? <><strong>{email}</strong> wurde </> : "Ihre E-Mail-Adresse wurde "}
+                {email ? (
+                  <>
+                    <strong>{email}</strong> wurde{" "}
+                  </>
+                ) : (
+                  "Ihre E-Mail-Adresse wurde "
+                )}
                 aus unserem Newsletter-Verteiler entfernt. Sie erhalten keine weiteren E-Mails.
               </p>
             </>

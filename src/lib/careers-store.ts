@@ -163,7 +163,7 @@ export const careersStore = {
   addApplicant(
     input: Omit<Applicant, "id" | "createdAt" | "status" | "jobTitle"> & {
       status?: ApplicantStatus;
-    }
+    },
   ) {
     const job = jobs.find((j) => j.id === input.jobId);
     const applicant: Applicant = {

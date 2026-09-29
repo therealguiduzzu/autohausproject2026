@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export type EmailQueueItem = {
@@ -26,7 +27,7 @@ export type EmailQueueOverview = {
   notice?: string;
 };
 
-async function isAdmin(supabase: any, userId: string): Promise<boolean> {
+async function isAdmin(supabase: SupabaseClient, userId: string): Promise<boolean> {
   const { data } = await supabase
     .from("user_roles")
     .select("id")
@@ -53,22 +54,22 @@ export const getEmailQueueOverview = createServerFn({ method: "GET" })
     };
 
     // 1) email_send_log (Source of Truth, falls Email-Infrastruktur aktiv ist)
-    let logRows:
-      | Array<{
-          message_id: string | null;
-          template_name: string | null;
-          recipient_email: string | null;
-          status: string;
-          error_message: string | null;
-          metadata: Record<string, unknown> | null;
-          created_at: string;
-        }>
-      | null = null;
+    let logRows: Array<{
+      message_id: string | null;
+      template_name: string | null;
+      recipient_email: string | null;
+      status: string;
+      error_message: string | null;
+      metadata: Record<string, unknown> | null;
+      created_at: string;
+    }> | null = null;
 
     try {
       const { data, error } = await supabaseAdmin
         .from("email_send_log" as never)
-        .select("message_id, template_name, recipient_email, status, error_message, metadata, created_at")
+        .select(
+          "message_id, template_name, recipient_email, status, error_message, metadata, created_at",
+        )
         .order("created_at", { ascending: false })
         .limit(500);
       if (!error && data) {
@@ -108,10 +109,8 @@ export const getEmailQueueOverview = createServerFn({ method: "GET" })
 
       for (const [msgId, rows] of byMsg) {
         const latest = rows[0]!;
-        const subj =
-          (latest.metadata && (latest.metadata as Record<string, unknown>).subject) as
-            | string
-            | undefined;
+        const subj = (latest.metadata && (latest.metadata as Record<string, unknown>).subject) as
+          string | undefined;
         const mapped: EmailQueueItem = {
           source: "log",
           messageId: msgId,
@@ -141,7 +140,11 @@ export const getEmailQueueOverview = createServerFn({ method: "GET" })
     if (pendingSubs) {
       for (const s of pendingSubs) {
         const status: EmailQueueItem["status"] =
-          s.status === "confirmed" ? "sent" : s.status === "unsubscribed" ? "suppressed" : "pending";
+          s.status === "confirmed"
+            ? "sent"
+            : s.status === "unsubscribed"
+              ? "suppressed"
+              : "pending";
         overview.items.push({
           source: "newsletter",
           messageId: `nl-${s.id}`,

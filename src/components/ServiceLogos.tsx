@@ -49,14 +49,9 @@ export function AlfaRomeoServiceLogo({
   className,
   title = "Alfa Romeo Service Partner",
 }: LogoProps) {
-  return (
-    <PartnerLogo src="/partner/alfa-romeo-service.png" title={title} className={className} />
-  );
+  return <PartnerLogo src="/partner/alfa-romeo-service.png" title={title} className={className} />;
 }
 
-export function StellantisLogo({
-  className,
-  title = "Offizieller Stellantis-Partner",
-}: LogoProps) {
+export function StellantisLogo({ className, title = "Offizieller Stellantis-Partner" }: LogoProps) {
   return <PartnerLogo src="/partner/stellantis-logo.jpg" title={title} className={className} />;
 }

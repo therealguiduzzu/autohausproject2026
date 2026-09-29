@@ -34,9 +34,7 @@ const SITE = SITE_URL;
 
 export const Route = createFileRoute("/fahrzeug/$slug")({
   loader: async ({ params, context }) => {
-    const data = await context.queryClient.ensureQueryData(
-      vehicleBySlugQueryOptions(params.slug),
-    );
+    const data = await context.queryClient.ensureQueryData(vehicleBySlugQueryOptions(params.slug));
     if (!data) throw notFound();
     return data;
   },
@@ -63,9 +61,7 @@ export const Route = createFileRoute("/fahrzeug/$slug")({
       Reserviert: "https://schema.org/InStock",
       Verkauft: "https://schema.org/OutOfStock",
     };
-    const allImages = v.images.map((img) =>
-      img.startsWith("http") ? img : `${SITE}${img}`,
-    );
+    const allImages = v.images.map((img) => (img.startsWith("http") ? img : `${SITE}${img}`));
     const firstRegIso = v.firstRegistration
       ? new Date(v.firstRegistration).toISOString().split("T")[0]
       : undefined;
@@ -81,7 +77,9 @@ export const Route = createFileRoute("/fahrzeug/$slug")({
       model: v.model,
       sku: v.mobileDeId || v.id.slice(0, 8).toUpperCase(),
       color,
-      vehicleModelDate: v.firstRegistration ? new Date(v.firstRegistration).getFullYear() : undefined,
+      vehicleModelDate: v.firstRegistration
+        ? new Date(v.firstRegistration).getFullYear()
+        : undefined,
       dateVehicleFirstRegistered: firstRegIso,
       mileageFromOdometer: {
         "@type": "QuantitativeValue",
@@ -104,7 +102,9 @@ export const Route = createFileRoute("/fahrzeug/$slug")({
         "@id": `${url}#offer`,
         price: v.price,
         priceCurrency: "EUR",
-        priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+        priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split("T")[0],
         itemCondition: conditionSchema[v.condition],
         availability: availabilitySchema[v.status],
         url,
@@ -140,9 +140,7 @@ export const Route = createFileRoute("/fahrzeug/$slug")({
         { property: "twitter:image", content: image },
       ],
       links: [{ rel: "canonical", href: url }],
-      scripts: [
-        { type: "application/ld+json", children: JSON.stringify(jsonLd) },
-      ],
+      scripts: [{ type: "application/ld+json", children: JSON.stringify(jsonLd) }],
     };
   },
   component: VehicleDetailPage,
@@ -150,8 +148,12 @@ export const Route = createFileRoute("/fahrzeug/$slug")({
   errorComponent: () => (
     <div className="mx-auto max-w-2xl px-6 py-24 text-center">
       <h1 className="font-display text-3xl font-semibold">Fehler beim Laden</h1>
-      <p className="mt-3 text-muted-foreground">Das Fahrzeug konnte gerade nicht geladen werden. Bitte versuchen Sie es später erneut.</p>
-      <Link to="/" className="mt-6 inline-block text-primary underline">Zurück zur Startseite</Link>
+      <p className="mt-3 text-muted-foreground">
+        Das Fahrzeug konnte gerade nicht geladen werden. Bitte versuchen Sie es später erneut.
+      </p>
+      <Link to="/" className="mt-6 inline-block text-primary underline">
+        Zurück zur Startseite
+      </Link>
     </div>
   ),
 });
@@ -178,10 +180,17 @@ function inferExteriorColor(v: Vehicle): string {
   const hay = `${v.version} ${v.features.join(" ")}`.toLowerCase();
   if (v.brand === "Alfa Romeo") return "Rosso Alfa (Rot)";
   if (hay.includes("ocean") || hay.includes("grün") || hay.includes("green")) return "Ocean Green";
-  if (hay.includes("scorpion") || hay.includes("grau") || hay.includes("grey") || hay.includes("gray"))
+  if (
+    hay.includes("scorpion") ||
+    hay.includes("grau") ||
+    hay.includes("grey") ||
+    hay.includes("gray")
+  )
     return "Scorpion Grey";
-  if (hay.includes("bianco") || hay.includes("weiß") || hay.includes("white")) return "Bianco Gelato";
-  if (hay.includes("nero") || hay.includes("schwarz") || hay.includes("black")) return "Nero Vulcano";
+  if (hay.includes("bianco") || hay.includes("weiß") || hay.includes("white"))
+    return "Bianco Gelato";
+  if (hay.includes("nero") || hay.includes("schwarz") || hay.includes("black"))
+    return "Nero Vulcano";
   return "Auf Anfrage";
 }
 
@@ -229,7 +238,10 @@ function VehicleDetailPage() {
     v.condition === "Neuwagen"
       ? "Neuwagen"
       : v.firstRegistration
-        ? new Date(v.firstRegistration).toLocaleDateString("de-DE", { month: "2-digit", year: "numeric" })
+        ? new Date(v.firstRegistration).toLocaleDateString("de-DE", {
+            month: "2-digit",
+            year: "numeric",
+          })
         : "—";
 
   const specRows: { icon: typeof Calendar; label: string; value: string }[] = [
@@ -246,8 +258,7 @@ function VehicleDetailPage() {
   const gallery = resolveGallery(v);
   const safeIndex = Math.min(activeImage, gallery.length - 1);
   const heroImg = gallery[safeIndex];
-  const goPrev = () =>
-    setActiveImage((i) => (i - 1 + gallery.length) % gallery.length);
+  const goPrev = () => setActiveImage((i) => (i - 1 + gallery.length) % gallery.length);
   const goNext = () => setActiveImage((i) => (i + 1) % gallery.length);
 
   return (
@@ -288,7 +299,10 @@ function VehicleDetailPage() {
           </div>
           <h1 className="mt-3 font-display text-3xl font-semibold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
             {v.brand} {v.model}
-            <span className="block text-foreground/70 sm:inline sm:text-foreground/70"> {v.version}</span>
+            <span className="block text-foreground/70 sm:inline sm:text-foreground/70">
+              {" "}
+              {v.version}
+            </span>
           </h1>
         </div>
 
@@ -357,9 +371,18 @@ function VehicleDetailPage() {
             {/* Service & ownership essentials — clean typography, no overlays */}
             <section className="mt-8 grid gap-3 sm:grid-cols-3">
               {[
-                { title: "Leasing", body: "Individuelle Raten ab 0 € Anzahlung — wir rechnen Ihr Wunsch-Paket." },
-                { title: "Service", body: "Inklusive 12 Monate Händlergarantie & Stellantis-Werksdiagnose." },
-                { title: "Reifenservice", body: "Reifenwechsel, Einlagerung und Auswuchten direkt vor Ort." },
+                {
+                  title: "Leasing",
+                  body: "Individuelle Raten ab 0 € Anzahlung — wir rechnen Ihr Wunsch-Paket.",
+                },
+                {
+                  title: "Service",
+                  body: "Inklusive 12 Monate Händlergarantie & Stellantis-Werksdiagnose.",
+                },
+                {
+                  title: "Reifenservice",
+                  body: "Reifenwechsel, Einlagerung und Auswuchten direkt vor Ort.",
+                },
               ].map((item) => (
                 <div
                   key={item.title}
@@ -368,19 +391,18 @@ function VehicleDetailPage() {
                   <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
                     {item.title}
                   </div>
-                  <p className="mt-1.5 text-sm leading-relaxed text-foreground/85">
-                    {item.body}
-                  </p>
+                  <p className="mt-1.5 text-sm leading-relaxed text-foreground/85">{item.body}</p>
                 </div>
               ))}
             </section>
-
 
             {/* Technical specifications table */}
             <section className="mt-12">
               <div className="flex items-baseline justify-between border-b border-border/60 pb-3">
                 <h2 className="font-display text-2xl font-semibold">Technische Daten</h2>
-                <span className="text-xs uppercase tracking-wider text-muted-foreground">Strukturierte Daten</span>
+                <span className="text-xs uppercase tracking-wider text-muted-foreground">
+                  Strukturierte Daten
+                </span>
               </div>
               <dl className="mt-2 divide-y divide-border/60 rounded-xl border border-border/60 bg-surface/60 sm:grid sm:grid-cols-2 sm:divide-y-0">
                 {specRows.map(({ icon: Icon, label, value }, idx) => (
@@ -404,7 +426,9 @@ function VehicleDetailPage() {
             {v.features.length > 0 && (
               <section className="mt-12">
                 <div className="flex items-baseline justify-between border-b border-border/60 pb-3">
-                  <h2 className="font-display text-2xl font-semibold">Ausstattung &amp; Highlights</h2>
+                  <h2 className="font-display text-2xl font-semibold">
+                    Ausstattung &amp; Highlights
+                  </h2>
                   <span className="inline-flex items-center gap-1 text-xs text-primary">
                     <Sparkles className="h-3.5 w-3.5" /> Sonderausstattung
                   </span>
@@ -467,7 +491,6 @@ function VehicleDetailPage() {
               {/* Interactive financing slider */}
               <FinancingSlider price={v.discountPrice ?? v.price} />
 
-
               <TestDriveForm vehicle={v} />
             </div>
 
@@ -487,7 +510,9 @@ function VehicleDetailPage() {
                   <UserRound className="h-8 w-8" />
                 </div>
                 <div className="min-w-0">
-                  <div className="font-display text-lg font-semibold leading-tight">Siegfried Polenz</div>
+                  <div className="font-display text-lg font-semibold leading-tight">
+                    Siegfried Polenz
+                  </div>
                   <div className="text-xs text-muted-foreground">Verkaufsleitung · Auto Semmel</div>
                 </div>
               </div>
@@ -556,20 +581,20 @@ function TestDriveForm({ vehicle }: { vehicle: Vehicle }) {
       onSubmit={async (e) => {
         e.preventDefault();
         try {
-        await leadsStore.add({
-          type: "Probefahrt",
-          name: name || "Unbekannt",
-          email,
-          phone,
-          subject: `Probefahrt · ${vehicle.brand} ${vehicle.model} ${vehicle.version}`,
-          details: {
-            Fahrzeug: `${vehicle.brand} ${vehicle.model} ${vehicle.version}`,
-            "Wunsch-Termin": date || "Flexibel",
-            Anmerkung: note || "—",
-          },
-          vehicleId: vehicle.id,
-        });
-        setSent(true);
+          await leadsStore.add({
+            type: "Probefahrt",
+            name: name || "Unbekannt",
+            email,
+            phone,
+            subject: `Probefahrt · ${vehicle.brand} ${vehicle.model} ${vehicle.version}`,
+            details: {
+              Fahrzeug: `${vehicle.brand} ${vehicle.model} ${vehicle.version}`,
+              "Wunsch-Termin": date || "Flexibel",
+              Anmerkung: note || "—",
+            },
+            vehicleId: vehicle.id,
+          });
+          setSent(true);
         } catch (err) {
           toast.error(
             err instanceof Error && err.message.startsWith("Bitte warten")
@@ -585,18 +610,51 @@ function TestDriveForm({ vehicle }: { vehicle: Vehicle }) {
         <Car className="mr-1.5 inline h-3.5 w-3.5 text-primary" />
         Probefahrt anfragen
       </div>
-      <input className="input" placeholder="Ihr Name" value={name} onChange={(e) => setName(e.target.value)} required />
-      <input className="input" type="tel" placeholder="Telefon" value={phone} onChange={(e) => setPhone(e.target.value)} required />
-      <input className="input" type="email" placeholder="E-Mail" value={email} onChange={(e) => setEmail(e.target.value)} required />
-      <input className="input" placeholder="Wunsch-Termin (z.B. Samstag vormittag)" value={date} onChange={(e) => setDate(e.target.value)} />
-      <textarea className="input" rows={3} placeholder="Anmerkung (optional)" value={note} onChange={(e) => setNote(e.target.value)} />
+      <input
+        className="input"
+        placeholder="Ihr Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        required
+      />
+      <input
+        className="input"
+        type="tel"
+        placeholder="Telefon"
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+        required
+      />
+      <input
+        className="input"
+        type="email"
+        placeholder="E-Mail"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+      />
+      <input
+        className="input"
+        placeholder="Wunsch-Termin (z.B. Samstag vormittag)"
+        value={date}
+        onChange={(e) => setDate(e.target.value)}
+      />
+      <textarea
+        className="input"
+        rows={3}
+        placeholder="Anmerkung (optional)"
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+      />
       <button
         type="submit"
         className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-wider text-primary-foreground shadow-[var(--shadow-glow)] transition hover:brightness-110"
       >
         <Send className="h-4 w-4" /> Probefahrt anfragen
       </button>
-      <p className="text-center text-[11px] text-muted-foreground">DSGVO-konform. Keine Weitergabe an Dritte.</p>
+      <p className="text-center text-[11px] text-muted-foreground">
+        DSGVO-konform. Keine Weitergabe an Dritte.
+      </p>
     </form>
   );
 }
@@ -647,9 +705,7 @@ function FinancingSlider({ price }: { price: number }) {
       <div className="mt-5">
         <label className="flex items-center justify-between text-xs font-semibold text-foreground">
           <span>Anzahlung</span>
-          <span className="tabular-nums text-primary">
-            {deposit.toLocaleString("de-DE")} €
-          </span>
+          <span className="tabular-nums text-primary">{deposit.toLocaleString("de-DE")} €</span>
         </label>
         <input
           type="range"
@@ -685,7 +741,6 @@ function FinancingSlider({ price }: { price: number }) {
   );
 }
 
-
 /* ---------------- Pkw-EnVKV Energy Label (WLTP) ---------------- */
 
 const CO2_CLASSES = ["A", "B", "C", "D", "E", "F", "G"] as const;
@@ -708,10 +763,8 @@ function EnergyLabel({ vehicle: v }: { vehicle: Vehicle }) {
   // Welche Verbrauchswerte sind je Antriebsart fachlich relevant?
   const fuel = v.fuelType;
   const showLiters =
-    (fuel === "Benzin" || fuel === "Diesel" || fuel === "Hybrid") &&
-    v.consumptionCombined != null;
-  const showKwh =
-    (fuel === "Elektro" || fuel === "Hybrid") && v.powerConsumption != null;
+    (fuel === "Benzin" || fuel === "Diesel" || fuel === "Hybrid") && v.consumptionCombined != null;
+  const showKwh = (fuel === "Elektro" || fuel === "Hybrid") && v.powerConsumption != null;
   const showCo2 = v.co2Emissions != null;
 
   const hasAny = cls || showLiters || showKwh || showCo2;

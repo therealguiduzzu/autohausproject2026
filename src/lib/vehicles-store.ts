@@ -1,6 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { mapVehicleRow, type Vehicle, type Brand, type Condition, type FuelType, type Transmission, type VehicleStatus } from "./vehicles";
+import {
+  mapVehicleRow,
+  type Vehicle,
+  type Brand,
+  type Condition,
+  type FuelType,
+  type Transmission,
+  type VehicleStatus,
+} from "./vehicles";
 import { getQueryClient } from "./query-client-ref";
 import type { Database } from "@/integrations/supabase/types";
 
