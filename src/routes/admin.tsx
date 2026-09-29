@@ -378,7 +378,7 @@ function Dashboard({ onLogout, userEmail }: { onLogout: () => void; userEmail: s
           </div>
         </header>
 
-        <KpiHeader vehicleCount={vehicles.length} openLeads={newLeadCount} />
+        <KpiHeader vehicles={vehicles} openLeads={newLeadCount} />
 
         {tab === "list" && <VehicleList vehicles={vehicles} />}
         {tab === "new" && <NewVehicleForm onCreated={() => setTab("list")} />}
@@ -1501,35 +1501,31 @@ function LeadDetail({ lead }: { lead: Lead }) {
 
 /* ---------------- KPI Header ---------------- */
 
-function KpiHeader({
-  vehicleCount: _vehicleCount,
-  openLeads,
-}: {
-  vehicleCount: number;
-  openLeads: number;
-}) {
-  // Static demo values for the pitch; openLeads still reflects live data when > 0
-  const leadsValue = openLeads > 0 ? openLeads : 5;
+function KpiHeader({ vehicles, openLeads }: { vehicles: AdminVehicle[]; openLeads: number }) {
+  const active = vehicles.filter((v) => v.status !== "Verkauft");
+  const total = active.reduce((sum, v) => sum + (v.discountPrice ?? v.price), 0);
+  const avg = active.length ? Math.round(total / active.length) : 0;
+  const eur = (n: number) => `${n.toLocaleString("de-DE")} €`;
   return (
     <div className="mb-8 grid gap-4 md:grid-cols-3">
       <KpiCard
         icon={<Car className="h-4 w-4" />}
-        label="Fahrzeug-Bestand Gesamt"
-        value="84 Fahrzeuge"
-        sub="Synchronisiert mit mobile.de"
+        label="Fahrzeug-Bestand"
+        value={`${active.length} Fahrzeuge`}
+        sub={`${vehicles.length - active.length} verkauft`}
       />
       <KpiCard
         icon={<Inbox className="h-4 w-4" />}
         label="Aktive Kundenanfragen"
-        value={`${leadsValue} Leads offen`}
-        sub="Letzte Anfrage vor 12 Min."
-        pulse
+        value={`${openLeads} ${openLeads === 1 ? "Anfrage" : "Anfragen"} offen`}
+        sub="Status „Neu“"
+        pulse={openLeads > 0}
       />
       <KpiCard
         icon={<TrendingUp className="h-4 w-4" />}
         label="Bestandswert (Brutto)"
-        value="1.489.600 €"
-        sub="Durchschnittspreis: 17.733 €"
+        value={eur(total)}
+        sub={`Durchschnittspreis: ${eur(avg)}`}
       />
     </div>
   );
@@ -2665,8 +2661,8 @@ function NewsletterManager() {
               <span className="font-semibold text-foreground">„Kampagne starten"</span> liest das
               System nur bestätigte Abonnenten aus Ihrer Datenbank, rendert die Vorlage individuell
               pro Empfänger und versendet die E-Mails über den verschlüsselten Versand-Dienst
-              (Lovable Emails / Resend). Bounces, Abmeldungen und Öffnungsraten fließen automatisch
-              in dieses Dashboard zurück.
+              (E-Mail-Queue). Bounces, Abmeldungen und Öffnungsraten fließen automatisch in dieses
+              Dashboard zurück.
             </p>
             <p className="text-xs">
               <span className="font-semibold text-foreground">
