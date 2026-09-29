@@ -297,6 +297,8 @@ function Hero() {
           className="h-full w-full object-cover"
           width={1920}
           height={1280}
+          fetchPriority="high"
+          decoding="async"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
@@ -616,6 +618,7 @@ function VehicleCard({
           src={v.images[0]}
           alt={`${v.brand} ${v.model} ${v.version}`}
           loading="lazy"
+          decoding="async"
           width={1024}
           height={720}
           className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
@@ -1836,6 +1839,9 @@ function Highlights() {
                     src={v.images[0]}
                     alt={`${v.brand} ${v.model} ${v.version}`}
                     loading="lazy"
+                    decoding="async"
+                    width={1024}
+                    height={640}
                     className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
                   />
                   <span
