@@ -128,3 +128,11 @@ export const leadsStore = {
     if (error) throw error;
   },
 };
+
+/** Bearbeitungsfrist für neue Anfragen (Stunden). */
+export const LEAD_SLA_HOURS = 24;
+
+/** Neue Anfrage, die länger als die Frist unbearbeitet ist. */
+export function isLeadOverdue(lead: Pick<Lead, "status" | "createdAt">, now = Date.now()): boolean {
+  return lead.status === "Neu" && now - lead.createdAt > LEAD_SLA_HOURS * 3_600_000;
+}

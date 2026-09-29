@@ -43,6 +43,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import { getYearReport } from "@/lib/report.functions";
+import { buildReportCsv } from "@/lib/report";
 import VehicleImportPanel from "@/components/admin/VehicleImportPanel";
 import WerkstattPlaner from "@/components/admin/WerkstattPlaner";
 import ReviewsManager from "@/components/admin/ReviewsManager";
@@ -58,7 +60,14 @@ import {
   type Transmission,
 } from "@/lib/vehicles";
 import { useVehicles, vehiclesStore, type AdminVehicle } from "@/lib/vehicles-store";
-import { leadsStore, useLeads, type Lead, type LeadStatus } from "@/lib/leads-store";
+import {
+  leadsStore,
+  useLeads,
+  isLeadOverdue,
+  LEAD_SLA_HOURS,
+  type Lead,
+  type LeadStatus,
+} from "@/lib/leads-store";
 import {
   careersStore,
   useApplicants,
@@ -263,6 +272,7 @@ function Dashboard({
   const vehicles = useVehicles();
   const leads = useLeads();
   const newLeadCount = leads.filter((l) => l.status === "Neu").length;
+  const overdueCount = leads.filter((l) => isLeadOverdue(l)).length;
 
   return (
     <div className="flex min-h-screen flex-col lg:flex-row">
@@ -415,12 +425,15 @@ function Dashboard({
               {tab === "team" && "Team & Rollen"}
             </h1>
           </div>
-          <div className="hidden items-center gap-2 rounded-full border border-border/60 bg-card/60 px-3 py-1.5 text-xs text-muted-foreground md:flex">
-            <LayoutDashboard className="h-3.5 w-3.5" /> {userEmail || "Admin"} · Langenselbold
+          <div className="flex items-center gap-3">
+            <ReportButton />
+            <div className="hidden items-center gap-2 rounded-full border border-border/60 bg-card/60 px-3 py-1.5 text-xs text-muted-foreground md:flex">
+              <LayoutDashboard className="h-3.5 w-3.5" /> {userEmail || "Admin"} · Langenselbold
+            </div>
           </div>
         </header>
 
-        <KpiHeader vehicles={vehicles} openLeads={newLeadCount} />
+        <KpiHeader vehicles={vehicles} openLeads={newLeadCount} overdueLeads={overdueCount} />
 
         {tab === "list" && <VehicleList vehicles={vehicles} />}
         {tab === "new" && <NewVehicleForm onCreated={() => setTab("list")} />}
@@ -443,6 +456,54 @@ function Dashboard({
           </div>
         </footer>
       </main>
+    </div>
+  );
+}
+
+function ReportButton() {
+  const [year, setYear] = useState(new Date().getFullYear());
+  const [busy, setBusy] = useState(false);
+  async function download() {
+    setBusy(true);
+    try {
+      const rows = await getYearReport({ data: { year } });
+      const blob = new Blob([buildReportCsv(year, rows)], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `auto-semmel-jahresbericht-${year}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error("Bericht konnte nicht erstellt werden.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  const thisYear = new Date().getFullYear();
+  return (
+    <div className="flex items-center gap-1.5 text-xs">
+      <select
+        aria-label="Berichtsjahr"
+        className="input h-8 py-0"
+        value={year}
+        onChange={(e) => setYear(Number(e.target.value))}
+      >
+        {[thisYear, thisYear - 1, thisYear - 2].map((y) => (
+          <option key={y}>{y}</option>
+        ))}
+      </select>
+      <button
+        type="button"
+        onClick={download}
+        disabled={busy}
+        className="flex items-center gap-1.5 rounded-lg border border-border/70 px-3 py-1.5 font-semibold hover:border-primary/40 disabled:opacity-60"
+      >
+        <Download className="h-3.5 w-3.5 text-primary" />{" "}
+        {busy ? "Erstelle …" : "Jahresbericht (CSV)"}
+      </button>
     </div>
   );
 }
@@ -1396,7 +1457,13 @@ function LeadsInbox({ leads }: { leads: Lead[] }) {
                           )}
                           {l.name}
                         </p>
-                        <span className="shrink-0 text-[10px] text-muted-foreground">
+                        <span
+                          className={`shrink-0 text-[10px] ${
+                            isLeadOverdue(l)
+                              ? "font-semibold text-red-600"
+                              : "text-muted-foreground"
+                          }`}
+                        >
                           {formatAgo(l.createdAt)}
                         </span>
                       </div>
@@ -1414,6 +1481,11 @@ function LeadsInbox({ leads }: { leads: Lead[] }) {
                         <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
                           {meta.label}
                         </span>
+                        {isLeadOverdue(l) && (
+                          <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-700">
+                            &gt; {LEAD_SLA_HOURS} Std offen
+                          </span>
+                        )}
                       </div>
                     </div>
                   </button>
@@ -1581,7 +1653,15 @@ function LeadDetail({ lead }: { lead: Lead }) {
 
 /* ---------------- KPI Header ---------------- */
 
-function KpiHeader({ vehicles, openLeads }: { vehicles: AdminVehicle[]; openLeads: number }) {
+function KpiHeader({
+  vehicles,
+  openLeads,
+  overdueLeads,
+}: {
+  vehicles: AdminVehicle[];
+  openLeads: number;
+  overdueLeads: number;
+}) {
   const active = vehicles.filter((v) => v.status !== "Verkauft");
   const total = active.reduce((sum, v) => sum + (v.discountPrice ?? v.price), 0);
   const avg = active.length ? Math.round(total / active.length) : 0;
@@ -1598,7 +1678,11 @@ function KpiHeader({ vehicles, openLeads }: { vehicles: AdminVehicle[]; openLead
         icon={<Inbox className="h-4 w-4" />}
         label="Aktive Kundenanfragen"
         value={`${openLeads} ${openLeads === 1 ? "Anfrage" : "Anfragen"} offen`}
-        sub="Status „Neu“"
+        sub={
+          overdueLeads > 0
+            ? `${overdueLeads} seit über ${LEAD_SLA_HOURS} Std unbearbeitet`
+            : "Alle innerhalb der Frist"
+        }
         pulse={openLeads > 0}
       />
       <KpiCard
