@@ -51,6 +51,9 @@ import { useVehiclesRealtime } from "@/hooks/use-vehicles-realtime";
 import { FiatServiceLogo, AlfaRomeoServiceLogo, StellantisLogo } from "@/components/ServiceLogos";
 import { leadsStore } from "@/lib/leads-store";
 import { SITE_URL } from "@/lib/site";
+import { toast } from "sonner";
+import HoneypotField from "@/components/HoneypotField";
+import ConsentMap from "@/components/ConsentMap";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -902,10 +905,11 @@ function TestDriveDialog({
     }
   }, [vehicle]);
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!vehicle) return;
-    leadsStore.add({
+    try {
+      await leadsStore.add({
       type: "Probefahrt",
       name: name || "Unbekannt",
       email,
@@ -917,7 +921,10 @@ function TestDriveDialog({
         Anmerkung: note || "—",
       },
     });
-    setSent(true);
+      setSent(true);
+    } catch (err) {
+      toast.error(leadErrorMessage(err));
+    }
   }
 
   return (
@@ -940,7 +947,8 @@ function TestDriveDialog({
           </button>
         </div>
       ) : (
-        <form onSubmit={submit} className="p-6 sm:p-8">
+        <form onSubmit={submit} className="relative p-6 sm:p-8">
+          <HoneypotField />
           <div className="text-[11px] uppercase tracking-[0.25em] text-primary">Probefahrt anfragen</div>
           <h3 className="mt-1 font-display text-2xl font-semibold leading-tight">
             {vehicle.brand} {vehicle.model}
@@ -1013,11 +1021,12 @@ function WerkstattHub() {
   const [contact, setContact] = useState({ name: "", phone: "", email: "" });
   const [sent, setSent] = useState(false);
 
-  const dates = ["Mo 30.06", "Di 01.07", "Mi 02.07", "Do 03.07", "Fr 04.07", "Sa 05.07"];
+  const dates = useMemo(() => nextServiceDates(6), []);
   const labels = ["Service", "Fahrzeug", "Termin", "Kontakt"];
 
-  function submit() {
-    leadsStore.add({
+  async function submit() {
+    try {
+      await leadsStore.add({
       type: "Werkstattermin",
       name: contact.name || "Unbekannt",
       email: contact.email,
@@ -1030,7 +1039,10 @@ function WerkstattHub() {
         Wunschtermin: `${date ?? "Flexibel"} · ${time}`,
       },
     });
-    setSent(true);
+      setSent(true);
+    } catch (err) {
+      toast.error(leadErrorMessage(err));
+    }
   }
 
   function reset() {
@@ -1047,6 +1059,7 @@ function WerkstattHub() {
 
   return (
     <section id="service" className="relative border-y border-border/60 bg-surface/60 py-24 sm:py-32">
+      <HoneypotField />
       <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-2 lg:gap-16">
         <div>
           <SectionHeader
@@ -1414,10 +1427,10 @@ function AnkaufSection() {
     if (step > 0) setStep((s) => s - 1);
   }
 
-  function submit() {
+  async function submit() {
     setSubmitting(true);
-    setTimeout(() => {
-      leadsStore.add({
+    try {
+      await leadsStore.add({
         type: "Fahrzeugankauf",
         name: form.name || "Unbekannt",
         email: form.email,
@@ -1432,9 +1445,12 @@ function AnkaufSection() {
           Wunschpreis: form.notes ? `${form.notes} €` : "—",
         },
       });
-      setSubmitting(false);
       setSent(true);
-    }, 1400);
+    } catch (err) {
+      toast.error(leadErrorMessage(err));
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   function reset() {
@@ -1446,6 +1462,7 @@ function AnkaufSection() {
 
   return (
     <section id="ankauf" className="relative overflow-hidden py-24 sm:py-32">
+      <HoneypotField />
       <div className="absolute inset-0 -z-10 carbon-texture opacity-40" />
       <div className="absolute inset-x-0 top-0 -z-10 h-96 bg-gradient-to-b from-primary/15 to-transparent blur-3xl" />
 
@@ -1653,14 +1670,7 @@ function Footer() {
           </p>
 
           <div className="mt-6 overflow-hidden rounded-2xl border border-border/70 shadow-[var(--shadow-soft)]">
-            <iframe
-              title="Auto Semmel · Gelnhäuser Str. 40, 63505 Langenselbold auf Google Maps"
-              src="https://maps.google.com/maps?q=Gelnh%C3%A4user%20Str.%2040%2C%2063505%20Langenselbold&t=m&z=15&ie=UTF8&iwloc=B&output=embed"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              className="block h-64 w-full border-0"
-              allowFullScreen
-            />
+            <ConsentMap />
           </div>
           <a
             href="https://www.google.com/maps/dir/?api=1&destination=Gelnh%C3%A4user%20Str.%2040%2C%2063505%20Langenselbold"
@@ -2577,6 +2587,26 @@ function GoogleReviewsSection() {
 /* ------------------------------------------------------------------ */
 
 const SITE = SITE_URL;
+
+/** Nächste `count` Öffnungstage (Mo–Sa, ab morgen) als "Mo 30.06". */
+function nextServiceDates(count: number): string[] {
+  const days = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+  const out: string[] = [];
+  const d = new Date();
+  while (out.length < count) {
+    d.setDate(d.getDate() + 1);
+    if (d.getDay() === 0) continue; // sonntags geschlossen
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    out.push(`${days[d.getDay()]} ${dd}.${mm}`);
+  }
+  return out;
+}
+
+function leadErrorMessage(err: unknown): string {
+  if (err instanceof Error && err.message.startsWith("Bitte warten")) return err.message;
+  return "Die Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut oder rufen Sie uns an: 06184 / 2633.";
+}
 
 function buildItemListJsonLd(vehicles: Vehicle[]) {
   const conditionSchema: Record<Condition, string> = {

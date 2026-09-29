@@ -26,6 +26,8 @@ import {
 import { vehicleBySlugQueryOptions } from "@/lib/vehicles-store";
 import { leadsStore } from "@/lib/leads-store";
 import { SITE_URL } from "@/lib/site";
+import { toast } from "sonner";
+import HoneypotField from "@/components/HoneypotField";
 import type { Vehicle, Condition, VehicleStatus } from "@/lib/vehicles";
 
 const SITE = SITE_URL;
@@ -553,6 +555,7 @@ function TestDriveForm({ vehicle }: { vehicle: Vehicle }) {
     <form
       onSubmit={async (e) => {
         e.preventDefault();
+        try {
         await leadsStore.add({
           type: "Probefahrt",
           name: name || "Unbekannt",
@@ -567,9 +570,17 @@ function TestDriveForm({ vehicle }: { vehicle: Vehicle }) {
           vehicleId: vehicle.id,
         });
         setSent(true);
+        } catch (err) {
+          toast.error(
+            err instanceof Error && err.message.startsWith("Bitte warten")
+              ? err.message
+              : "Die Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut oder rufen Sie uns an: 06184 / 2633.",
+          );
+        }
       }}
-      className="mt-5 space-y-3"
+      className="relative mt-5 space-y-3"
     >
+      <HoneypotField />
       <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
         <Car className="mr-1.5 inline h-3.5 w-3.5 text-primary" />
         Probefahrt anfragen

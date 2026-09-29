@@ -74,28 +74,48 @@ export interface NewLeadInput {
   vehicleId?: string;
 }
 
+const LEAD_COOLDOWN_KEY = "auto-semmel-last-lead";
+const LEAD_COOLDOWN_MS = 15_000;
+
 export const leadsStore = {
   add: async (input: NewLeadInput) => {
+    if (typeof window !== "undefined") {
+      // Spam-Schutz 1: Honeypot befüllt -> Bot. Stillschweigend "erfolgreich" beenden.
+      const hpFilled = Array.from(
+        document.querySelectorAll<HTMLInputElement>("input[data-lead-hp]"),
+      ).some((el) => el.value.trim() !== "");
+      if (hpFilled) return;
+      // Spam-Schutz 2: Abkühlzeit je Browser, gegen Doppelklicks und einfache Skripte.
+      try {
+        const last = Number(window.localStorage.getItem(LEAD_COOLDOWN_KEY) ?? 0);
+        if (Date.now() - last < LEAD_COOLDOWN_MS) {
+          throw new Error("Bitte warten Sie einen Moment, bevor Sie eine weitere Anfrage senden.");
+        }
+      } catch (e) {
+        if (e instanceof Error && e.message.startsWith("Bitte warten")) throw e;
+      }
+    }
     const sourceUrl = typeof window !== "undefined" ? window.location.href : null;
-    const { data, error } = await supabase
-      .from("leads")
-      .insert({
-        type: input.type,
-        name: input.name,
-        email: input.email ?? null,
-        phone: input.phone ?? null,
-        subject: input.subject,
-        details: input.details,
-        vehicle_id: input.vehicleId ?? null,
-        source_url: sourceUrl,
-        consent_given: true,
-        status: "Neu" as const,
-      })
-      .select()
-      .maybeSingle();
-    invalidateLeads();
+    // Kein `.select()`: anonyme Besucher dürfen Leads nur anlegen, nicht lesen (RLS).
+    const { error } = await supabase.from("leads").insert({
+      type: input.type,
+      name: input.name.trim().slice(0, 200),
+      email: input.email?.trim().slice(0, 255) || null,
+      phone: input.phone?.trim().slice(0, 50) || null,
+      subject: input.subject.slice(0, 300),
+      details: input.details,
+      vehicle_id: input.vehicleId ?? null,
+      source_url: sourceUrl,
+      consent_given: true,
+      status: "Neu" as const,
+    });
     if (error) throw error;
-    return data ? mapLeadRow(data) : null;
+    try {
+      window.localStorage.setItem(LEAD_COOLDOWN_KEY, String(Date.now()));
+    } catch {
+      /* localStorage nicht verfügbar – Server-Limit greift trotzdem */
+    }
+    invalidateLeads();
   },
   setStatus: async (id: string, status: LeadStatus) => {
     const { error } = await supabase.from("leads").update({ status }).eq("id", id);
