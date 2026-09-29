@@ -30,7 +30,7 @@ function randomToken(): string {
 }
 
 function siteOrigin(headers: Headers): string {
-  const envSite = process.env.SITE_URL;
+  const envSite = process.env.SITE_URL ?? process.env.VITE_SITE_URL;
   if (envSite) return envSite.replace(/\/$/, "");
   const forwardedHost = headers.get("x-forwarded-host") ?? headers.get("host");
   const proto = headers.get("x-forwarded-proto") ?? "https";
@@ -155,7 +155,10 @@ export const subscribeNewsletter = createServerFn({ method: "POST" })
       console.info("[newsletter] confirmation pending →", data.email, confirmUrl);
     }
 
-    return { ok: true, queued, confirmUrl: queued ? undefined : confirmUrl } as const;
+    // Der Bestätigungslink darf NIE an den Browser zurück, sonst ließe sich das
+    // Double-Opt-In für fremde Adressen umgehen. Nur in der Entwicklung sichtbar.
+    const exposeLink = !queued && process.env.NODE_ENV !== "production";
+    return { ok: true, queued, confirmUrl: exposeLink ? confirmUrl : undefined } as const;
   });
 
 /**
@@ -311,7 +314,10 @@ export const resendNewsletterConfirmation = createServerFn({ method: "POST" })
       console.info("[newsletter] resend pending →", data.email, confirmUrl);
     }
 
-    return { ok: true, queued, confirmUrl: queued ? undefined : confirmUrl } as const;
+    // Der Bestätigungslink darf NIE an den Browser zurück, sonst ließe sich das
+    // Double-Opt-In für fremde Adressen umgehen. Nur in der Entwicklung sichtbar.
+    const exposeLink = !queued && process.env.NODE_ENV !== "production";
+    return { ok: true, queued, confirmUrl: exposeLink ? confirmUrl : undefined } as const;
   });
 
 

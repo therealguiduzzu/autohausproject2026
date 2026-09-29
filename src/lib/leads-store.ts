@@ -95,21 +95,23 @@ export const leadsStore = {
         if (e instanceof Error && e.message.startsWith("Bitte warten")) throw e;
       }
     }
-    const sourceUrl = typeof window !== "undefined" ? window.location.href : null;
-    // Kein `.select()`: anonyme Besucher dürfen Leads nur anlegen, nicht lesen (RLS).
-    const { error } = await supabase.from("leads").insert({
-      type: input.type,
-      name: input.name.trim().slice(0, 200),
-      email: input.email?.trim().slice(0, 255) || null,
-      phone: input.phone?.trim().slice(0, 50) || null,
-      subject: input.subject.slice(0, 300),
-      details: input.details,
-      vehicle_id: input.vehicleId ?? null,
-      source_url: sourceUrl,
-      consent_given: true,
-      status: "Neu" as const,
+    const { submitLead } = await import("./leads.functions");
+    const result = await submitLead({
+      data: {
+        type: input.type,
+        name: input.name,
+        email: input.email,
+        phone: input.phone,
+        subject: input.subject,
+        details: input.details,
+        vehicleId: input.vehicleId,
+        sourceUrl: typeof window !== "undefined" ? window.location.href : undefined,
+        consent: true,
+      },
     });
-    if (error) throw error;
+    if (!result.ok) {
+      throw new Error("Bitte warten Sie einen Moment, bevor Sie eine weitere Anfrage senden.");
+    }
     try {
       window.localStorage.setItem(LEAD_COOLDOWN_KEY, String(Date.now()));
     } catch {
