@@ -53,6 +53,14 @@ import { SITE_URL } from "@/lib/site";
 import { toast } from "sonner";
 import HoneypotField from "@/components/HoneypotField";
 import ConsentMap from "@/components/ConsentMap";
+import { averageRating, usePublishedReviews } from "@/lib/reviews-store";
+import { isHoneypotFilled } from "@/lib/honeypot";
+import {
+  bookWorkshopAppointment,
+  getWorkshopAvailability,
+  type WorkshopAvailability,
+} from "@/lib/workshop.functions";
+import { WORKSHOP_SLOTS, formatDayLong, formatDayShort, nextWorkdays } from "@/lib/workshop";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -166,7 +174,7 @@ function Index() {
       <AnkaufSection />
       <AboutTeamSection />
       <NewsletterSection />
-      <GoogleReviewsSection />
+      <CustomerReviewsSection />
       <ServiceCtaBanner />
       <Footer />
 
@@ -304,6 +312,8 @@ function Nav() {
 /* ------------------------------------------------------------------ */
 
 function Hero() {
+  const stockCount = useVehicles().filter((v) => v.status !== "Verkauft").length;
+  const rating = averageRating(usePublishedReviews());
   return (
     <section className="relative overflow-hidden">
       <div className="absolute inset-0 -z-10">
@@ -343,9 +353,14 @@ function Hero() {
           <div className="mt-10 flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
             <Stat n="40+" label="Jahre vor Ort" />
             <div className="h-8 w-px bg-border" />
-            <Stat n="180+" label="Fahrzeuge auf Lager" />
+            <Stat n={String(stockCount)} label="Fahrzeuge im Bestand" />
             <div className="hidden h-8 w-px bg-border sm:block" />
-            <Stat n="4.3★" label="Google Bewertung" />
+            {rating != null && (
+              <Stat
+                n={`${rating.toLocaleString("de-DE", { maximumFractionDigits: 1 })}★`}
+                label="Kundenbewertungen"
+              />
+            )}
           </div>
         </div>
       </div>
@@ -1074,31 +1089,67 @@ function WerkstattHub() {
   const [brand, setBrand] = useState("Fiat");
   const [plate, setPlate] = useState("");
   const [date, setDate] = useState<string | null>(null);
-  const [time, setTime] = useState("vormittags");
+  const [time, setTime] = useState<string | null>(null);
   const [contact, setContact] = useState({ name: "", phone: "", email: "" });
+  const [consent, setConsent] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
+  const [availability, setAvailability] = useState<WorkshopAvailability | null>(null);
+  const [availabilityError, setAvailabilityError] = useState(false);
 
-  const dates = useMemo(() => nextServiceDates(6), []);
+  const dates = useMemo(() => nextWorkdays(8), []);
   const labels = ["Service", "Fahrzeug", "Termin", "Kontakt"];
 
+  useEffect(() => {
+    let alive = true;
+    getWorkshopAvailability({ data: { dates } })
+      .then((a) => alive && setAvailability(a))
+      .catch(() => alive && setAvailabilityError(true));
+    return () => {
+      alive = false;
+    };
+  }, [dates, sent]);
+
   async function submit() {
+    if (!date || !time) return;
+    if (isHoneypotFilled()) {
+      setSent(true);
+      return;
+    }
+    setBusy(true);
     try {
-      await leadsStore.add({
-        type: "Werkstattermin",
-        name: contact.name || "Unbekannt",
-        email: contact.email,
-        phone: contact.phone,
-        subject: `Werkstattermin · ${brand} (${service})`,
-        details: {
-          Service: service,
-          Marke: brand,
-          Kennzeichen: plate || "—",
-          Wunschtermin: `${date ?? "Flexibel"} · ${time}`,
+      const res = await bookWorkshopAppointment({
+        data: {
+          date,
+          time: time as (typeof WORKSHOP_SLOTS)[number],
+          service,
+          vehicle: `${brand}${plate ? ` · ${plate}` : ""}`,
+          name: contact.name,
+          email: contact.email,
+          phone: contact.phone,
+          consent: true,
         },
       });
-      setSent(true);
-    } catch (err) {
-      toast.error(leadErrorMessage(err));
+      if (res.ok) {
+        setSent(true);
+      } else if (res.reason === "slotFull") {
+        toast.error("Dieser Termin wurde gerade vergeben. Bitte wählen Sie einen anderen.");
+        setTime(null);
+        setStep(2);
+        getWorkshopAvailability({ data: { dates } })
+          .then(setAvailability)
+          .catch(() => {});
+      } else if (res.reason === "rateLimited") {
+        toast.error("Zu viele Anfragen. Bitte versuchen Sie es in einigen Minuten erneut.");
+      } else {
+        toast.error("Dieses Datum ist nicht buchbar. Bitte wählen Sie ein anderes.");
+      }
+    } catch {
+      toast.error(
+        "Der Termin konnte nicht gebucht werden. Bitte versuchen Sie es erneut oder rufen Sie uns an: 06184 / 2633.",
+      );
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -1108,16 +1159,22 @@ function WerkstattHub() {
     setBrand("Fiat");
     setPlate("");
     setDate(null);
-    setTime("vormittags");
+    setTime(null);
     setContact({ name: "", phone: "", email: "" });
+    setConsent(false);
     setSent(false);
   }
 
   const canNext =
     (step === 0 && !!service) ||
     (step === 1 && !!brand && plate.trim().length > 0) ||
-    (step === 2 && !!date) ||
-    (step === 3 && contact.name && contact.phone && contact.email);
+    (step === 2 && !!date && !!time) ||
+    (step === 3 &&
+      !!contact.name &&
+      !!contact.phone &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email) &&
+      consent &&
+      !busy);
 
   return (
     <section
@@ -1191,16 +1248,17 @@ function WerkstattHub() {
               <div className="grid h-14 w-14 place-items-center rounded-full bg-primary/15 text-primary">
                 <CheckCircle2 className="h-7 w-7" />
               </div>
-              <h4 className="mt-4 font-display text-2xl font-semibold">Termin angefragt</h4>
+              <h4 className="mt-4 font-display text-2xl font-semibold">Termin gebucht</h4>
               <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-                Vielen Dank, {contact.name.split(" ")[0] || "danke"}! Unser Serviceteam meldet sich
-                in Kürze zur Terminbestätigung.
+                Vielen Dank, {contact.name.split(" ")[0] || "danke"}! Ihr Termin am{" "}
+                {date ? formatDayLong(date) : ""} um {time} Uhr ist bestätigt. Eine Bestätigung
+                erhalten Sie per E-Mail.
               </p>
               <button
                 onClick={reset}
                 className="mt-6 rounded-full border border-border px-5 py-2 text-sm transition hover:border-primary hover:text-primary"
               >
-                Weiteren Termin anfragen
+                Weiteren Termin buchen
               </button>
             </div>
           ) : (
@@ -1275,30 +1333,69 @@ function WerkstattHub() {
                 {step === 2 && (
                   <div>
                     <h4 className="font-display text-xl font-semibold">Wann passt es Ihnen?</h4>
-                    <div className="mt-4 grid grid-cols-3 gap-2">
+                    <div className="mt-4 grid grid-cols-4 gap-2">
                       {dates.map((d) => (
                         <button
                           key={d}
                           type="button"
-                          onClick={() => setDate(d)}
-                          className={`rounded-lg border px-3 py-3 text-sm transition ${
+                          onClick={() => {
+                            setDate(d);
+                            setTime(null);
+                          }}
+                          aria-pressed={date === d}
+                          className={`rounded-lg border px-2 py-3 text-sm transition ${
                             date === d
                               ? "border-primary bg-primary/10 text-foreground"
                               : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
                           }`}
                         >
-                          {d}
+                          {formatDayShort(d)}
                         </button>
                       ))}
                     </div>
-                    <div className="mt-5">
-                      <Field label="Tageszeit">
-                        <Select value={time} onChange={setTime}>
-                          <option value="vormittags">Vormittags (8–12 Uhr)</option>
-                          <option value="mittags">Mittags (12–14 Uhr)</option>
-                          <option value="nachmittags">Nachmittags (14–17 Uhr)</option>
-                        </Select>
-                      </Field>
+                    <div className="mt-5" aria-live="polite">
+                      {availabilityError ? (
+                        <p className="text-sm text-muted-foreground">
+                          Die Verfügbarkeit konnte nicht geladen werden. Bitte rufen Sie uns an:{" "}
+                          <a href="tel:+4961842633" className="text-primary underline">
+                            06184 / 2633
+                          </a>
+                          .
+                        </p>
+                      ) : !date ? (
+                        <p className="text-sm text-muted-foreground">
+                          Bitte zuerst einen Tag wählen.
+                        </p>
+                      ) : !availability ? (
+                        <p className="text-sm text-muted-foreground">
+                          Verfügbarkeit wird geladen …
+                        </p>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                          {WORKSHOP_SLOTS.map((t) => {
+                            const free = availability[date]?.[t] ?? 0;
+                            return (
+                              <button
+                                key={t}
+                                type="button"
+                                disabled={free === 0}
+                                onClick={() => setTime(t)}
+                                aria-pressed={time === t}
+                                className={`rounded-lg border px-2 py-3 text-sm transition disabled:cursor-not-allowed disabled:opacity-40 ${
+                                  time === t
+                                    ? "border-primary bg-primary/10 text-foreground"
+                                    : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                                }`}
+                              >
+                                <span className="block font-semibold">{t} Uhr</span>
+                                <span className="block text-[10px] uppercase tracking-wider">
+                                  {free === 0 ? "belegt" : "frei"}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -1328,8 +1425,25 @@ function WerkstattHub() {
                     </div>
                     <div className="mt-5 rounded-lg border border-border/60 bg-surface/60 p-3 text-xs text-muted-foreground">
                       <div className="mb-1 font-medium text-foreground">Zusammenfassung</div>
-                      {service} · {brand} {plate && `(${plate})`} · {date ?? "—"} · {time}
+                      {service} · {brand} {plate && `(${plate})`} ·{" "}
+                      {date ? formatDayLong(date) : "—"}, {time} Uhr
                     </div>
+                    <label className="mt-4 flex items-start gap-2 text-xs text-muted-foreground">
+                      <input
+                        type="checkbox"
+                        checked={consent}
+                        onChange={(e) => setConsent(e.target.checked)}
+                        className="mt-0.5 h-4 w-4 accent-[var(--primary)]"
+                      />
+                      <span>
+                        Ich habe die{" "}
+                        <a href="/datenschutz" target="_blank" className="text-primary underline">
+                          Datenschutzerklärung
+                        </a>{" "}
+                        gelesen und stimme der Verarbeitung meiner Angaben zur Terminvereinbarung
+                        zu.
+                      </span>
+                    </label>
                   </div>
                 )}
               </div>
@@ -1359,7 +1473,8 @@ function WerkstattHub() {
                     onClick={submit}
                     className="flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:brightness-110 disabled:opacity-50"
                   >
-                    <Send className="h-4 w-4" /> Terminanfrage absenden
+                    <Send className="h-4 w-4" />{" "}
+                    {busy ? "Wird gebucht …" : "Termin verbindlich buchen"}
                   </button>
                 )}
               </div>
@@ -2603,33 +2718,10 @@ function NewsletterSection() {
   );
 }
 
-function GoogleReviewsSection() {
-  const reviews = [
-    {
-      name: "Max M.",
-      location: "Hanau",
-      rating: 5,
-      date: "Vor 2 Wochen",
-      text: "Habe hier meinen neuen Alfa Romeo Tonale gekauft. Von der Beratung bis zur Übergabe absolut erstklassig und familiär. Sehr zu empfehlen!",
-      guide: false,
-    },
-    {
-      name: "Sabine S.",
-      location: "Langenselbold",
-      rating: 5,
-      date: "Vor 1 Monat",
-      text: "Seit Jahren Kundin mit meinem Fiat 500 in der Werkstatt. Ehrlich, fair, transparent. Hier wird einem nichts aufgeschwatzt.",
-      guide: true,
-    },
-    {
-      name: "Thomas K.",
-      location: "",
-      rating: 5,
-      date: "Vor 3 Wochen",
-      text: "Reibungsloser Ankauf meines Altfahrzeugs und faire Verrechnung. Sehr kompetentes Team!",
-      guide: false,
-    },
-  ];
+function CustomerReviewsSection() {
+  const reviews = usePublishedReviews();
+  if (reviews.length === 0) return null; // keine erfundenen Platzhalter: ohne echte Bewertungen kein Abschnitt
+  const avg = averageRating(reviews)!;
 
   return (
     <section className="bg-background">
@@ -2639,92 +2731,55 @@ function GoogleReviewsSection() {
             Das sagen unsere Kunden über Auto Semmel
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Über 300 positive Bewertungen auf Google
+            Ø {avg.toLocaleString("de-DE", { maximumFractionDigits: 1 })} von 5 Sternen aus{" "}
+            {reviews.length} ausgewählten Kundenbewertungen
           </p>
-
-          {/* Google Overview Badge */}
-          <div className="mt-6 inline-flex items-center gap-3 rounded-full border border-border/70 bg-surface px-5 py-2.5 shadow-[var(--shadow-soft)]">
-            <svg viewBox="0 0 24 24" className="h-5 w-5" aria-label="Google">
-              <path
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"
-                fill="#4285F4"
-              />
-              <path
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                fill="#34A853"
-              />
-              <path
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                fill="#FBBC05"
-              />
-              <path
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                fill="#EA4335"
-              />
-            </svg>
-            <div className="flex items-center gap-1">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} className="h-4 w-4 fill-amber-500 text-amber-500" />
-              ))}
-            </div>
-            <span className="text-sm font-semibold text-foreground">4.8 / 5 Sterne</span>
-          </div>
         </div>
 
-        {/* Review Cards */}
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {reviews.map((r) => (
             <article
-              key={r.name}
-              className="flex flex-col rounded-2xl border border-border/70 bg-surface p-6 shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 hover:shadow-xl"
+              key={r.id}
+              className="flex flex-col rounded-2xl border border-border/70 bg-surface p-6 shadow-[var(--shadow-card)]"
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="grid h-10 w-10 place-items-center rounded-full bg-foreground/5 text-xs font-bold text-foreground">
-                    {r.name.split(" ")[0][0]}
-                    {r.name.split(" ")[1]?.[0] ?? ""}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
-                      {r.name}
-                      {r.guide && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700">
-                          <MapPin className="h-2.5 w-2.5" /> Local Guide
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {r.location ? `${r.location} · ` : ""}
-                      {r.date}
-                    </div>
+              <div className="flex items-center gap-2.5">
+                <div className="grid h-10 w-10 place-items-center rounded-full bg-foreground/5 text-xs font-bold text-foreground">
+                  {r.author
+                    .split(" ")
+                    .map((p) => p[0])
+                    .join("")
+                    .slice(0, 2)}
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-foreground">{r.author}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {r.source_url ? (
+                      <a
+                        href={r.source_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        {r.source}
+                      </a>
+                    ) : (
+                      r.source
+                    )}
+                    {r.review_date
+                      ? ` · ${new Date(r.review_date).toLocaleDateString("de-DE", { month: "long", year: "numeric" })}`
+                      : ""}
                   </div>
                 </div>
-                <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0 opacity-60" aria-hidden>
-                  <path
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"
-                    fill="#4285F4"
-                  />
-                  <path
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    fill="#34A853"
-                  />
-                  <path
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    fill="#FBBC05"
-                  />
-                  <path
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    fill="#EA4335"
-                  />
-                </svg>
               </div>
-
-              <div className="mt-3 flex items-center gap-0.5">
+              <div
+                className="mt-3 flex items-center gap-0.5"
+                role="img"
+                aria-label={`${r.rating} von 5 Sternen`}
+              >
                 {Array.from({ length: r.rating }).map((_, i) => (
                   <Star key={i} className="h-4 w-4 fill-amber-500 text-amber-500" />
                 ))}
               </div>
-
               <p className="mt-3 text-sm leading-relaxed text-foreground/90">{r.text}</p>
             </article>
           ))}
@@ -2739,21 +2794,6 @@ function GoogleReviewsSection() {
 /* ------------------------------------------------------------------ */
 
 const SITE = SITE_URL;
-
-/** Nächste `count` Öffnungstage (Mo–Sa, ab morgen) als "Mo 30.06". */
-function nextServiceDates(count: number): string[] {
-  const days = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
-  const out: string[] = [];
-  const d = new Date();
-  while (out.length < count) {
-    d.setDate(d.getDate() + 1);
-    if (d.getDay() === 0) continue; // sonntags geschlossen
-    const dd = String(d.getDate()).padStart(2, "0");
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    out.push(`${days[d.getDay()]} ${dd}.${mm}`);
-  }
-  return out;
-}
 
 function leadErrorMessage(err: unknown): string {
   if (err instanceof Error && err.message.startsWith("Bitte warten")) return err.message;

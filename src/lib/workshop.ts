@@ -105,7 +105,7 @@ export interface CalendarAppointment {
 }
 
 const icsEscape = (s: string) =>
-  s.replace(/\\/g, "\\\\").replace(/;/g, "\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+  s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
 
 const icsLocal = (iso: string, time: string) =>
   `${iso.replace(/-/g, "")}T${time.replace(":", "")}00`;

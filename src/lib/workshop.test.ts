@@ -71,7 +71,7 @@ describe("workshop", () => {
     );
     expect(ics).toContain("DTSTART;TZID=Europe/Berlin:20260702T100000");
     expect(ics).toContain("DTEND;TZID=Europe/Berlin:20260702T113000");
-    expect(ics).toContain("SUMMARY:Inspektion · A\; B");
+    expect(ics).toContain("SUMMARY:Inspektion · A\\; B");
     expect(ics).not.toContain("UID:2@");
     expect(ics.endsWith("END:VCALENDAR\r\n")).toBe(true);
   });

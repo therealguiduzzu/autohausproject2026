@@ -234,3 +234,14 @@ export const adminDeleteAppointment = createServerFn({ method: "POST" })
     const mailed = await sendAppointmentMails("deleted", row, { team: false });
     return { ok: true, mailed } as const;
   });
+
+/** Abo-URL des Kalender-Feeds (enthält das geheime Token, daher nur für Personal). */
+export const getCalendarFeedUrl = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await requireRole(context, ["admin", "staff"]);
+    const token = process.env.WORKSHOP_CALENDAR_TOKEN;
+    if (!token || token.length < 24) return { url: null } as const;
+    const base = (process.env.VITE_SITE_URL ?? process.env.SITE_URL ?? "").replace(/\/+$/, "");
+    return { url: `${base}/api/calendar/werkstatt.ics?token=${token}` } as const;
+  });
