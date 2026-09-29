@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SITE_URL } from "@/lib/site";
 import { ArrowLeft, Settings2 } from "lucide-react";
 import { openCookieSettings } from "@/components/CookieBanner";
 
@@ -8,9 +9,9 @@ export const Route = createFileRoute("/datenschutz")({
       { title: "Datenschutz — Auto Semmel Langenselbold" },
       { name: "description", content: "Datenschutzerklärung der Auto Semmel GmbH & Co. Siegfried Polenz KG gemäß DSGVO." },
       { property: "og:title", content: "Datenschutz — Auto Semmel" },
-      { property: "og:url", content: "https://la-passione-digital.lovable.app/datenschutz" },
+      { property: "og:url", content: `${SITE_URL}/datenschutz` },
     ],
-    links: [{ rel: "canonical", href: "https://la-passione-digital.lovable.app/datenschutz" }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/datenschutz` }],
   }),
   component: DatenschutzPage,
 });

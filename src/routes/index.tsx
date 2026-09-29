@@ -50,6 +50,7 @@ import { useVehicles } from "@/lib/vehicles-store";
 import { useVehiclesRealtime } from "@/hooks/use-vehicles-realtime";
 import { FiatServiceLogo, AlfaRomeoServiceLogo, StellantisLogo } from "@/components/ServiceLogos";
 import { leadsStore } from "@/lib/leads-store";
+import { SITE_URL } from "@/lib/site";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -66,11 +67,11 @@ export const Route = createFileRoute("/")({
         content:
           "Tradition, Qualität & italienische Leidenschaft. Neuwagen, Tageszulassungen, Gebrauchtwagen & Nutzfahrzeuge direkt an der A66.",
       },
-      { property: "og:url", content: "https://la-passione-digital.lovable.app/" },
-      { property: "og:image", content: `https://la-passione-digital.lovable.app${heroGiulia}` },
-      { property: "twitter:image", content: `https://la-passione-digital.lovable.app${heroGiulia}` },
+      { property: "og:url", content: `${SITE_URL}/` },
+      { property: "og:image", content: `${SITE_URL}${heroGiulia}` },
+      { property: "twitter:image", content: `${SITE_URL}${heroGiulia}` },
     ],
-    links: [{ rel: "canonical", href: "https://la-passione-digital.lovable.app/" }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/` }],
     scripts: [
       {
         type: "application/ld+json",
@@ -78,13 +79,13 @@ export const Route = createFileRoute("/")({
           "@context": "https://schema.org",
           "@type": "WebSite",
           name: "Auto Semmel",
-          url: "https://la-passione-digital.lovable.app/",
+          url: `${SITE_URL}/`,
           potentialAction: {
             "@type": "SearchAction",
             target: {
               "@type": "EntryPoint",
               urlTemplate:
-                "https://la-passione-digital.lovable.app/?condition={condition}&brand={brand}&price_max={price_max}&transmission={transmission}",
+                `${SITE_URL}/?condition={condition}&brand={brand}&price_max={price_max}&transmission={transmission}`,
             },
             "query-input": [
               {
@@ -2575,7 +2576,7 @@ function GoogleReviewsSection() {
 /* JSON-LD ItemList — currently visible vehicles                      */
 /* ------------------------------------------------------------------ */
 
-const SITE = "https://la-passione-digital.lovable.app";
+const SITE = SITE_URL;
 
 function buildItemListJsonLd(vehicles: Vehicle[]) {
   const conditionSchema: Record<Condition, string> = {

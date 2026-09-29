@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SITE_URL } from "@/lib/site";
 import { ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/impressum")({
@@ -7,9 +8,9 @@ export const Route = createFileRoute("/impressum")({
       { title: "Impressum — Auto Semmel Langenselbold" },
       { name: "description", content: "Impressum und rechtliche Angaben der Auto Semmel GmbH & Co. Siegfried Polenz KG in Langenselbold." },
       { property: "og:title", content: "Impressum — Auto Semmel" },
-      { property: "og:url", content: "https://la-passione-digital.lovable.app/impressum" },
+      { property: "og:url", content: `${SITE_URL}/impressum` },
     ],
-    links: [{ rel: "canonical", href: "https://la-passione-digital.lovable.app/impressum" }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/impressum` }],
   }),
   component: ImpressumPage,
 });

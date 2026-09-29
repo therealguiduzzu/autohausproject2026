@@ -25,9 +25,10 @@ import {
 } from "lucide-react";
 import { vehicleBySlugQueryOptions } from "@/lib/vehicles-store";
 import { leadsStore } from "@/lib/leads-store";
+import { SITE_URL } from "@/lib/site";
 import type { Vehicle, Condition, VehicleStatus } from "@/lib/vehicles";
 
-const SITE = "https://la-passione-digital.lovable.app";
+const SITE = SITE_URL;
 
 export const Route = createFileRoute("/fahrzeug/$slug")({
   loader: async ({ params, context }) => {

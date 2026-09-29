@@ -876,7 +876,7 @@ function NewVehicleForm({ onCreated }: { onCreated: () => void }) {
                 <div className="mt-4 grid grid-cols-3 gap-3 md:grid-cols-6">
                   {images.map((src, i) => (
                     <div key={i} className="relative aspect-square overflow-hidden rounded-lg border border-border/60">
-                      <img src={src} alt="" className="h-full w-full object-cover" />
+                      <img src={src} alt={`Vorschau Fahrzeugbild ${i + 1}`} className="h-full w-full object-cover" />
                       <button
                         onClick={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
                         className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-background/80 text-foreground"
