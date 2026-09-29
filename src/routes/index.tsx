@@ -53,6 +53,7 @@ import { SITE_URL } from "@/lib/site";
 import { toast } from "sonner";
 import HoneypotField from "@/components/HoneypotField";
 import ConsentMap from "@/components/ConsentMap";
+import OpeningStatus from "@/components/OpeningStatus";
 import { averageRating, usePublishedReviews } from "@/lib/reviews-store";
 import { isHoneypotFilled } from "@/lib/honeypot";
 import {
@@ -202,6 +203,7 @@ function TopBar() {
             <Clock className="h-3.5 w-3.5 text-primary" />
             Verkauf Mo.–Fr. 7:30-17:30 Uhr · Sa 9–14 Uhr
           </span>
+          <OpeningStatus className="font-medium text-foreground" />
         </div>
         <a href="tel:+4961842633" className="flex items-center gap-1.5 hover:text-foreground">
           <Phone className="h-3.5 w-3.5 text-primary" />
@@ -299,6 +301,7 @@ function Nav() {
               <Phone className="h-4 w-4" />
               06184 / 2633
             </a>
+            <OpeningStatus className="text-xs text-muted-foreground" />
           </nav>
         </div>
       )}
