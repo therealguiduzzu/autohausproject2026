@@ -229,6 +229,7 @@ export type Database = {
           slot_date: string;
           slot_time: string;
           service: string;
+          cancel_token: string;
           category: string;
           vehicle: string;
           customer_name: string;
@@ -245,6 +246,7 @@ export type Database = {
           slot_date: string;
           slot_time: string;
           service: string;
+          cancel_token?: string;
           category?: string;
           vehicle?: string;
           customer_name: string;
@@ -261,6 +263,7 @@ export type Database = {
           slot_date?: string;
           slot_time?: string;
           service?: string;
+          cancel_token?: string;
           category?: string;
           vehicle?: string;
           customer_name?: string;

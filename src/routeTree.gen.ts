@@ -20,6 +20,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as FahrzeugSlugRouteImport } from './routes/fahrzeug.$slug'
 import { Route as NewsletterAbmeldenRouteImport } from './routes/newsletter.abmelden'
 import { Route as NewsletterBestaetigenRouteImport } from './routes/newsletter.bestaetigen'
+import { Route as TerminAbsagenRouteImport } from './routes/termin.absagen'
 import { Route as ApiCalendarWerkstattDoticsRouteImport } from './routes/api.calendar.werkstatt[.]ics'
 import { Route as ApiImportVehiclesRouteImport } from './routes/api.import.vehicles'
 
@@ -78,6 +79,11 @@ const NewsletterBestaetigenRoute = NewsletterBestaetigenRouteImport.update({
   path: '/newsletter/bestaetigen',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TerminAbsagenRoute = TerminAbsagenRouteImport.update({
+  id: '/termin/absagen',
+  path: '/termin/absagen',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCalendarWerkstattDoticsRoute =
   ApiCalendarWerkstattDoticsRouteImport.update({
     id: '/api/calendar/werkstatt.ics',
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/fahrzeug/$slug': typeof FahrzeugSlugRoute
   '/newsletter/abmelden': typeof NewsletterAbmeldenRoute
   '/newsletter/bestaetigen': typeof NewsletterBestaetigenRoute
+  '/termin/absagen': typeof TerminAbsagenRoute
   '/api/calendar/werkstatt.ics': typeof ApiCalendarWerkstattDoticsRoute
   '/api/import/vehicles': typeof ApiImportVehiclesRoute
 }
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/fahrzeug/$slug': typeof FahrzeugSlugRoute
   '/newsletter/abmelden': typeof NewsletterAbmeldenRoute
   '/newsletter/bestaetigen': typeof NewsletterBestaetigenRoute
+  '/termin/absagen': typeof TerminAbsagenRoute
   '/api/calendar/werkstatt.ics': typeof ApiCalendarWerkstattDoticsRoute
   '/api/import/vehicles': typeof ApiImportVehiclesRoute
 }
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/fahrzeug/$slug': typeof FahrzeugSlugRoute
   '/newsletter/abmelden': typeof NewsletterAbmeldenRoute
   '/newsletter/bestaetigen': typeof NewsletterBestaetigenRoute
+  '/termin/absagen': typeof TerminAbsagenRoute
   '/api/calendar/werkstatt.ics': typeof ApiCalendarWerkstattDoticsRoute
   '/api/import/vehicles': typeof ApiImportVehiclesRoute
 }
@@ -150,6 +159,7 @@ export interface FileRouteTypes {
     | '/fahrzeug/$slug'
     | '/newsletter/abmelden'
     | '/newsletter/bestaetigen'
+    | '/termin/absagen'
     | '/api/calendar/werkstatt.ics'
     | '/api/import/vehicles'
   fileRoutesByTo: FileRoutesByTo
@@ -165,6 +175,7 @@ export interface FileRouteTypes {
     | '/fahrzeug/$slug'
     | '/newsletter/abmelden'
     | '/newsletter/bestaetigen'
+    | '/termin/absagen'
     | '/api/calendar/werkstatt.ics'
     | '/api/import/vehicles'
   id:
@@ -180,6 +191,7 @@ export interface FileRouteTypes {
     | '/fahrzeug/$slug'
     | '/newsletter/abmelden'
     | '/newsletter/bestaetigen'
+    | '/termin/absagen'
     | '/api/calendar/werkstatt.ics'
     | '/api/import/vehicles'
   fileRoutesById: FileRoutesById
@@ -196,6 +208,7 @@ export interface RootRouteChildren {
   FahrzeugSlugRoute: typeof FahrzeugSlugRoute
   NewsletterAbmeldenRoute: typeof NewsletterAbmeldenRoute
   NewsletterBestaetigenRoute: typeof NewsletterBestaetigenRoute
+  TerminAbsagenRoute: typeof TerminAbsagenRoute
   ApiCalendarWerkstattDoticsRoute: typeof ApiCalendarWerkstattDoticsRoute
   ApiImportVehiclesRoute: typeof ApiImportVehiclesRoute
 }
@@ -279,6 +292,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NewsletterBestaetigenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/termin/absagen': {
+      id: '/termin/absagen'
+      path: '/termin/absagen'
+      fullPath: '/termin/absagen'
+      preLoaderRoute: typeof TerminAbsagenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/calendar/werkstatt.ics': {
       id: '/api/calendar/werkstatt.ics'
       path: '/api/calendar/werkstatt.ics'
@@ -308,6 +328,7 @@ const rootRouteChildren: RootRouteChildren = {
   FahrzeugSlugRoute: FahrzeugSlugRoute,
   NewsletterAbmeldenRoute: NewsletterAbmeldenRoute,
   NewsletterBestaetigenRoute: NewsletterBestaetigenRoute,
+  TerminAbsagenRoute: TerminAbsagenRoute,
   ApiCalendarWerkstattDoticsRoute: ApiCalendarWerkstattDoticsRoute,
   ApiImportVehiclesRoute: ApiImportVehiclesRoute,
 }

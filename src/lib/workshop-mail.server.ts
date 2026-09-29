@@ -2,7 +2,13 @@ import { enqueueEmail, escapeHtml, mailLayout, teamRecipients } from "./mail.ser
 import { formatDayLong } from "./workshop";
 
 export type AppointmentMailKind =
-  "created" | "rescheduled" | "updated" | "cancelled" | "reactivated" | "deleted";
+  | "created"
+  | "rescheduled"
+  | "updated"
+  | "cancelled"
+  | "reactivated"
+  | "deleted"
+  | "cancelledByCustomer";
 
 export interface AppointmentMailData {
   slot_date: string;
@@ -23,7 +29,7 @@ const ADDRESS = "Auto Semmel · Gelnhäuser Straße 40 · 63505 Langenselbold";
 export async function sendAppointmentMails(
   kind: AppointmentMailKind,
   a: AppointmentMailData,
-  opts: { team?: boolean; previous?: string } = {},
+  opts: { team?: boolean; previous?: string; cancelUrl?: string } = {},
 ): Promise<boolean> {
   const slot = `${formatDayLong(a.slot_date)}, ${a.slot_time} Uhr`;
   const first = a.customer_name.split(" ")[0] || "Kunde";
@@ -34,6 +40,7 @@ export async function sendAppointmentMails(
     cancelled: `leider müssen wir Ihren Termin am ${slot} absagen. Wir melden uns für einen Ersatztermin.`,
     reactivated: `Ihr Termin am ${slot} ist wieder bestätigt.`,
     deleted: `Ihr Termin am ${slot} wurde storniert.`,
+    cancelledByCustomer: `Sie haben Ihren Termin am ${slot} abgesagt. Wir haben ihn aus dem Kalender entfernt.`,
   };
   const subject: Record<AppointmentMailKind, string> = {
     created: `Terminbestätigung: ${a.service} – ${slot}`,
@@ -42,6 +49,7 @@ export async function sendAppointmentMails(
     cancelled: `Absage: ${a.service} (${slot})`,
     reactivated: `Termin wieder bestätigt – ${slot}`,
     deleted: `Stornierung: ${a.service} (${slot})`,
+    cancelledByCustomer: `Ihre Terminabsage: ${a.service} (${slot})`,
   };
 
   let customerQueued = false;
@@ -54,25 +62,33 @@ export async function sendAppointmentMails(
         ${a.vehicle ? `<tr><td style="padding:2px 12px 2px 0;color:#666">Fahrzeug</td><td>${escapeHtml(a.vehicle)}</td></tr>` : ""}
         <tr><td style="padding:2px 12px 2px 0;color:#666">Ort</td><td>${escapeHtml(ADDRESS)}</td></tr>
       </table>
+      ${
+        opts.cancelUrl && (kind === "created" || kind === "rescheduled" || kind === "reactivated")
+          ? `<p style="margin-top:16px;font-size:13px">Verhindert? <a href="${opts.cancelUrl}" style="color:#B90E0A">Termin online absagen</a> (bis zum Vortag möglich).</p>`
+          : ""
+      }
       <p style="margin-top:16px">Fragen? Rufen Sie uns an: 06184 / 2633.</p>`;
     customerQueued = await enqueueEmail({
       to: a.customer_email,
       subject: subject[kind],
       html: mailLayout(subject[kind], body),
-      text: `Guten Tag ${first}, ${lead[kind]}\nService: ${a.service}\n${ADDRESS}\nTelefon: 06184 / 2633`,
+      text: `Guten Tag ${first}, ${lead[kind]}\nService: ${a.service}\n${ADDRESS}\nTelefon: 06184 / 2633${opts.cancelUrl ? `\nTermin absagen: ${opts.cancelUrl}` : ""}`,
       template: `appointment-${kind}`,
     });
   }
 
-  if (opts.team !== false && kind === "created") {
+  if (opts.team !== false && (kind === "created" || kind === "cancelledByCustomer")) {
     for (const to of teamRecipients()) {
       const body = `<p><strong>${escapeHtml(a.customer_name)}</strong> · ${escapeHtml(a.customer_phone ?? "")} · ${escapeHtml(a.customer_email ?? "")}</p>
         <p>${escapeHtml(slot)} · ${escapeHtml(a.service)}${a.vehicle ? ` · ${escapeHtml(a.vehicle)}` : ""}</p>`;
       await enqueueEmail({
         to,
-        subject: `Neuer Online-Termin: ${a.service} – ${slot}`,
-        html: mailLayout("Neuer Online-Werkstatttermin", body),
-        text: `Neuer Online-Termin: ${a.service}, ${slot}\n${a.customer_name} ${a.customer_phone ?? ""} ${a.customer_email ?? ""}\n${a.vehicle}`,
+        subject: `${kind === "created" ? "Neuer Online-Termin" : "Terminabsage durch Kunde"}: ${a.service} – ${slot}`,
+        html: mailLayout(
+          kind === "created" ? "Neuer Online-Werkstatttermin" : "Termin vom Kunden abgesagt",
+          body,
+        ),
+        text: `${kind === "created" ? "Neuer Online-Termin" : "Terminabsage durch Kunde"}: ${a.service}, ${slot}\n${a.customer_name} ${a.customer_phone ?? ""} ${a.customer_email ?? ""}\n${a.vehicle}`,
         template: "appointment-team",
       });
     }
