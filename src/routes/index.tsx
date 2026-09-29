@@ -684,9 +684,11 @@ function VehicleCard({ vehicle: v, onTestDrive }: { vehicle: Vehicle; onTestDriv
                 {v.price.toLocaleString("de-DE")} €
               </div>
             )}
-            <div className="text-xs text-muted-foreground">
-              ab <span className="text-foreground">{v.financingMonthly} €</span> mtl.
-            </div>
+            {v.financingMonthly > 0 && (
+              <div className="text-xs text-muted-foreground">
+                ab <span className="text-foreground">{v.financingMonthly} €</span> mtl.
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -844,10 +846,12 @@ function VehicleDetailDialog({
               <div className="font-display text-3xl font-bold">
                 {v.price.toLocaleString("de-DE")} €
               </div>
-              <div className="text-xs text-muted-foreground">
-                Finanzierung ab <span className="text-foreground">{v.financingMonthly} €</span> /
-                Monat
-              </div>
+              {v.financingMonthly > 0 && (
+                <div className="text-xs text-muted-foreground">
+                  Finanzierung ab <span className="text-foreground">{v.financingMonthly} €</span> /
+                  Monat
+                </div>
+              )}
             </div>
             <div className="ml-auto rounded-md bg-background/60 px-2 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">
               Mobile.de ID {v.mobileDeId}

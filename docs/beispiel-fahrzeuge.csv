@@ -1,0 +1,4 @@
+ID;Marke;Modell;Variante;Zustand;Preis;MwSt ausweisbar;Kilometerstand;Erstzulassung;Leistung (PS);Kraftstoff;Getriebe;Bilder;Ausstattung;CO2-Klasse
+MD-1001;Alfa Romeo;Tonale;1.5 VGT MHEV TCT Veloce;Gebraucht;38.900,00;ja;12.500;03/2024;160;Benzin (Mild-Hybrid);Automatik;https://example.com/tonale-1.jpg|https://example.com/tonale-2.jpg;Navigation|LED-Scheinwerfer|Sitzheizung;C
+MD-1002;Fiat;500e;La Prima;Neuwagen;29.900,00;nein;0;;118;Elektro;Automatik;;Panorama-Glasdach|Wärmepumpe;A
+MD-1003;Fiat Professional;Ducato;Kastenwagen L2H2 140 Multijet;Tageszulassung;36.500,00;ja;10;06/2025;140;Diesel;Schaltgetriebe;;;

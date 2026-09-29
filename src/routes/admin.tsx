@@ -42,6 +42,7 @@ import {
   Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
+import VehicleImportPanel from "@/components/admin/VehicleImportPanel";
 import {
   MODELS_BY_BRAND,
   type Brand,
@@ -690,7 +691,7 @@ function NewVehicleForm({ onCreated }: { onCreated: () => void }) {
       condition: form.condition,
       price,
       vatDeductible: form.vatDeductible,
-      financingMonthly: Number(form.financingMonthly) || Math.round(price / 140),
+      financingMonthly: Number(form.financingMonthly) || 0,
       mileage: Number(form.mileage) || 0,
       firstRegistration: form.firstRegistration,
       powerHp: Number(form.powerHp) || 0,
@@ -1169,223 +1170,36 @@ function Stepper({ step, labels }: { step: number; labels: string[] }) {
 /* ---------------- API status ---------------- */
 
 function ApiStatus() {
-  const [autoImport, setAutoImport] = useState(true);
   return (
     <div className="space-y-6">
-      {/* Headline widget — Mobile.de */}
-      <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-card/40 p-6 sm:p-8">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(185,14,10,0.16),_transparent_60%)]" />
-        <div className="relative">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/15 text-primary">
-                <Database className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
-                  Listing Sync
-                </p>
-                <h3 className="font-display text-xl font-semibold">
-                  Mobile.de Echtzeit-Synchronisation
-                </h3>
-              </div>
-            </div>
-            <span className="relative flex items-center gap-2 rounded-full bg-emerald-500/15 px-3 py-1.5 text-xs font-semibold text-emerald-700">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-              </span>
-              Status: Live-API verbunden (Synchronisiert)
-            </span>
-          </div>
-
-          {/* Micro-dashboard */}
-          <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            {[
-              { label: "Fahrzeuge importiert", value: "84", tone: "text-foreground" },
-              { label: "Letzter Sync", value: "vor 12 Min.", tone: "text-foreground" },
-              { label: "Sync-Fehler", value: "0", tone: "text-emerald-700" },
-            ].map((m) => (
-              <div
-                key={m.label}
-                className="rounded-xl border border-border/60 bg-background/40 p-4 transition hover:border-primary/40 hover:shadow-sm"
-              >
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                  {m.label}
-                </p>
-                <p className={`mt-1 font-display text-2xl font-semibold ${m.tone}`}>{m.value}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Auto-import toggle */}
-          <div className="mt-6 grid gap-4 rounded-xl border border-border/60 bg-background/40 p-5 sm:grid-cols-[1fr_auto] sm:items-center">
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="font-medium text-foreground">Automatischer täglicher Import</p>
-                <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-700">
-                  Aktiv
-                </span>
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Synchronisiert Bestand, Bilder und Preise jede Nacht automatisch aus Mobile.de.
-              </p>
-            </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={autoImport}
-              onClick={() => setAutoImport((v) => !v)}
-              className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors duration-300 ${
-                autoImport ? "bg-primary" : "bg-muted/60"
-              }`}
-            >
-              <span
-                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform duration-300 ${
-                  autoImport ? "translate-x-6" : "translate-x-1"
-                }`}
-              />
-            </button>
-          </div>
-
-          {/* Connection details */}
-          <ul className="mt-5 grid gap-2 text-sm sm:grid-cols-2">
-            <Row label="Endpoint" value="services.mobile.de/seller-api/v1" />
-            <Row label="Authentifizierung" value="Basic Auth · Händler-Key" />
-            <Row label="Letzter Sync" value="Heute, vor 12 Min." />
-            <Row label="Inserate synchronisiert" value="84 / 84" />
-          </ul>
-
-          {/* Info box */}
-          <div className="mt-6 flex gap-3 rounded-xl border border-primary/30 bg-primary/10 p-4 text-sm">
-            <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-            <p className="leading-relaxed text-foreground/90">
-              <span className="font-semibold text-primary">Vorteil für Auto Semmel: </span>
-              Sobald Ihr Mobile.de-Händler-Key hinterlegt ist, werden alle Fahrzeuge vollautomatisch
-              synchronisiert. Manuelle Pflege entfällt.
-            </p>
-          </div>
-
-          <button className="mt-6 inline-flex items-center gap-2 rounded-lg border border-primary/60 bg-primary/10 px-4 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary/20">
-            <KeyRound className="h-4 w-4" /> Händler-Key hinterlegen
-          </button>
-        </div>
-      </div>
-
-      {/* Synchronisations-Log */}
-      <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/40">
-        <div className="flex items-center justify-between border-b border-border/60 px-6 py-4">
-          <div className="flex items-center gap-3">
-            <span className="grid h-9 w-9 place-items-center rounded-lg bg-emerald-500/15 text-emerald-700">
-              <Activity className="h-4 w-4" />
-            </span>
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                Synchronisations-Log
-              </p>
-              <h3 className="font-display text-base font-semibold">Mobile.de Import-Historie</h3>
-            </div>
-          </div>
-          <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-medium text-emerald-700">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-            Aktiv
-          </span>
-        </div>
-        <ul className="divide-y divide-border/40 text-sm">
-          {[
-            {
-              when: "15:32:10",
-              msg: "Sync: Alfa Romeo Tonale data updated",
-              detail: "Price change detected on mobile.de · 38.900 € → 37.450 €",
-              ok: true,
-            },
-            {
-              when: "15:30:15",
-              msg: "Sync: Fiat 500e photos successfully refreshed",
-              detail: "12 neue Bilder · 4 ersetzt",
-              ok: true,
-            },
-            {
-              when: "14:15:02",
-              msg: "Sync: Fiat Ducato successfully imported as new vehicle",
-              detail: "Kastenwagen L2H2 140 Multijet · ID #MD-84019",
-              ok: true,
-            },
-            {
-              when: "Heute, 06:00",
-              msg: "Nightly Full-Sync",
-              detail: "84 Fahrzeuge geprüft · Preise aktualisiert",
-              ok: true,
-            },
-            {
-              when: "Gestern, 06:00",
-              msg: "Nightly Full-Sync",
-              detail: "82 Fahrzeuge geprüft · 2 neu · 7 Bilder aktualisiert",
-              ok: true,
-            },
-          ].map((entry, i) => (
-            <li
-              key={i}
-              className="flex flex-wrap items-start gap-4 px-6 py-4 transition hover:bg-muted/30"
-            >
-              <span
-                className={`mt-1 h-2 w-2 shrink-0 rounded-full ${
-                  entry.ok ? "bg-emerald-500" : "bg-amber-500"
-                }`}
-              />
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <p className="font-medium text-foreground">{entry.msg}</p>
-                  <span className="font-mono text-[11px] text-muted-foreground">{entry.when}</span>
-                </div>
-                <p className="mt-0.5 text-xs text-muted-foreground">{entry.detail}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-        <div className="border-t border-border/60 bg-background/30 px-6 py-3 text-[11px] text-muted-foreground">
-          Demo-Daten für die Präsentation · Live-Sync aktiviert sich automatisch, sobald der
-          Händler-Key hinterlegt ist.
-        </div>
-      </div>
-
-      {/* Secondary integrations */}
+      <VehicleImportPanel />
       <div className="grid gap-4 lg:grid-cols-3">
         <StatusCard
           title="Datenbank"
-          subtitle="Vehicle storage"
+          subtitle="Fahrzeugbestand"
           icon={<Database className="h-5 w-5" />}
           status="ready"
           statusLabel="Bereit"
-          desc="Schema definiert. Bereit zum Migrieren des lokalen Bestands."
+          desc="Fahrzeuge, Anfragen und Newsletter werden in der Datenbank gespeichert."
+        />
+        <StatusCard
+          title="mobile.de / AutoScout24"
+          subtitle="Direktanbindung"
+          icon={<Activity className="h-5 w-5" />}
+          status="standby"
+          statusLabel="Nicht angebunden"
+          desc="Import aktuell per Datei oder API-Endpunkt. Direkte Schnittstelle auf Anfrage."
         />
         <StatusCard
           title="DAT / Schwacke Bewertung"
           subtitle="Ankauf-Modul"
-          icon={<Activity className="h-5 w-5" />}
+          icon={<ShieldCheck className="h-5 w-5" />}
           status="standby"
           statusLabel="Geplant"
           desc="Automatische Fahrzeugbewertung für Ankaufsanfragen."
         />
-        <StatusCard
-          title="Stellantis Händlerportal"
-          subtitle="Bestands-Import"
-          icon={<ShieldCheck className="h-5 w-5" />}
-          status="ready"
-          statusLabel="Verbunden"
-          desc="Neuwagen-Konfigurationen werden täglich aktualisiert."
-        />
       </div>
     </div>
-  );
-}
-
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <li className="flex items-center justify-between border-b border-border/40 pb-2 last:border-0">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="font-mono text-xs">{value}</span>
-    </li>
   );
 }
 

@@ -20,6 +20,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as FahrzeugSlugRouteImport } from './routes/fahrzeug.$slug'
 import { Route as NewsletterAbmeldenRouteImport } from './routes/newsletter.abmelden'
 import { Route as NewsletterBestaetigenRouteImport } from './routes/newsletter.bestaetigen'
+import { Route as ApiImportVehiclesRouteImport } from './routes/api.import.vehicles'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -76,6 +77,11 @@ const NewsletterBestaetigenRoute = NewsletterBestaetigenRouteImport.update({
   path: '/newsletter/bestaetigen',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiImportVehiclesRoute = ApiImportVehiclesRouteImport.update({
+  id: '/api/import/vehicles',
+  path: '/api/import/vehicles',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/fahrzeug/$slug': typeof FahrzeugSlugRoute
   '/newsletter/abmelden': typeof NewsletterAbmeldenRoute
   '/newsletter/bestaetigen': typeof NewsletterBestaetigenRoute
+  '/api/import/vehicles': typeof ApiImportVehiclesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/fahrzeug/$slug': typeof FahrzeugSlugRoute
   '/newsletter/abmelden': typeof NewsletterAbmeldenRoute
   '/newsletter/bestaetigen': typeof NewsletterBestaetigenRoute
+  '/api/import/vehicles': typeof ApiImportVehiclesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/fahrzeug/$slug': typeof FahrzeugSlugRoute
   '/newsletter/abmelden': typeof NewsletterAbmeldenRoute
   '/newsletter/bestaetigen': typeof NewsletterBestaetigenRoute
+  '/api/import/vehicles': typeof ApiImportVehiclesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
     | '/fahrzeug/$slug'
     | '/newsletter/abmelden'
     | '/newsletter/bestaetigen'
+    | '/api/import/vehicles'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/fahrzeug/$slug'
     | '/newsletter/abmelden'
     | '/newsletter/bestaetigen'
+    | '/api/import/vehicles'
   id:
     | '__root__'
     | '/'
@@ -157,6 +168,7 @@ export interface FileRouteTypes {
     | '/fahrzeug/$slug'
     | '/newsletter/abmelden'
     | '/newsletter/bestaetigen'
+    | '/api/import/vehicles'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -171,6 +183,7 @@ export interface RootRouteChildren {
   FahrzeugSlugRoute: typeof FahrzeugSlugRoute
   NewsletterAbmeldenRoute: typeof NewsletterAbmeldenRoute
   NewsletterBestaetigenRoute: typeof NewsletterBestaetigenRoute
+  ApiImportVehiclesRoute: typeof ApiImportVehiclesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -252,6 +265,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NewsletterBestaetigenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/import/vehicles': {
+      id: '/api/import/vehicles'
+      path: '/api/import/vehicles'
+      fullPath: '/api/import/vehicles'
+      preLoaderRoute: typeof ApiImportVehiclesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -267,6 +287,7 @@ const rootRouteChildren: RootRouteChildren = {
   FahrzeugSlugRoute: FahrzeugSlugRoute,
   NewsletterAbmeldenRoute: NewsletterAbmeldenRoute,
   NewsletterBestaetigenRoute: NewsletterBestaetigenRoute,
+  ApiImportVehiclesRoute: ApiImportVehiclesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
