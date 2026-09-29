@@ -171,7 +171,7 @@ export const getEmailQueueOverview = createServerFn({ method: "GET" })
 
     if (!overview.infraReady) {
       overview.notice =
-        "Die Lovable-E-Mail-Infrastruktur ist noch nicht aktiviert. Sobald die Sender-Domain eingerichtet ist, erscheinen hier alle ausgehenden Mails inkl. Statusverlauf aus email_send_log.";
+        "Die E-Mail-Infrastruktur ist noch nicht aktiviert. Sobald die Sender-Domain eingerichtet ist, erscheinen hier alle ausgehenden Mails inkl. Statusverlauf aus email_send_log.";
     }
 
     return overview;

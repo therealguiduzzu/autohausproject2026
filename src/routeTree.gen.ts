@@ -9,40 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as KarriereRouteImport } from './routes/karriere'
-import { Route as ImpressumRouteImport } from './routes/impressum'
-import { Route as DatenschutzRouteImport } from './routes/datenschutz'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as NewsletterBestaetigenRouteImport } from './routes/newsletter.bestaetigen'
-import { Route as NewsletterAbmeldenRouteImport } from './routes/newsletter.abmelden'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as DatenschutzRouteImport } from './routes/datenschutz'
+import { Route as ImpressumRouteImport } from './routes/impressum'
+import { Route as KarriereRouteImport } from './routes/karriere'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as FahrzeugSlugRouteImport } from './routes/fahrzeug.$slug'
+import { Route as NewsletterAbmeldenRouteImport } from './routes/newsletter.abmelden'
+import { Route as NewsletterBestaetigenRouteImport } from './routes/newsletter.bestaetigen'
 
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const KarriereRoute = KarriereRouteImport.update({
-  id: '/karriere',
-  path: '/karriere',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ImpressumRoute = ImpressumRouteImport.update({
-  id: '/impressum',
-  path: '/impressum',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DatenschutzRoute = DatenschutzRouteImport.update({
-  id: '/datenschutz',
-  path: '/datenschutz',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -50,14 +31,39 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NewsletterBestaetigenRoute = NewsletterBestaetigenRouteImport.update({
-  id: '/newsletter/bestaetigen',
-  path: '/newsletter/bestaetigen',
+const DatenschutzRoute = DatenschutzRouteImport.update({
+  id: '/datenschutz',
+  path: '/datenschutz',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImpressumRoute = ImpressumRouteImport.update({
+  id: '/impressum',
+  path: '/impressum',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KarriereRoute = KarriereRouteImport.update({
+  id: '/karriere',
+  path: '/karriere',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FahrzeugSlugRoute = FahrzeugSlugRouteImport.update({
+  id: '/fahrzeug/$slug',
+  path: '/fahrzeug/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NewsletterAbmeldenRoute = NewsletterAbmeldenRouteImport.update({
@@ -65,9 +71,9 @@ const NewsletterAbmeldenRoute = NewsletterAbmeldenRouteImport.update({
   path: '/newsletter/abmelden',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FahrzeugSlugRoute = FahrzeugSlugRouteImport.update({
-  id: '/fahrzeug/$slug',
-  path: '/fahrzeug/$slug',
+const NewsletterBestaetigenRoute = NewsletterBestaetigenRouteImport.update({
+  id: '/newsletter/bestaetigen',
+  path: '/newsletter/bestaetigen',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/datenschutz': typeof DatenschutzRoute
   '/impressum': typeof ImpressumRoute
   '/karriere': typeof KarriereRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/fahrzeug/$slug': typeof FahrzeugSlugRoute
   '/newsletter/abmelden': typeof NewsletterAbmeldenRoute
@@ -90,6 +97,7 @@ export interface FileRoutesByTo {
   '/datenschutz': typeof DatenschutzRoute
   '/impressum': typeof ImpressumRoute
   '/karriere': typeof KarriereRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/fahrzeug/$slug': typeof FahrzeugSlugRoute
   '/newsletter/abmelden': typeof NewsletterAbmeldenRoute
@@ -103,6 +111,7 @@ export interface FileRoutesById {
   '/datenschutz': typeof DatenschutzRoute
   '/impressum': typeof ImpressumRoute
   '/karriere': typeof KarriereRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/fahrzeug/$slug': typeof FahrzeugSlugRoute
   '/newsletter/abmelden': typeof NewsletterAbmeldenRoute
@@ -117,6 +126,7 @@ export interface FileRouteTypes {
     | '/datenschutz'
     | '/impressum'
     | '/karriere'
+    | '/robots.txt'
     | '/sitemap.xml'
     | '/fahrzeug/$slug'
     | '/newsletter/abmelden'
@@ -129,6 +139,7 @@ export interface FileRouteTypes {
     | '/datenschutz'
     | '/impressum'
     | '/karriere'
+    | '/robots.txt'
     | '/sitemap.xml'
     | '/fahrzeug/$slug'
     | '/newsletter/abmelden'
@@ -141,6 +152,7 @@ export interface FileRouteTypes {
     | '/datenschutz'
     | '/impressum'
     | '/karriere'
+    | '/robots.txt'
     | '/sitemap.xml'
     | '/fahrzeug/$slug'
     | '/newsletter/abmelden'
@@ -154,6 +166,7 @@ export interface RootRouteChildren {
   DatenschutzRoute: typeof DatenschutzRoute
   ImpressumRoute: typeof ImpressumRoute
   KarriereRoute: typeof KarriereRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   FahrzeugSlugRoute: typeof FahrzeugSlugRoute
   NewsletterAbmeldenRoute: typeof NewsletterAbmeldenRoute
@@ -162,39 +175,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/karriere': {
-      id: '/karriere'
-      path: '/karriere'
-      fullPath: '/karriere'
-      preLoaderRoute: typeof KarriereRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/impressum': {
-      id: '/impressum'
-      path: '/impressum'
-      fullPath: '/impressum'
-      preLoaderRoute: typeof ImpressumRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/datenschutz': {
-      id: '/datenschutz'
-      path: '/datenschutz'
-      fullPath: '/datenschutz'
-      preLoaderRoute: typeof DatenschutzRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -204,18 +189,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/newsletter/bestaetigen': {
-      id: '/newsletter/bestaetigen'
-      path: '/newsletter/bestaetigen'
-      fullPath: '/newsletter/bestaetigen'
-      preLoaderRoute: typeof NewsletterBestaetigenRouteImport
+    '/datenschutz': {
+      id: '/datenschutz'
+      path: '/datenschutz'
+      fullPath: '/datenschutz'
+      preLoaderRoute: typeof DatenschutzRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/impressum': {
+      id: '/impressum'
+      path: '/impressum'
+      fullPath: '/impressum'
+      preLoaderRoute: typeof ImpressumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/karriere': {
+      id: '/karriere'
+      path: '/karriere'
+      fullPath: '/karriere'
+      preLoaderRoute: typeof KarriereRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fahrzeug/$slug': {
+      id: '/fahrzeug/$slug'
+      path: '/fahrzeug/$slug'
+      fullPath: '/fahrzeug/$slug'
+      preLoaderRoute: typeof FahrzeugSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/newsletter/abmelden': {
@@ -225,11 +245,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NewsletterAbmeldenRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/fahrzeug/$slug': {
-      id: '/fahrzeug/$slug'
-      path: '/fahrzeug/$slug'
-      fullPath: '/fahrzeug/$slug'
-      preLoaderRoute: typeof FahrzeugSlugRouteImport
+    '/newsletter/bestaetigen': {
+      id: '/newsletter/bestaetigen'
+      path: '/newsletter/bestaetigen'
+      fullPath: '/newsletter/bestaetigen'
+      preLoaderRoute: typeof NewsletterBestaetigenRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -242,6 +262,7 @@ const rootRouteChildren: RootRouteChildren = {
   DatenschutzRoute: DatenschutzRoute,
   ImpressumRoute: ImpressumRoute,
   KarriereRoute: KarriereRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   FahrzeugSlugRoute: FahrzeugSlugRoute,
   NewsletterAbmeldenRoute: NewsletterAbmeldenRoute,

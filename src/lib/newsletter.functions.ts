@@ -35,7 +35,7 @@ function siteOrigin(headers: Headers): string {
   const forwardedHost = headers.get("x-forwarded-host") ?? headers.get("host");
   const proto = headers.get("x-forwarded-proto") ?? "https";
   if (forwardedHost) return `${proto}://${forwardedHost}`;
-  return "https://auto-semmel.lovable.app";
+  return "http://localhost:3000";
 }
 
 /**

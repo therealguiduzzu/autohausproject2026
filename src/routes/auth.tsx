@@ -2,7 +2,6 @@ import { createFileRoute, useRouter, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { Lock, ArrowLeft, Mail, LogIn } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/auth")({
@@ -46,16 +45,15 @@ function AuthPage() {
   async function onGoogle() {
     setBusy(true);
     setErr(null);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/admin` },
     });
-    if (result.error) {
+    if (error) {
       setBusy(false);
-      setErr(result.error instanceof Error ? result.error.message : "Login fehlgeschlagen.");
-      return;
+      setErr(error.message || "Login fehlgeschlagen.");
     }
-    if (result.redirected) return;
-    router.navigate({ to: "/admin" });
+    // Bei Erfolg leitet Supabase zum Google-Login weiter.
   }
 
   return (

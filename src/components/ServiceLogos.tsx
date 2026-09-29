@@ -1,29 +1,48 @@
 /**
- * Official "FIAT SERVICE" and "ALFA ROMEO SERVICE" partner badges,
- * provided by the dealership and served 1:1 via Lovable Assets CDN.
+ * Partner-Logos (FIAT SERVICE, ALFA ROMEO SERVICE, Stellantis).
  *
- * StellantisLogo now uses the official brand asset for maximum trust
- * and recognition across the site.
+ * Die Bilddateien liegen NICHT im Repository, weil sie Marken des Herstellers sind
+ * und nur mit Genehmigung/Händlervertrag verwendet werden dürfen. Sie werden aus
+ * `public/partner/` geladen:
+ *   public/partner/fiat-service.png
+ *   public/partner/alfa-romeo-service.png
+ *   public/partner/stellantis-logo.jpg
+ * Fehlt eine Datei, wird ein Text-Badge angezeigt.
  */
-import fiatServiceAsset from "@/assets/fiat-service.png.asset.json";
-import alfaRomeoServiceAsset from "@/assets/alfa-romeo-service.png.asset.json";
-import stellantisLogoAsset from "@/assets/stellantis-logo.jpg.asset.json";
+import { useState } from "react";
 
 type LogoProps = {
   className?: string;
   title?: string;
 };
 
-export function FiatServiceLogo({ className, title = "FIAT Service Partner" }: LogoProps) {
+function PartnerLogo({ src, title, className }: LogoProps & { src: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    return (
+      <span
+        role="img"
+        aria-label={title}
+        className={`inline-flex items-center justify-center text-xs font-semibold uppercase tracking-wider ${className ?? ""}`}
+      >
+        {title}
+      </span>
+    );
+  }
   return (
     <img
-      src={fiatServiceAsset.url}
+      src={src}
       alt={title}
       className={className}
       loading="lazy"
       decoding="async"
+      onError={() => setFailed(true)}
     />
   );
+}
+
+export function FiatServiceLogo({ className, title = "FIAT Service Partner" }: LogoProps) {
+  return <PartnerLogo src="/partner/fiat-service.png" title={title} className={className} />;
 }
 
 export function AlfaRomeoServiceLogo({
@@ -31,13 +50,7 @@ export function AlfaRomeoServiceLogo({
   title = "Alfa Romeo Service Partner",
 }: LogoProps) {
   return (
-    <img
-      src={alfaRomeoServiceAsset.url}
-      alt={title}
-      className={className}
-      loading="lazy"
-      decoding="async"
-    />
+    <PartnerLogo src="/partner/alfa-romeo-service.png" title={title} className={className} />
   );
 }
 
@@ -45,13 +58,5 @@ export function StellantisLogo({
   className,
   title = "Offizieller Stellantis-Partner",
 }: LogoProps) {
-  return (
-    <img
-      src={stellantisLogoAsset.url}
-      alt={title}
-      className={className}
-      loading="lazy"
-      decoding="async"
-    />
-  );
+  return <PartnerLogo src="/partner/stellantis-logo.jpg" title={title} className={className} />;
 }

@@ -1252,7 +1252,7 @@ function ApiStatus() {
       {/* Secondary integrations */}
       <div className="grid gap-4 lg:grid-cols-3">
         <StatusCard
-          title="Lovable Cloud Datenbank"
+          title="Datenbank"
           subtitle="Vehicle storage"
           icon={<Database className="h-5 w-5" />}
           status="ready"
@@ -2462,7 +2462,7 @@ function NewsletterManager() {
           <div className="space-y-2 text-sm text-muted-foreground">
             <p className="font-display text-sm font-semibold text-foreground">So funktioniert Ihr Newsletter-Center</p>
             <p>
-              Alle Anmeldungen vom Landing-Page-Formular werden in Ihrer <span className="font-semibold text-foreground">Lovable Cloud Datenbank</span> (Tabelle <code className="rounded bg-muted/60 px-1 py-0.5 text-[11px]">newsletter_subscribers</code>) gespeichert — DSGVO-konform mit Double-Opt-In, IP-Logging und Einwilligungszeitstempel.
+              Alle Anmeldungen vom Landing-Page-Formular werden in Ihrer <span className="font-semibold text-foreground">Datenbank</span> (Tabelle <code className="rounded bg-muted/60 px-1 py-0.5 text-[11px]">newsletter_subscribers</code>) gespeichert — DSGVO-konform mit Double-Opt-In, IP-Logging und Einwilligungszeitstempel.
             </p>
             <p>
               Beim Klick auf <span className="font-semibold text-foreground">„Kampagne starten"</span> liest das System nur bestätigte Abonnenten aus Ihrer Datenbank, rendert die Vorlage individuell pro Empfänger und versendet die E-Mails über den verschlüsselten Versand-Dienst (Lovable Emails / Resend). Bounces, Abmeldungen und Öffnungsraten fließen automatisch in dieses Dashboard zurück.

@@ -4,7 +4,7 @@
  */
 const rawSiteUrl =
   (import.meta.env?.VITE_SITE_URL as string | undefined) ??
-  "https://la-passione-digital.lovable.app";
+  "http://localhost:3000";
 
 export const SITE_URL = rawSiteUrl.replace(/\/+$/, "");
 
