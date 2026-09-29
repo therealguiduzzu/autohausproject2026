@@ -29,6 +29,19 @@ npm run dev            # http://localhost:3000
 
 Im Admin-Bereich unter *Fahrzeuge → Import* CSV/JSON hochladen, oder automatisiert per `POST /api/import/vehicles` (Header `Authorization: Bearer $IMPORT_API_TOKEN`). Details: [docs/fahrzeug-import.md](docs/fahrzeug-import.md).
 
+## Funktionen im Admin-Bereich (`/admin`)
+
+| Bereich | Beschreibung |
+| --- | --- |
+| Fahrzeuge / Import | Bestand pflegen, CSV/JSON-Import, API-Import |
+| Anfragen | Leads (Probefahrt, Ankauf, Kontakt) mit Status |
+| Werkstatt | Wochenkalender; Kunden buchen online freie Slots (`src/lib/workshop.ts`: Slots, Kapazität), E-Mails bei Buchung/Änderung, abonnierbarer iCal-Feed |
+| Kundenbewertungen | Echte Bewertungen erfassen und veröffentlichen (Abschnitt bleibt ohne Bewertungen ausgeblendet) |
+| Newsletter | Double-Opt-In, Versand an bestätigte Abonnenten mit Abmeldelink (kein Tracking) |
+| Team & Rollen | Einladen, `admin`/`staff` vergeben (nur Administratoren) |
+
+E-Mails laufen über die Queue `transactional_emails` (pgmq). Ohne eingerichtete Absender-Domain bleiben Mails aus; Daten gehen nie verloren.
+
 ## Partner-Logos
 
 Marken-Logos liegen nicht im Repo. Dateien nach `public/partner/` legen (siehe dortige README).

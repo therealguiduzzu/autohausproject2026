@@ -45,6 +45,8 @@ import { toast } from "sonner";
 import VehicleImportPanel from "@/components/admin/VehicleImportPanel";
 import WerkstattPlaner from "@/components/admin/WerkstattPlaner";
 import ReviewsManager from "@/components/admin/ReviewsManager";
+import NewsletterManager from "@/components/admin/NewsletterManager";
+import TeamManager from "@/components/admin/TeamManager";
 import {
   MODELS_BY_BRAND,
   type Brand,
@@ -76,7 +78,7 @@ export const Route = createFileRoute("/admin")({
 
 function AdminPage() {
   const { user, loading } = useAuth();
-  const { isStaff } = useMyRoles(user);
+  const { isStaff, isAdmin } = useMyRoles(user);
   const router = useRouter();
 
   async function handleLogout() {
@@ -104,7 +106,12 @@ function AdminPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Dashboard onLogout={handleLogout} userEmail={user.email ?? ""} />
+      <Dashboard
+        onLogout={handleLogout}
+        userEmail={user.email ?? ""}
+        userId={user.id}
+        isAdmin={isAdmin}
+      />
     </div>
   );
 }
@@ -216,7 +223,16 @@ function NoAccessScreen({ email, onLogout }: { email: string; onLogout: () => vo
 /* ---------------- Dashboard ---------------- */
 
 type Tab =
-  "list" | "new" | "leads" | "api" | "calendar" | "reviews" | "newsletter" | "emailq" | "careers";
+  | "list"
+  | "new"
+  | "leads"
+  | "api"
+  | "calendar"
+  | "reviews"
+  | "newsletter"
+  | "emailq"
+  | "careers"
+  | "team";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -229,7 +245,17 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function Dashboard({ onLogout, userEmail }: { onLogout: () => void; userEmail: string }) {
+function Dashboard({
+  onLogout,
+  userEmail,
+  userId,
+  isAdmin,
+}: {
+  onLogout: () => void;
+  userEmail: string;
+  userId: string;
+  isAdmin: boolean;
+}) {
   const [tab, setTab] = useState<Tab>("list");
   const vehicles = useVehicles();
   const leads = useLeads();
@@ -333,8 +359,17 @@ function Dashboard({ onLogout, userEmail }: { onLogout: () => void; userEmail: s
             active={tab === "api"}
             onClick={() => setTab("api")}
           >
-            Schnittstellen-Status
+            Import & Schnittstellen
           </NavBtn>
+          {isAdmin && (
+            <NavBtn
+              icon={<ShieldCheck className="h-4 w-4" />}
+              active={tab === "team"}
+              onClick={() => setTab("team")}
+            >
+              Team & Rollen
+            </NavBtn>
+          )}
         </nav>
 
         <div className="hidden border-t border-border/60 p-6 lg:block">
@@ -362,17 +397,19 @@ function Dashboard({ onLogout, userEmail }: { onLogout: () => void; userEmail: s
               {tab === "emailq" && "Zustellung & Monitoring"}
               {tab === "careers" && "Personal & Bewerbungen"}
               {tab === "api" && "Integrationen"}
+              {tab === "team" && "Zugänge & Berechtigungen"}
             </p>
             <h1 className="font-display text-3xl font-semibold">
               {tab === "list" && "Fahrzeugliste"}
               {tab === "new" && "Neues Fahrzeug anlegen"}
               {tab === "leads" && "Posteingang / Leads"}
               {tab === "calendar" && "Werkstatt-Kalender"}
-              {tab === "reviews" && "Google Bewertungen"}
+              {tab === "reviews" && "Kundenbewertungen"}
               {tab === "newsletter" && "Newsletter & Marketing"}
               {tab === "emailq" && "Transaktionale E-Mail-Queue"}
               {tab === "careers" && "Stellen & Bewerber"}
-              {tab === "api" && "Schnittstellen-Status"}
+              {tab === "api" && "Import & Schnittstellen"}
+              {tab === "team" && "Team & Rollen"}
             </h1>
           </div>
           <div className="hidden items-center gap-2 rounded-full border border-border/60 bg-card/60 px-3 py-1.5 text-xs text-muted-foreground md:flex">
@@ -391,6 +428,7 @@ function Dashboard({ onLogout, userEmail }: { onLogout: () => void; userEmail: s
         {tab === "emailq" && <EmailQueueView />}
         {tab === "careers" && <CareersManager />}
         {tab === "api" && <ApiStatus />}
+        {tab === "team" && isAdmin && <TeamManager currentUserId={userId} />}
 
         <footer className="mt-12 border-t border-border/60 pt-5 text-[11px] text-muted-foreground">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
@@ -1564,188 +1602,6 @@ function KpiCard({
       </div>
       <p className="font-display text-2xl font-semibold leading-tight">{value}</p>
       <p className="mt-1 text-xs text-muted-foreground">{sub}</p>
-    </div>
-  );
-}
-
-/* ---------------- Newsletter & Marketing ---------------- */
-
-function NewsletterManager() {
-  const templates = [
-    {
-      id: "reifen",
-      title: "Reifenwechsel-Saison Einladung",
-      subject: "Jetzt Reifenwechsel-Termin sichern — Auto Semmel Langenselbold",
-      preview:
-        "Liebe Kundinnen und Kunden, die Saison startet — sichern Sie sich Ihren Wunschtermin für den Reifenwechsel inkl. kostenloser Einlagerung.",
-    },
-    {
-      id: "modell",
-      title: "Neues Modell eingetroffen",
-      subject: "Neu in unserem Showroom: Alfa Romeo Tonale & Junior",
-      preview:
-        "Erleben Sie unsere neuesten italienischen Modelle live in Langenselbold — Probefahrt jetzt unverbindlich anfragen.",
-    },
-    {
-      id: "aktion",
-      title: "Gebrauchtwagen-Aktion",
-      subject: "Hand-Selektierte Gebrauchtwagen — diese Woche mit Bonus",
-      preview:
-        "Unsere meisterlich geprüften Gebrauchtwagen — diese Woche inkl. 12 Monaten Garantie & freier Inspektion.",
-    },
-  ];
-  const [tplId, setTplId] = useState(templates[0].id);
-  const [sending, setSending] = useState(false);
-  const tpl = templates.find((t) => t.id === tplId)!;
-
-  const onSend = () => {
-    setSending(true);
-    setTimeout(() => {
-      setSending(false);
-      toast.success("Kampagne in Warteschlange", {
-        description: `„${tpl.title}" wird an 412 Abonnenten versendet.`,
-      });
-    }, 900);
-  };
-
-  return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Metrics */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-border/60 bg-card/60 p-5 shadow-sm">
-          <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
-            <Mail className="h-3.5 w-3.5 text-primary" /> Abonnenten gesamt
-          </div>
-          <p className="mt-2 font-display text-3xl font-semibold text-foreground">412</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            <span className="font-semibold text-emerald-700">+18</span> in den letzten 30 Tagen ·
-            Double-Opt-In bestätigt
-          </p>
-        </div>
-        <div className="rounded-2xl border border-border/60 bg-card/60 p-5 shadow-sm">
-          <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
-            <TrendingUp className="h-3.5 w-3.5 text-primary" /> Letzte Kampagne
-          </div>
-          <p className="mt-2 font-display text-3xl font-semibold text-foreground">Vor 3 Wochen</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Öffnungsrate <span className="font-semibold text-foreground">64%</span> · Klickrate 12%
-          </p>
-        </div>
-      </div>
-
-      {/* Schnell-Kampagne */}
-      <div className="rounded-2xl border border-border/60 bg-card/60 p-6 shadow-sm">
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <h3 className="font-display text-lg font-semibold">Schnell-Kampagne starten</h3>
-            <p className="text-xs text-muted-foreground">
-              Wählen Sie eine Vorlage — versendet an alle bestätigten Abonnenten.
-            </p>
-          </div>
-          <span className="rounded-full border border-border/60 bg-background/60 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-            Vorlagen-Modus
-          </span>
-        </div>
-
-        <div className="grid gap-5 md:grid-cols-2">
-          <div className="space-y-3">
-            <Field label="Vorlage">
-              <select
-                className="input w-full"
-                value={tplId}
-                onChange={(e) => setTplId(e.target.value)}
-              >
-                {templates.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.title}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Betreff">
-              <input className="input w-full" defaultValue={tpl.subject} key={tpl.subject} />
-            </Field>
-            <Field label="Empfängergruppe">
-              <select className="input w-full">
-                <option>Alle Abonnenten (412)</option>
-                <option>Region Main-Kinzig-Kreis (287)</option>
-                <option>Alfa Romeo Interessenten (134)</option>
-                <option>Fiat Professional / Gewerbe (61)</option>
-              </select>
-            </Field>
-            <button
-              onClick={onSend}
-              disabled={sending}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-60"
-            >
-              {sending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4" />
-              )}
-              {sending ? "Wird versendet..." : "Kampagne starten"}
-            </button>
-          </div>
-
-          <div className="rounded-xl border border-border/60 bg-background/60 p-5">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Vorschau
-            </p>
-            <p className="mt-2 font-display text-base font-semibold text-foreground">
-              {tpl.subject}
-            </p>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{tpl.preview}</p>
-            <div className="mt-4 inline-flex rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground">
-              Jetzt Termin sichern →
-            </div>
-            <p className="mt-4 border-t border-border/60 pt-3 text-[10px] text-muted-foreground">
-              Auto Semmel GmbH & Co. Siegfried Polenz KG · Gelnhäuser Straße 40, 63505 Langenselbold
-              · <span className="underline">Abmelden</span>
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Guide */}
-      <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5">
-        <div className="flex items-start gap-3">
-          <div className="grid h-9 w-9 flex-shrink-0 place-items-center rounded-lg bg-primary/15 text-primary">
-            <Database className="h-4 w-4" />
-          </div>
-          <div className="space-y-2 text-sm text-muted-foreground">
-            <p className="font-display text-sm font-semibold text-foreground">
-              So funktioniert Ihr Newsletter-Center
-            </p>
-            <p>
-              Alle Anmeldungen vom Landing-Page-Formular werden in Ihrer{" "}
-              <span className="font-semibold text-foreground">Datenbank</span> (Tabelle{" "}
-              <code className="rounded bg-muted/60 px-1 py-0.5 text-[11px]">
-                newsletter_subscribers
-              </code>
-              ) gespeichert — DSGVO-konform mit Double-Opt-In, IP-Logging und
-              Einwilligungszeitstempel.
-            </p>
-            <p>
-              Beim Klick auf{" "}
-              <span className="font-semibold text-foreground">„Kampagne starten"</span> liest das
-              System nur bestätigte Abonnenten aus Ihrer Datenbank, rendert die Vorlage individuell
-              pro Empfänger und versendet die E-Mails über den verschlüsselten Versand-Dienst
-              (E-Mail-Queue). Bounces, Abmeldungen und Öffnungsraten fließen automatisch in dieses
-              Dashboard zurück.
-            </p>
-            <p className="text-xs">
-              <span className="font-semibold text-foreground">
-                Nächster Schritt für den Live-Betrieb:
-              </span>{" "}
-              Versand-Domain (z.B.{" "}
-              <code className="rounded bg-muted/60 px-1 py-0.5 text-[11px]">
-                news.auto-semmel.de
-              </code>
-              ) verifizieren — danach gehen Kampagnen mit einem Klick raus.
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
