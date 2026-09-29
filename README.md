@@ -42,6 +42,13 @@ Im Admin-Bereich unter *Fahrzeuge → Import* CSV/JSON hochladen, oder automatis
 
 E-Mails laufen über die Queue `transactional_emails` (pgmq). Ohne eingerichtete Absender-Domain bleiben Mails aus; Daten gehen nie verloren.
 
+## Demo-/Konzeptmodus (Vorführung beim Kunden)
+
+1. Build mit `VITE_DEMO_MODE=1`: `noindex`, `robots.txt` sperrt alles, leere Sitemap, Banner „Konzeptentwurf – nicht öffentlich“.
+2. Beispieldaten einspielen: `supabase/seed-demo.sql` (9 Fahrzeuge, 3 Anfragen, 4 Termine; alle erfunden, Platzhalterbilder). Entfernen: `supabase/remove-demo.sql`.
+3. Zusätzlich Zugriff beschränken (Passwortschutz des Hosters oder nicht verlinkte URL), solange kein Vertrag besteht.
+4. Vor dem Livegang: Demo-Modus aus (`VITE_DEMO_MODE=0`), `remove-demo.sql` ausführen.
+
 ## Partner-Logos
 
 Marken-Logos liegen nicht im Repo. Dateien nach `public/partner/` legen (siehe dortige README).

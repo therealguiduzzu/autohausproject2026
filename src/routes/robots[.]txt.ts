@@ -1,11 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
-import { SITE_URL } from "@/lib/site";
+import { SITE_URL, DEMO_MODE } from "@/lib/site";
 
 export const Route = createFileRoute("/robots.txt")({
   server: {
     handlers: {
       GET: async () => {
+        if (DEMO_MODE) {
+          return new Response("User-agent: *\nDisallow: /\n", {
+            headers: { "Content-Type": "text/plain; charset=utf-8" },
+          });
+        }
         const body = [
           "User-agent: *",
           "Allow: /",

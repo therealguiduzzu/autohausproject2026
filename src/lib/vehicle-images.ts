@@ -4,6 +4,9 @@ import carFiat500 from "@/assets/car-fiat500.jpg";
 import carAbarth from "@/assets/car-abarth.jpg";
 import carDucato from "@/assets/car-ducato.jpg";
 import heroGiulia from "@/assets/hero-giulia.jpg";
+import carGiulia from "@/assets/car-giulia.jpg";
+import carPanda from "@/assets/car-panda.jpg";
+import hero500e from "@/assets/hero-500e.jpg";
 
 /**
  * Maps `image_keys` stored in the DB to the bundled assets shipped with the
@@ -16,6 +19,9 @@ export const BUNDLED_IMAGES: Record<string, string> = {
   "car-abarth": carAbarth,
   "car-ducato": carDucato,
   "hero-giulia": heroGiulia,
+  "car-giulia": carGiulia,
+  "car-panda": carPanda,
+  "hero-500e": hero500e,
 };
 
 export function resolveVehicleImages(image_urls: string[], image_keys: string[]): string[] {

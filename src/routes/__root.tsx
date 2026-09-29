@@ -13,7 +13,8 @@ import appCss from "../styles.css?url";
 import CookieBanner from "../components/CookieBanner";
 import WhatsAppButton from "../components/WhatsAppButton";
 import { Toaster } from "@/components/ui/sonner";
-import { SITE_URL } from "@/lib/site";
+import { SITE_URL, DEMO_MODE } from "@/lib/site";
+import DemoBanner from "../components/DemoBanner";
 
 function NotFoundComponent() {
   return (
@@ -85,6 +86,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { name: "author", content: "Auto Semmel GmbH & Co. Siegfried Polenz KG" },
       { name: "theme-color", content: "#B90E0A" },
+      ...(DEMO_MODE ? [{ name: "robots", content: "noindex, nofollow, noarchive" }] : []),
       { property: "og:site_name", content: "Auto Semmel" },
       { property: "og:type", content: "website" },
       { property: "og:locale", content: "de_DE" },
@@ -195,6 +197,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <DemoBanner />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <WhatsAppButton />
