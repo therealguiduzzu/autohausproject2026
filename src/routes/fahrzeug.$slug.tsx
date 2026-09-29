@@ -28,6 +28,8 @@ import { leadsStore } from "@/lib/leads-store";
 import { SITE_URL } from "@/lib/site";
 import { toast } from "sonner";
 import HoneypotField from "@/components/HoneypotField";
+import OpeningStatus from "@/components/OpeningStatus";
+import { useVehicles } from "@/lib/vehicles-store";
 import type { Vehicle, Condition, VehicleStatus } from "@/lib/vehicles";
 
 const SITE = SITE_URL;
@@ -489,7 +491,26 @@ function VehicleDetailPage() {
               </p>
 
               {/* Interactive financing slider */}
-              <FinancingSlider price={v.discountPrice ?? v.price} />
+              {/* Direkte Handlungsaufforderung statt erfundener Ratenrechnung */}
+              <div className="mt-5 grid grid-cols-2 gap-2">
+                <a
+                  href="#probefahrt-form"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-3 text-sm font-semibold text-primary-foreground transition hover:brightness-110"
+                >
+                  <Car className="h-4 w-4" /> Probefahrt anfragen
+                </a>
+                <a
+                  href="tel:+4961842633"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border/70 px-3 py-3 text-sm font-semibold transition hover:border-primary hover:text-primary"
+                >
+                  <PhoneCall className="h-4 w-4" /> Anrufen
+                </a>
+              </div>
+              <p className="mt-3 flex items-start gap-2 text-xs text-muted-foreground">
+                <Euro className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+                Finanzierung oder Inzahlungnahme? Wir erstellen Ihnen gern ein individuelles,
+                unverbindliches Angebot.
+              </p>
 
               <TestDriveForm vehicle={v} />
             </div>
@@ -497,56 +518,30 @@ function VehicleDetailPage() {
             {/* Pkw-EnVKV / WLTP energy label */}
             <EnergyLabel vehicle={v} />
 
-            {/* Persönlicher Ansprechpartner */}
+            {/* Ansprechpartner */}
             <div className="rounded-2xl border border-border/70 bg-surface p-6 shadow-sm">
               <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                Ihr persönlicher Ansprechpartner in Langenselbold
-              </div>
-              <div className="mt-4 flex items-center gap-4">
-                <div
-                  className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-full border border-border/70 bg-gradient-to-br from-primary/20 to-primary/5 text-primary"
-                  aria-hidden
-                >
-                  <UserRound className="h-8 w-8" />
-                </div>
-                <div className="min-w-0">
-                  <div className="font-display text-lg font-semibold leading-tight">
-                    Siegfried Polenz
-                  </div>
-                  <div className="text-xs text-muted-foreground">Verkaufsleitung · Auto Semmel</div>
-                </div>
+                Ihr Verkaufsteam in Langenselbold
               </div>
               <div className="mt-4 space-y-2 text-sm">
                 <a
-                  href="tel:+496184263356"
+                  href="tel:+4961842633"
                   className="flex items-center gap-2 text-foreground transition hover:text-primary"
                 >
-                  <Phone className="h-4 w-4 text-primary" /> 06184 / 12 34-56
+                  <Phone className="h-4 w-4 text-primary" /> 06184 / 2633
                 </a>
                 <a
-                  href="mailto:s.polenz@auto-semmel.de"
+                  href="mailto:info@auto-semmel.de"
                   className="flex items-center gap-2 break-all text-foreground transition hover:text-primary"
                 >
-                  <Mail className="h-4 w-4 text-primary" /> s.polenz@auto-semmel.de
+                  <Mail className="h-4 w-4 text-primary" /> info@auto-semmel.de
                 </a>
-              </div>
-              <div className="mt-5 grid grid-cols-2 gap-2">
-                <a
-                  href="#probefahrt-form"
-                  className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2.5 text-xs font-semibold text-primary-foreground transition hover:brightness-110"
-                >
-                  <Car className="h-3.5 w-3.5" /> Probefahrt
-                </a>
-                <a
-                  href="tel:+496184263356"
-                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border/70 px-3 py-2.5 text-xs font-semibold transition hover:border-primary hover:text-primary"
-                >
-                  <PhoneCall className="h-3.5 w-3.5" /> Rückruf
-                </a>
+                <OpeningStatus className="text-xs text-muted-foreground" />
               </div>
             </div>
           </aside>
         </div>
+        <SimilarVehicles current={v} />
       </main>
     </div>
   );
@@ -661,86 +656,6 @@ function TestDriveForm({ vehicle }: { vehicle: Vehicle }) {
 
 /* ---------------- Interactive Financing Slider ---------------- */
 
-function calcMonthly(price: number, deposit: number): number {
-  // Simple, transparent calc tuned to spec:
-  //   price 39 000 €, deposit 0       → 399 €
-  //   price 39 000 €, deposit 10 000  → 289 €
-  // base ≈ price/100 + 9, jede 1 000 € Anzahlung ≈ -11 €/Monat
-  const base = (price - deposit) / 100 + 9;
-  const bonus = deposit / 1000;
-  return Math.max(49, Math.round(base - bonus));
-}
-
-function FinancingSlider({ price }: { price: number }) {
-  const MAX = 15_000;
-  const [deposit, setDeposit] = useState(0);
-  const monthly = calcMonthly(price, deposit);
-
-  return (
-    <div className="mt-5 rounded-xl border border-primary/20 bg-primary/5 p-5">
-      <div className="flex items-start gap-3">
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
-          <Euro className="h-4 w-4" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-            Finanzierungsrechner
-          </div>
-          <div className="mt-0.5 flex items-baseline gap-1.5">
-            <span className="text-xs text-muted-foreground">ab</span>
-            <span
-              key={monthly}
-              className="font-display text-3xl font-bold text-primary tabular-nums animate-fade-in"
-            >
-              {monthly}
-            </span>
-            <span className="text-sm font-semibold text-primary">€ / Monat</span>
-          </div>
-          <div className="mt-0.5 text-[11px] text-muted-foreground">
-            Beispielrate · 48 Monate · 10.000 km / Jahr
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-5">
-        <label className="flex items-center justify-between text-xs font-semibold text-foreground">
-          <span>Anzahlung</span>
-          <span className="tabular-nums text-primary">{deposit.toLocaleString("de-DE")} €</span>
-        </label>
-        <input
-          type="range"
-          min={0}
-          max={MAX}
-          step={500}
-          value={deposit}
-          onChange={(e) => setDeposit(Number(e.target.value))}
-          aria-label="Anzahlung in Euro"
-          className="mt-2 h-2 w-full cursor-pointer appearance-none rounded-full bg-border accent-[hsl(var(--primary))] transition-all"
-          style={{
-            background: `linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) ${
-              (deposit / MAX) * 100
-            }%, hsl(var(--border)) ${(deposit / MAX) * 100}%, hsl(var(--border)) 100%)`,
-          }}
-        />
-        <div className="mt-1.5 flex justify-between text-[10px] uppercase tracking-wider text-muted-foreground">
-          <span>0 €</span>
-          <span>15.000 €</span>
-        </div>
-      </div>
-
-      <button
-        type="button"
-        className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
-      >
-        <Send className="h-3.5 w-3.5" /> Finanzierungsangebot anfordern
-      </button>
-      <p className="mt-2 text-center text-[10px] leading-relaxed text-muted-foreground">
-        Unverbindliches Rechenbeispiel. Bonität vorausgesetzt. Repräsentatives Beispiel auf Anfrage.
-      </p>
-    </div>
-  );
-}
-
 /* ---------------- Pkw-EnVKV Energy Label (WLTP) ---------------- */
 
 const CO2_CLASSES = ["A", "B", "C", "D", "E", "F", "G"] as const;
@@ -845,5 +760,67 @@ function EnergyLabel({ vehicle: v }: { vehicle: Vehicle }) {
         geltenden Fassung.
       </p>
     </div>
+  );
+}
+
+/** 3 ähnliche Fahrzeuge: gleiche Marke bevorzugt, sonst nach Preisnähe. */
+function SimilarVehicles({ current }: { current: Vehicle }) {
+  const all = useVehicles();
+  const similar = all
+    .filter((x) => x.id !== current.id && x.status !== "Verkauft")
+    .map((x) => ({
+      x,
+      score:
+        Math.abs(x.price - current.price) / Math.max(current.price, 1) +
+        (x.brand === current.brand ? 0 : 0.5) +
+        (x.condition === current.condition ? 0 : 0.2),
+    }))
+    .sort((a, b) => a.score - b.score)
+    .slice(0, 3)
+    .map((r) => r.x);
+  if (similar.length === 0) return null;
+
+  return (
+    <section className="mx-auto max-w-7xl px-6 pb-16" aria-labelledby="similar-heading">
+      <h2 id="similar-heading" className="font-display text-2xl font-semibold">
+        Das könnte Sie auch interessieren
+      </h2>
+      <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {similar.map((x) => (
+          <Link
+            key={x.id}
+            to="/fahrzeug/$slug"
+            params={{ slug: x.slug ?? x.id }}
+            className="group overflow-hidden rounded-2xl border border-border/70 bg-surface transition hover:-translate-y-0.5 hover:shadow-lg"
+          >
+            <div className="aspect-[16/10] overflow-hidden bg-background">
+              <img
+                src={x.images[0]}
+                alt={`${x.brand} ${x.model} ${x.version}`}
+                loading="lazy"
+                decoding="async"
+                width={640}
+                height={400}
+                className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+              />
+            </div>
+            <div className="p-4">
+              <div className="text-sm font-semibold">
+                {x.brand} {x.model}
+              </div>
+              <div className="truncate text-xs text-muted-foreground">{x.version}</div>
+              <div className="mt-2 flex items-baseline justify-between">
+                <span className="font-display text-lg font-bold text-primary">
+                  {(x.discountPrice ?? x.price).toLocaleString("de-DE")} €
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {x.mileage.toLocaleString("de-DE")} km
+                </span>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }
