@@ -157,6 +157,123 @@ export type Database = {
         };
         Relationships: [];
       };
+      newsletter_campaigns: {
+        Row: {
+          id: string;
+          template_id: string;
+          subject: string;
+          recipient_count: number;
+          queued_count: number;
+          sent_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          template_id: string;
+          subject: string;
+          recipient_count?: number;
+          queued_count?: number;
+          sent_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          template_id?: string;
+          subject?: string;
+          recipient_count?: number;
+          queued_count?: number;
+          sent_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      reviews: {
+        Row: {
+          id: string;
+          author: string;
+          rating: number;
+          text: string;
+          source: string;
+          source_url: string | null;
+          review_date: string | null;
+          published: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          author: string;
+          rating: number;
+          text: string;
+          source?: string;
+          source_url?: string | null;
+          review_date?: string | null;
+          published?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          author?: string;
+          rating?: number;
+          text?: string;
+          source?: string;
+          source_url?: string | null;
+          review_date?: string | null;
+          published?: boolean;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      workshop_appointments: {
+        Row: {
+          id: string;
+          slot_date: string;
+          slot_time: string;
+          service: string;
+          category: string;
+          vehicle: string;
+          customer_name: string;
+          customer_email: string | null;
+          customer_phone: string | null;
+          status: string;
+          source: string;
+          consent_given: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slot_date: string;
+          slot_time: string;
+          service: string;
+          category?: string;
+          vehicle?: string;
+          customer_name: string;
+          customer_email?: string | null;
+          customer_phone?: string | null;
+          status?: string;
+          source?: string;
+          consent_given?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          slot_date?: string;
+          slot_time?: string;
+          service?: string;
+          category?: string;
+          vehicle?: string;
+          customer_name?: string;
+          customer_email?: string | null;
+          customer_phone?: string | null;
+          status?: string;
+          source?: string;
+          consent_given?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       vehicles: {
         Row: {
           badge: string | null;

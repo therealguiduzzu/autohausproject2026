@@ -20,6 +20,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as FahrzeugSlugRouteImport } from './routes/fahrzeug.$slug'
 import { Route as NewsletterAbmeldenRouteImport } from './routes/newsletter.abmelden'
 import { Route as NewsletterBestaetigenRouteImport } from './routes/newsletter.bestaetigen'
+import { Route as ApiCalendarWerkstattDoticsRouteImport } from './routes/api.calendar.werkstatt[.]ics'
 import { Route as ApiImportVehiclesRouteImport } from './routes/api.import.vehicles'
 
 const IndexRoute = IndexRouteImport.update({
@@ -77,6 +78,12 @@ const NewsletterBestaetigenRoute = NewsletterBestaetigenRouteImport.update({
   path: '/newsletter/bestaetigen',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCalendarWerkstattDoticsRoute =
+  ApiCalendarWerkstattDoticsRouteImport.update({
+    id: '/api/calendar/werkstatt.ics',
+    path: '/api/calendar/werkstatt.ics',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiImportVehiclesRoute = ApiImportVehiclesRouteImport.update({
   id: '/api/import/vehicles',
   path: '/api/import/vehicles',
@@ -95,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/fahrzeug/$slug': typeof FahrzeugSlugRoute
   '/newsletter/abmelden': typeof NewsletterAbmeldenRoute
   '/newsletter/bestaetigen': typeof NewsletterBestaetigenRoute
+  '/api/calendar/werkstatt.ics': typeof ApiCalendarWerkstattDoticsRoute
   '/api/import/vehicles': typeof ApiImportVehiclesRoute
 }
 export interface FileRoutesByTo {
@@ -109,6 +117,7 @@ export interface FileRoutesByTo {
   '/fahrzeug/$slug': typeof FahrzeugSlugRoute
   '/newsletter/abmelden': typeof NewsletterAbmeldenRoute
   '/newsletter/bestaetigen': typeof NewsletterBestaetigenRoute
+  '/api/calendar/werkstatt.ics': typeof ApiCalendarWerkstattDoticsRoute
   '/api/import/vehicles': typeof ApiImportVehiclesRoute
 }
 export interface FileRoutesById {
@@ -124,6 +133,7 @@ export interface FileRoutesById {
   '/fahrzeug/$slug': typeof FahrzeugSlugRoute
   '/newsletter/abmelden': typeof NewsletterAbmeldenRoute
   '/newsletter/bestaetigen': typeof NewsletterBestaetigenRoute
+  '/api/calendar/werkstatt.ics': typeof ApiCalendarWerkstattDoticsRoute
   '/api/import/vehicles': typeof ApiImportVehiclesRoute
 }
 export interface FileRouteTypes {
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/fahrzeug/$slug'
     | '/newsletter/abmelden'
     | '/newsletter/bestaetigen'
+    | '/api/calendar/werkstatt.ics'
     | '/api/import/vehicles'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -154,6 +165,7 @@ export interface FileRouteTypes {
     | '/fahrzeug/$slug'
     | '/newsletter/abmelden'
     | '/newsletter/bestaetigen'
+    | '/api/calendar/werkstatt.ics'
     | '/api/import/vehicles'
   id:
     | '__root__'
@@ -168,6 +180,7 @@ export interface FileRouteTypes {
     | '/fahrzeug/$slug'
     | '/newsletter/abmelden'
     | '/newsletter/bestaetigen'
+    | '/api/calendar/werkstatt.ics'
     | '/api/import/vehicles'
   fileRoutesById: FileRoutesById
 }
@@ -183,6 +196,7 @@ export interface RootRouteChildren {
   FahrzeugSlugRoute: typeof FahrzeugSlugRoute
   NewsletterAbmeldenRoute: typeof NewsletterAbmeldenRoute
   NewsletterBestaetigenRoute: typeof NewsletterBestaetigenRoute
+  ApiCalendarWerkstattDoticsRoute: typeof ApiCalendarWerkstattDoticsRoute
   ApiImportVehiclesRoute: typeof ApiImportVehiclesRoute
 }
 
@@ -265,6 +279,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NewsletterBestaetigenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/calendar/werkstatt.ics': {
+      id: '/api/calendar/werkstatt.ics'
+      path: '/api/calendar/werkstatt.ics'
+      fullPath: '/api/calendar/werkstatt.ics'
+      preLoaderRoute: typeof ApiCalendarWerkstattDoticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/import/vehicles': {
       id: '/api/import/vehicles'
       path: '/api/import/vehicles'
@@ -287,6 +308,7 @@ const rootRouteChildren: RootRouteChildren = {
   FahrzeugSlugRoute: FahrzeugSlugRoute,
   NewsletterAbmeldenRoute: NewsletterAbmeldenRoute,
   NewsletterBestaetigenRoute: NewsletterBestaetigenRoute,
+  ApiCalendarWerkstattDoticsRoute: ApiCalendarWerkstattDoticsRoute,
   ApiImportVehiclesRoute: ApiImportVehiclesRoute,
 }
 export const routeTree = rootRouteImport

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getQueryClient } from "./query-client-ref";
+import { isHoneypotFilled } from "./honeypot";
 import type { Database } from "@/integrations/supabase/types";
 
 export type LeadType = "Probefahrt" | "Werkstattermin" | "Fahrzeugankauf" | "Kontakt";
@@ -81,10 +82,7 @@ export const leadsStore = {
   add: async (input: NewLeadInput) => {
     if (typeof window !== "undefined") {
       // Spam-Schutz 1: Honeypot befüllt -> Bot. Stillschweigend "erfolgreich" beenden.
-      const hpFilled = Array.from(
-        document.querySelectorAll<HTMLInputElement>("input[data-lead-hp]"),
-      ).some((el) => el.value.trim() !== "");
-      if (hpFilled) return;
+      if (isHoneypotFilled()) return;
       // Spam-Schutz 2: Abkühlzeit je Browser, gegen Doppelklicks und einfache Skripte.
       try {
         const last = Number(window.localStorage.getItem(LEAD_COOLDOWN_KEY) ?? 0);
