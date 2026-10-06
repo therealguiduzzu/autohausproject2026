@@ -1,0 +1,211 @@
+#!/usr/bin/env python3
+"""Erzeugt den Konzept-Pitch als PDF (HTML → Chromium). Aufruf: python3 build_pitch.py
+
+Preise, Kontakt und Zeitplan unten anpassen, dann neu ausführen.
+Benötigt Chromium (Playwright-Installation oder CHROME=/pfad/zu/chrome).
+"""
+import os, subprocess, pathlib, html
+
+# ---------------- Anpassbar ----------------
+EINRICHTUNG = "3.900 €"          # einmalig, netto
+BETREUUNG = "99 €"               # pro Monat, netto
+FREMDKOSTEN = "ca. 30–50 €"      # pro Monat, direkt beim Anbieter (Hosting, Datenbank, E-Mail)
+ZEITPLAN = "ca. 3–4 Wochen"      # bis Livegang, abhängig von Zulieferung der Inhalte
+KONTAKT_NAME = "[Ihr Name]"
+KONTAKT_TEL = "[Telefon]"
+KONTAKT_MAIL = "[E-Mail]"
+DATUM = "Oktober 2026"
+# -------------------------------------------
+
+here = pathlib.Path(__file__).resolve().parent
+fonts = (here / ".." / ".." / "public" / "fonts").resolve()
+e = html.escape
+
+CSS = f"""
+@font-face{{font-family:'Inter Tight';font-weight:400;src:url('file://{fonts}/inter-tight-400-latin.woff2') format('woff2')}}
+@font-face{{font-family:'Inter Tight';font-weight:600;src:url('file://{fonts}/inter-tight-600-latin.woff2') format('woff2')}}
+@font-face{{font-family:'Playfair Display';font-weight:600;src:url('file://{fonts}/playfair-display-600-latin.woff2') format('woff2')}}
+@font-face{{font-family:'Playfair Display';font-weight:700;src:url('file://{fonts}/playfair-display-700-latin.woff2') format('woff2')}}
+:root{{--bg:#FBFBFA;--fg:#1A1A1A;--muted:#5C5854;--red:#B90E0A;--green:#008C45;--border:#E3E1DC;--card:#FFFFFF;--tint:#F6F4F0}}
+@page{{size:A4;margin:0}}
+*{{box-sizing:border-box;margin:0;padding:0}}
+html,body{{background:var(--bg);color:var(--fg);font-family:'Inter Tight',sans-serif;font-size:10.4pt;line-height:1.45;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+.page{{width:210mm;height:297mm;position:relative;overflow:hidden;page-break-after:always;background:var(--bg)}}
+.page:last-child{{page-break-after:auto}}
+.tri{{height:4px;background:linear-gradient(90deg,var(--green) 0 33.3%,#fff 33.3% 66.6%,var(--red) 66.6%);border-bottom:1px solid var(--border)}}
+.pad{{padding:0 16mm}}
+.top{{display:flex;justify-content:space-between;align-items:center;padding:6mm 16mm 4mm}}
+.brand{{display:flex;align-items:center;gap:9px}}
+.mono{{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#B90E0A,#d12a22);color:#fff;display:grid;place-items:center;font:italic 700 13pt 'Playfair Display',serif}}
+.brand b{{font:600 13pt 'Playfair Display',serif;display:block;line-height:1.1}}
+.brand span{{font-size:7pt;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}}
+.meta{{font-size:8pt;color:var(--muted);text-align:right}}
+.hero{{position:relative;height:78mm;margin:0 16mm;border-radius:14px;overflow:hidden}}
+.hero img{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.12) translateX(17%);transform-origin:right center}}
+.hero::after{{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(251,251,250,1) 0 44%,rgba(251,251,250,.6) 58%,rgba(251,251,250,0) 78%)}}
+.hero .txt{{position:absolute;z-index:2;left:8mm;top:50%;transform:translateY(-50%);width:105mm}}
+.eyebrow{{font-size:7.5pt;letter-spacing:.28em;text-transform:uppercase;color:var(--red);font-weight:600}}
+h1{{font:700 25pt/1.08 'Playfair Display',serif;margin:6px 0 8px;letter-spacing:-.01em}}
+.lead{{color:var(--muted);font-size:10.4pt}}
+h2{{font:600 15pt 'Playfair Display',serif;margin-bottom:3mm}}
+.sec{{padding:0 16mm;margin-top:7mm}}
+.q li{{list-style:none;padding:2.2mm 0 2.2mm 6mm;position:relative;border-bottom:1px solid var(--border)}}
+.q li:before{{content:'';position:absolute;left:0;top:3.9mm;width:7px;height:7px;border-radius:50%;background:var(--red)}}
+.q li:last-child{{border-bottom:0}}
+.grid3{{display:grid;grid-template-columns:repeat(3,1fr);gap:4mm}}
+.grid2{{display:grid;grid-template-columns:repeat(2,1fr);gap:4mm}}
+.card{{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:3.6mm;box-shadow:0 6px 16px -10px rgba(30,25,20,.25)}}
+.card h3{{font-size:10.6pt;font-weight:600;margin:2mm 0 1mm}}
+.card p{{font-size:8.7pt;color:var(--muted);line-height:1.38}}
+.ico{{width:26px;height:26px;border-radius:8px;background:rgba(185,14,10,.1);color:var(--red);display:grid;place-items:center;font-weight:600;font-size:10pt}}
+.ico.g{{background:rgba(0,140,69,.12);color:var(--green)}}
+.steps{{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;counter-reset:s}}
+.step{{background:var(--tint);border-radius:12px;padding:3mm 3.5mm;position:relative}}
+.step:before{{counter-increment:s;content:counter(s);font:700 15pt 'Playfair Display',serif;color:var(--red)}}
+.step b{{display:block;font-size:9.6pt;margin:1mm 0}}
+.step p{{font-size:8.6pt;color:var(--muted)}}
+.price{{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:3.5mm 5mm}}
+.price.hl{{border:1.5px solid var(--red);box-shadow:0 10px 24px -14px rgba(185,14,10,.45)}}
+.price .n{{font:700 21pt 'Playfair Display',serif;color:var(--red);line-height:1.1}}
+.price small{{display:block;color:var(--muted);font-size:8.2pt;margin-top:1mm}}
+.price ul{{margin-top:2mm;padding-left:4.2mm;font-size:9pt}}
+.price li{{margin-bottom:1mm}}
+.cta{{margin:4mm 16mm 0;background:var(--fg);color:#fff;border-radius:14px;padding:5mm 8mm;display:flex;justify-content:space-between;align-items:center;gap:8mm}}
+.cta h2{{color:#fff;margin:0 0 1mm;font-size:14pt}}
+.cta p{{color:#d9d6d1;font-size:9.2pt}}
+.cta .c{{font-size:9.4pt;text-align:right;white-space:nowrap;color:#fff}}
+.cta .c b{{display:block;color:#fff;font-size:10.6pt}}
+.foot{{position:absolute;left:16mm;right:16mm;bottom:5mm;font-size:7.4pt;color:var(--muted);border-top:1px solid var(--border);padding-top:2.5mm;display:flex;justify-content:space-between;gap:8mm}}
+.tag{{display:inline-block;border:1px solid var(--border);border-radius:99px;padding:.6mm 3mm;font-size:8pt;color:var(--muted);margin:0 1.5mm 1.5mm 0;background:#fff}}
+"""
+
+def feat(i, title, text, g=False):
+    return f'<div class="card"><div class="ico{" g" if g else ""}">{i}</div><h3>{e(title)}</h3><p>{e(text)}</p></div>'
+
+page1 = f"""
+<section class="page">
+  <div class="tri"></div>
+  <div class="top">
+    <div class="brand"><div class="mono">AS</div><div><b>Auto Semmel</b><span>Langenselbold · Alfa Romeo · Fiat · Abarth</span></div></div>
+    <div class="meta">Konzeptvorschlag<br>{e(DATUM)}</div>
+  </div>
+  <div class="hero">
+    <img src="hero.jpg" alt="">
+    <div class="txt">
+      <div class="eyebrow">La passione per le auto italiane</div>
+      <h1>Ihre Autos. Ihre Werkstatt. Eine Website, die Anfragen bringt.</h1>
+      <p class="lead">Ein Konzept für die Online-Präsenz von Auto Semmel – gebaut für den Alltag im Autohaus, nicht für die Schaufensterwirkung allein.</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>Typisch für Autohäuser – trifft das auch bei Ihnen zu?</h2>
+    <ul class="q">
+      <li><b>Bestand an zwei Orten pflegen:</b> Inserate im Portal, dazu die eigene Website – doppelte Arbeit, schnell veraltete Angaben.</li>
+      <li><b>Werkstatttermine nur per Telefon:</b> Anrufe in der Hauptzeit, Rückfragen, Terminabsagen erst am Tag selbst.</li>
+      <li><b>Anfragen in vielen Postfächern:</b> Probefahrt, Ankauf, Kontakt – ohne klare Übersicht, wer wann antworten muss.</li>
+      <li><b>Rechtliches nebenbei:</b> Datenschutz, Cookies, Einbindungen von Karten und Schriften – ein Abmahnrisiko, das niemand gern betreut.</li>
+    </ul>
+  </div>
+
+  <div class="sec">
+    <h2>Unser Ansatz in drei Sätzen</h2>
+    <div class="grid3">
+      {feat("1","Einmal pflegen","Der Fahrzeugbestand kommt aus Ihrem bestehenden Export (CSV, JSON oder Schnittstelle) auf die Website – Preise, Bilder und Status bleiben aktuell.")}
+      {feat("2","Direkt buchen & anfragen","Kunden buchen freie Werkstatt-Slots online, fragen Probefahrten an oder senden Fotos zu ihrem Ankauf – ohne Telefonschleife.",True)}
+      {feat("3","Alles an einem Ort","Anfragen, Termine, Newsletter und Team in einem Verwaltungsbereich. Überfällige Anfragen sind rot markiert.")}
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>Für wen wir das gebaut haben</h2>
+    <p style="color:var(--muted)">Inhabergeführte Autohäuser mit Verkauf und Werkstatt, die ihre Website als aktiven Vertriebskanal nutzen wollen – bei klarem Preis, eigenen Zugängen und ohne Abhängigkeit von einem Baukasten-Anbieter.</p>
+    <div style="margin-top:3mm"><span class="tag">Verkauf</span><span class="tag">Werkstatt</span><span class="tag">Ankauf</span><span class="tag">Newsletter</span><span class="tag">Team &amp; Rollen</span><span class="tag">DSGVO-bewusst</span></div>
+  </div>
+
+  <div class="foot"><span>Auto Semmel – Konzeptvorschlag · vertraulich</span><span>Seite 1 / 2</span></div>
+</section>
+"""
+
+page2 = f"""
+<section class="page">
+  <div class="tri"></div>
+  <div class="top">
+    <div class="brand"><div class="mono">AS</div><div><b>Auto Semmel</b><span>Konzeptvorschlag</span></div></div>
+    <div class="meta">Funktionen · Ablauf · Investition</div>
+  </div>
+
+  <div class="sec" style="margin-top:0">
+    <h2>Was das Konzept heute schon kann</h2>
+    <div class="grid3">
+      {feat("▣","Fahrzeugbörse","Filter, Detailseiten mit CO₂-Angaben, Aktionspreise, ähnliche Fahrzeuge, Probefahrt-Anfrage.")}
+      {feat("⇅","Bestands-Import","CSV/JSON mit Vorschau oder automatisch per API. Reservierungen und Aktionspreise bleiben erhalten.",True)}
+      {feat("◷","Online-Werkstatttermin","Freie Slots in Echtzeit, Bestätigung per E-Mail, Absage per Link, Kalender zum Abonnieren.")}
+      {feat("✉","Anfragen-Verwaltung","Alle Anfragen mit Status, 24-Std.-Markierung und E-Mail-Benachrichtigung ans Team.",True)}
+      {feat("◉","Ankauf mit Fotos","Kunden senden Fahrzeugdaten und bis zu 4 Fotos (ohne Standortdaten) für ein schnelleres Angebot.")}
+      {feat("☰","Newsletter & Team","Newsletter mit Double-Opt-In, Rollen für Mitarbeitende, Jahresbericht als CSV.",True)}
+    </div>
+  </div>
+
+  <div class="sec" style="margin-top:3.5mm">
+    <div class="grid2">
+      <div class="card">
+        <div class="eyebrow" style="color:var(--green)">Ihre Daten, Ihre Konten</div>
+        <p style="margin-top:2mm;color:var(--fg);font-size:9.2pt">Domain, Datenbank, Hosting und E-Mail laufen auf <b>Ihren</b> Konten, Betrieb in der EU möglich. Sie können den Dienstleister jederzeit wechseln.</p>
+      </div>
+      <div class="card">
+        <div class="eyebrow" style="color:var(--green)">Rechtlich sauber gedacht</div>
+        <p style="margin-top:2mm;color:var(--fg);font-size:9.2pt">Karte erst nach Klick, Schriften lokal, Double-Opt-In, nur echte Kundenbewertungen. Rechtstexte prüfen Sie vor dem Livegang.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec" style="margin-top:3.5mm">
+    <h2>So läuft es ab</h2>
+    <div class="steps">
+      <div class="step"><b>Kennenlernen</b><p>Demo, Bestandsexport und Wünsche klären.</p></div>
+      <div class="step"><b>Einrichtung</b><p>Ihr Bestand, Ihre Texte, Ihre Logos (mit Freigabe), Ihre Zugänge.</p></div>
+      <div class="step"><b>Abnahme & Schulung</b><p>Testbuchung, Importlauf und 1–2 Std. Einweisung fürs Team.</p></div>
+      <div class="step"><b>Livegang</b><p>Domain-Umzug, laufende Betreuung. Livegang nach {e(ZEITPLAN)}.</p></div>
+    </div>
+  </div>
+
+  <div class="sec" style="margin-top:3.5mm">
+    <h2>Investition</h2>
+    <div class="grid2">
+      <div class="price hl">
+        <div class="eyebrow">Einrichtung · einmalig</div>
+        <div class="n" style="margin-top:2mm">{e(EINRICHTUNG)}</div>
+        <small>netto zzgl. MwSt.</small>
+        <ul><li>Einrichtung und Import Ihres Bestands</li><li>E-Mail, Termine, Anfragen angebunden</li><li>Schulung, Abnahme, Übergabe der Zugänge</li></ul>
+      </div>
+      <div class="price">
+        <div class="eyebrow">Betreuung · monatlich</div>
+        <div class="n" style="margin-top:2mm">{e(BETREUUNG)}</div>
+        <small>netto zzgl. MwSt. · monatlich kündbar</small>
+        <ul><li>Updates und Sicherheitsfixes</li><li>Kontrolle der Backups und E-Mail-Zustellung</li><li>Support per E-Mail/Telefon zu festen Zeiten</li></ul>
+      </div>
+    </div>
+    <p style="margin-top:2mm;font-size:8.4pt;color:var(--muted)">Dazu Fremdkosten für Hosting, Datenbank, Domain und E-Mail ({e(FREMDKOSTEN)} pro Monat), direkt beim Anbieter.</p>
+  </div>
+
+  <div class="cta">
+    <div><h2>Als Nächstes: 30 Minuten Live-Demo</h2><p>Ohne Verpflichtung – mit Beispieldaten, auf Wunsch mit einem Export Ihres Bestands.</p></div>
+    <div class="c"><b>{e(KONTAKT_NAME)}</b>{e(KONTAKT_TEL)}<br>{e(KONTAKT_MAIL)}</div>
+  </div>
+
+  <div class="foot"><span>Konzeptentwurf mit Beispieldaten · Marken/Logos nur mit Freigabe · Angebot freibleibend</span><span>Seite 2 / 2</span></div>
+</section>
+"""
+
+doc = f'<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Auto Semmel – Konzeptvorschlag</title><style>{CSS}</style></head><body>{page1}{page2}</body></html>'
+src = here / "pitch.html"
+src.write_text(doc, encoding="utf-8")
+
+chrome = os.environ.get("CHROME") or next(
+    (str(p) for p in pathlib.Path("/opt/pw-browsers").glob("chromium-*/chrome-linux/chrome")), "chromium")
+out = here / "Auto-Semmel-Konzept.pdf"
+subprocess.run([chrome, "--headless", "--no-sandbox", "--disable-gpu", "--allow-file-access-from-files",
+                "--no-pdf-header-footer", f"--print-to-pdf={out}", src.as_uri()], check=True,
+               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+print("OK", out)
