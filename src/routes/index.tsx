@@ -167,7 +167,6 @@ function Index() {
       <Nav />
       <Hero />
       <SearchBar filters={filters} setFilters={setFilters} count={results.length} />
-      <Highlights />
       <TrustBar />
       <VehicleGrid
         vehicles={results}
@@ -320,8 +319,6 @@ function Nav() {
 /* ------------------------------------------------------------------ */
 
 function Hero() {
-  const stockCount = useVehicles().filter((v) => v.status !== "Verkauft").length;
-  const rating = averageRating(usePublishedReviews());
   return (
     <section className="relative isolate overflow-hidden">
       <div className="absolute inset-0 -z-10">
@@ -358,30 +355,29 @@ function Hero() {
             Professional — direkt an der A66, mit Meisterwerkstatt für alle Marken.
           </p>
 
-          <div className="mt-10 flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
-            <Stat n="40+" label="Jahre vor Ort" />
-            <div className="h-8 w-px bg-border" />
-            <Stat n={String(stockCount)} label="Fahrzeuge im Bestand" />
-            <div className="hidden h-8 w-px bg-border sm:block" />
-            {rating != null && (
-              <Stat
-                n={`${rating.toLocaleString("de-DE", { maximumFractionDigits: 1 })}★`}
-                label="Kundenbewertungen"
-              />
-            )}
+          <div className="mt-9 flex flex-wrap items-center gap-3">
+            <a
+              href="#fahrzeuge"
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-glow)] transition hover:brightness-110"
+            >
+              Fahrzeuge ansehen <ArrowRight className="h-4 w-4" />
+            </a>
+            <a
+              href="#service"
+              className="inline-flex items-center gap-2 rounded-full border border-foreground/25 bg-background/70 px-6 py-3.5 text-sm font-semibold text-foreground backdrop-blur transition hover:border-foreground/60"
+            >
+              Werkstatttermin buchen
+            </a>
+            <a
+              href="#ankauf"
+              className="px-2 py-3.5 text-sm font-semibold text-foreground underline decoration-foreground/30 underline-offset-4 transition hover:decoration-foreground"
+            >
+              Auto verkaufen
+            </a>
           </div>
         </div>
       </div>
     </section>
-  );
-}
-
-function Stat({ n, label }: { n: string; label: string }) {
-  return (
-    <div>
-      <div className="font-display text-2xl font-semibold text-foreground">{n}</div>
-      <div className="text-xs uppercase tracking-wider">{label}</div>
-    </div>
   );
 }
 
@@ -408,13 +404,9 @@ function SearchBar({
   };
 
   return (
-    <section className="relative z-10 -mt-20 px-6 lg:-mt-24">
-      <div className="mx-auto max-w-6xl rounded-2xl border border-border/70 bg-surface-elevated/90 p-5 shadow-[var(--shadow-card)] backdrop-blur-xl sm:p-7">
-        <div className="mb-5 flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-muted-foreground">
-          <Search className="h-3.5 w-3.5 text-primary" /> Fahrzeugsuche · Langenselbold
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <section className="relative z-10 -mt-16 px-6 lg:-mt-20">
+      <div className="mx-auto max-w-6xl rounded-2xl border border-border/70 bg-surface-elevated/95 p-4 shadow-[var(--shadow-card)] backdrop-blur-xl sm:p-5">
+        <div className="grid grid-cols-2 items-end gap-3 lg:grid-cols-[1fr_1fr_1fr_1.2fr_auto]">
           <Field label="Zustand">
             <Select
               value={filters.condition}
@@ -446,35 +438,39 @@ function SearchBar({
             </Select>
           </Field>
 
-          <Field label="Modell">
-            <Select value={filters.model} onChange={(v) => update("model", v)}>
-              {models.map((m) => (
-                <option key={m}>{m}</option>
-              ))}
-            </Select>
-          </Field>
+          <div className="hidden sm:block">
+            <Field label="Modell">
+              <Select value={filters.model} onChange={(v) => update("model", v)}>
+                {models.map((m) => (
+                  <option key={m}>{m}</option>
+                ))}
+              </Select>
+            </Field>
+          </div>
 
-          <Field label={`Max. Preis ${filters.priceMax.toLocaleString("de-DE")} €`}>
-            <input
-              type="range"
-              min={5000}
-              max={80000}
-              step={1000}
-              value={filters.priceMax}
-              onChange={(e) => update("priceMax", Number(e.target.value))}
-              className="h-10 w-full cursor-pointer accent-[color:var(--primary)]"
-            />
-          </Field>
+          <div className="col-span-2 lg:col-span-1">
+            <Field label={`Max. Preis ${filters.priceMax.toLocaleString("de-DE")} €`}>
+              <input
+                type="range"
+                min={5000}
+                max={80000}
+                step={1000}
+                value={filters.priceMax}
+                onChange={(e) => update("priceMax", Number(e.target.value))}
+                aria-label="Maximaler Preis in Euro"
+                className="h-11 w-full cursor-pointer accent-[var(--primary)]"
+              />
+            </Field>
+          </div>
+
+          <button
+            onClick={scrollToGrid}
+            className="group col-span-2 flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-semibold text-primary-foreground transition hover:brightness-110 lg:col-span-1"
+          >
+            <span className="tabular-nums">{count}</span> {count === 1 ? "Fahrzeug" : "Fahrzeuge"}
+            <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+          </button>
         </div>
-
-        <button
-          onClick={scrollToGrid}
-          className="group mt-6 flex w-full items-center justify-center gap-3 rounded-xl bg-primary px-6 py-4 text-base font-semibold uppercase tracking-wider text-primary-foreground shadow-[var(--shadow-glow)] transition hover:brightness-110"
-        >
-          <span className="tabular-nums">{count}</span>
-          {count === 1 ? "Fahrzeug" : "Fahrzeuge"} gefunden
-          <ArrowRight className="h-5 w-5 transition group-hover:translate-x-1" />
-        </button>
       </div>
     </section>
   );
@@ -515,36 +511,11 @@ function Select({
 /* Trust bar                                                            */
 /* ------------------------------------------------------------------ */
 
-const TRUST_BADGES = [
-  "Festpreise – keine Überraschungen",
-  "Meistergeprüfte Qualität",
-  "Inklusive 12 Monate Händlergarantie",
-];
-
 function TrustBar() {
   return (
-    <section className="mx-auto max-w-7xl px-6 pt-20">
-      <div className="rounded-2xl border border-border/60 bg-surface p-5 shadow-[var(--shadow-soft)]">
-        <div className="grid gap-3 sm:grid-cols-3">
-          {TRUST_BADGES.map((label) => (
-            <div
-              key={label}
-              className="flex items-center gap-3 rounded-xl border border-[color:var(--italian-green)]/25 bg-[color:var(--italian-green)]/8 px-4 py-3"
-              style={{ backgroundColor: "color-mix(in oklab, #008c45 8%, transparent)" }}
-            >
-              <span
-                className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-white"
-                style={{ backgroundColor: "#008c45" }}
-              >
-                <Check className="h-5 w-5" strokeWidth={3} />
-              </span>
-              <span className="min-w-0 text-sm font-semibold" style={{ color: "#006b35" }}>
-                {label}
-              </span>
-            </div>
-          ))}
-        </div>
-        <div className="mt-5 flex flex-col items-center justify-center gap-4 border-t border-border/60 pt-5 sm:flex-row sm:gap-8">
+    <section className="mx-auto max-w-7xl px-6 pt-14">
+      <div className="rounded-2xl border border-border/60 bg-surface p-4 shadow-[var(--shadow-soft)]">
+        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-8">
           <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
             Autorisierter Servicepartner
           </span>
@@ -586,9 +557,11 @@ function VehicleGrid({
       />
 
       {vehicles.length > 0 ? (
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="-mx-6 mt-10 flex snap-x snap-mandatory scroll-pl-6 gap-4 overflow-x-auto px-6 pb-4 sm:mx-0 sm:mt-12 sm:grid sm:grid-cols-2 sm:gap-6 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4">
           {vehicles.map((v) => (
-            <VehicleCard key={v.id} vehicle={v} onTestDrive={() => onTestDrive(v)} />
+            <div key={v.id} className="flex w-[82%] shrink-0 snap-start sm:w-auto">
+              <VehicleCard vehicle={v} onTestDrive={() => onTestDrive(v)} />
+            </div>
           ))}
         </div>
       ) : (
@@ -600,13 +573,6 @@ function VehicleGrid({
           </p>
         </div>
       )}
-
-      <div className="mt-12 flex justify-center">
-        <button className="group flex items-center gap-2 rounded-full border border-border px-6 py-3 text-sm font-medium transition hover:border-primary hover:text-primary">
-          Gesamten Fahrzeugbestand ansehen
-          <ChevronRight className="h-4 w-4 transition group-hover:translate-x-1" />
-        </button>
-      </div>
     </section>
   );
 }
@@ -622,8 +588,8 @@ function SectionHeader({
 }) {
   return (
     <div className="max-w-2xl">
-      <div className="mb-3 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.3em] text-primary">
-        <span className="h-px w-8 bg-primary" /> {eyebrow}
+      <div className="mb-3 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground">
+        <span className="h-px w-8 bg-border" /> {eyebrow}
       </div>
       <h2 className="font-display text-4xl font-semibold leading-[1.05] tracking-tight text-balance sm:text-5xl">
         {title}
@@ -646,7 +612,7 @@ function VehicleCard({ vehicle: v, onTestDrive }: { vehicle: Vehicle; onTestDriv
   const year = registrationYearLabel(v);
   const slugOrId = v.slug ?? v.id;
   return (
-    <article className="brand-card group flex flex-col overflow-hidden rounded-2xl border border-border/70 bg-surface transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-[var(--shadow-card)]">
+    <article className="brand-card group flex w-full flex-col overflow-hidden rounded-2xl border border-border/70 bg-surface transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-[var(--shadow-card)]">
       <div className="relative aspect-[4/3] overflow-hidden bg-background">
         <img
           src={v.images[0]}
@@ -664,15 +630,11 @@ function VehicleCard({ vehicle: v, onTestDrive }: { vehicle: Vehicle; onTestDriv
             )}
             {v.brand === "Fiat Professional" && <Badge tone="outline">Fiat Professional</Badge>}
             {v.badge && v.brand !== "Fiat Professional" && <Badge tone="primary">{v.badge}</Badge>}
-            {v.fuelType === "Elektro" && <Badge tone="green">Elektro</Badge>}
+            {v.fuelType === "Elektro" && v.badge?.toLowerCase() !== "elektro" && (
+              <Badge tone="green">Elektro</Badge>
+            )}
             {v.vatDeductible && <Badge tone="ghost">MwSt. ausweisbar</Badge>}
           </div>
-          <button
-            aria-label="Merken"
-            className="grid h-9 w-9 place-items-center rounded-full bg-background/80 text-foreground/80 backdrop-blur transition hover:bg-primary hover:text-primary-foreground"
-          >
-            <Heart className="h-4 w-4" />
-          </button>
         </div>
         <div className="absolute bottom-3 left-3 rounded-md bg-background/80 px-2 py-1 text-[10px] font-medium uppercase tracking-wider backdrop-blur">
           {v.condition}
@@ -680,7 +642,9 @@ function VehicleCard({ vehicle: v, onTestDrive }: { vehicle: Vehicle; onTestDriv
       </div>
 
       <div className="flex flex-1 flex-col p-5">
-        <div className="text-[11px] uppercase tracking-[0.2em] text-primary">{v.brand}</div>
+        <div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+          {v.brand}
+        </div>
         <h3 className="mt-1 line-clamp-2 font-display text-lg font-semibold leading-snug">
           {v.model} {v.version}
         </h3>
@@ -699,19 +663,19 @@ function VehicleCard({ vehicle: v, onTestDrive }: { vehicle: Vehicle; onTestDriv
           />
         </div>
 
-        <div className="mt-auto flex items-end justify-between border-t border-border/60 pt-4">
+        <div className="mt-auto flex flex-wrap items-end justify-between gap-3 border-t border-border/60 pt-4">
           <div>
             {v.discountPrice != null && v.discountPrice < v.price ? (
               <>
                 <div className="text-xs text-muted-foreground line-through">
                   {v.price.toLocaleString("de-DE")} €
                 </div>
-                <div className="font-display text-2xl font-bold text-primary">
+                <div className="whitespace-nowrap font-display text-2xl font-bold text-primary">
                   {v.discountPrice.toLocaleString("de-DE")} €
                 </div>
               </>
             ) : (
-              <div className="font-display text-2xl font-bold text-foreground">
+              <div className="whitespace-nowrap font-display text-2xl font-bold text-foreground">
                 {v.price.toLocaleString("de-DE")} €
               </div>
             )}
@@ -727,7 +691,7 @@ function VehicleCard({ vehicle: v, onTestDrive }: { vehicle: Vehicle; onTestDriv
               onClick={onTestDrive}
               aria-label="Probefahrt anfragen"
               title="Probefahrt anfragen"
-              className="grid h-10 w-10 place-items-center rounded-lg border border-border text-muted-foreground transition hover:border-primary hover:text-primary"
+              className="grid h-11 w-11 place-items-center rounded-lg border border-border text-muted-foreground transition hover:border-primary hover:text-primary sm:h-10 sm:w-10"
             >
               <Car className="h-4 w-4" />
             </button>
@@ -749,7 +713,7 @@ function VehicleCard({ vehicle: v, onTestDrive }: { vehicle: Vehicle; onTestDriv
 function Spec({ icon, v }: { icon: React.ReactNode; v: string }) {
   return (
     <div className="flex flex-col items-center gap-1 rounded-md bg-background/60 py-2 text-center">
-      <span className="text-primary/80">{icon}</span>
+      <span className="text-muted-foreground">{icon}</span>
       <span className="truncate text-foreground/90">{v}</span>
     </div>
   );
@@ -863,7 +827,9 @@ function VehicleDetailDialog({
           />
           <div className="absolute left-4 top-4 flex flex-wrap gap-2">
             <Badge tone="primary">{v.condition}</Badge>
-            {v.fuelType === "Elektro" && <Badge tone="green">Elektro</Badge>}
+            {v.fuelType === "Elektro" && v.badge?.toLowerCase() !== "elektro" && (
+              <Badge tone="green">Elektro</Badge>
+            )}
             {v.vatDeductible && <Badge tone="ghost">MwSt. ausweisbar</Badge>}
           </div>
         </div>
@@ -1473,7 +1439,7 @@ function WerkstattHub() {
                   type="button"
                   onClick={() => setStep((s) => Math.max(0, s - 1))}
                   disabled={step === 0}
-                  className="text-sm text-muted-foreground transition hover:text-foreground disabled:opacity-30"
+                  className={`text-sm text-muted-foreground transition hover:text-foreground ${step === 0 ? "invisible" : ""}`}
                 >
                   Zurück
                 </button>
@@ -1878,7 +1844,7 @@ function AnkaufSection() {
                     type="button"
                     onClick={back}
                     disabled={step === 0}
-                    className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-medium transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+                    className={`inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-medium transition hover:border-primary hover:text-primary ${step === 0 ? "invisible" : ""}`}
                   >
                     <ArrowLeft className="h-4 w-4" /> Zurück
                   </button>
@@ -2063,144 +2029,8 @@ function Footer() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Highlights · Brand Splitter · Service CTA                          */
+/* Brand Splitter · Service CTA                                       */
 /* ------------------------------------------------------------------ */
-
-/** Bevorzugte Highlight-Slugs in Reihenfolge — fallen auf die ersten verfügbaren Fahrzeuge zurück. */
-const HIGHLIGHT_SLUGS = [
-  "alfa-romeo-tonale-veloce-2025",
-  "fiat-500e-la-prima-2025",
-  "abarth-595-turismo-2023",
-];
-
-function pickHighlights(all: Vehicle[]): Vehicle[] {
-  const available = all.filter((v) => v.status === "Verfügbar");
-  const bySlug = new Map(available.map((v) => [v.slug ?? "", v] as const));
-  const picked: Vehicle[] = [];
-  for (const slug of HIGHLIGHT_SLUGS) {
-    const v = bySlug.get(slug);
-    if (v) picked.push(v);
-  }
-  for (const v of available) {
-    if (picked.length >= 3) break;
-    if (!picked.includes(v)) picked.push(v);
-  }
-  return picked.slice(0, 3);
-}
-
-function Highlights() {
-  const vehicles = useVehicles();
-  const highlights = useMemo(() => pickHighlights(vehicles), [vehicles]);
-
-  if (highlights.length === 0) return null;
-
-  return (
-    <section className="border-y border-border/60 bg-surface/30">
-      <div className="mx-auto max-w-7xl px-6 py-20">
-        <div className="mb-10 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-              Showroom Langenselbold
-            </div>
-            <h2 className="mt-2 font-serif text-3xl md:text-4xl">
-              Aktuelle Fahrzeug-Highlights in Langenselbold
-            </h2>
-            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              Drei Empfehlungen aus unserem Bestand – sofort verfügbar und probefahrbereit.
-            </p>
-          </div>
-          <a
-            href="#fahrzeuge"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:gap-3"
-          >
-            Alle Fahrzeuge ansehen <ArrowRight className="h-4 w-4" />
-          </a>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-3">
-          {highlights.map((v) => {
-            const year = v.firstRegistration ? new Date(v.firstRegistration).getFullYear() : null;
-            const slugOrId = v.slug ?? v.id;
-            const isElectric = v.fuelType === "Elektro";
-            const badge = isElectric
-              ? "100% Elektrisch"
-              : v.discountPrice && v.discountPrice < v.price
-                ? "Top Deal"
-                : "Sofort verfügbar";
-            const badgeClass = isElectric
-              ? "bg-[color:var(--tricolore-green)] text-white"
-              : "bg-primary text-primary-foreground";
-            const displayPrice = v.discountPrice ?? v.price;
-            return (
-              <article
-                key={v.id}
-                className="brand-card group flex flex-col overflow-hidden rounded-2xl border border-border/70 bg-surface shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
-              >
-                <div className="relative aspect-[16/10] overflow-hidden bg-background">
-                  <img
-                    src={v.images[0]}
-                    alt={`${v.brand} ${v.model} ${v.version}`}
-                    loading="lazy"
-                    decoding="async"
-                    width={1024}
-                    height={640}
-                    className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-                  />
-                  <span
-                    className={`absolute left-4 top-4 inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wider shadow ${badgeClass}`}
-                  >
-                    {badge}
-                  </span>
-                </div>
-
-                <div className="flex flex-1 flex-col gap-4 p-6">
-                  <div>
-                    <div className="text-[11px] uppercase tracking-[0.2em] text-primary">
-                      {v.brand}
-                    </div>
-                    <h3 className="mt-1 font-serif text-lg leading-tight">
-                      {v.model} {v.version}
-                    </h3>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {year ? `EZ ${year} · ` : ""}
-                      {v.powerHp} PS · {v.fuelType}
-                    </p>
-                  </div>
-                  <div className="mt-auto flex items-end justify-between border-t border-border/60 pt-4">
-                    <div>
-                      {v.discountPrice && v.discountPrice < v.price ? (
-                        <>
-                          <div className="text-xs text-muted-foreground line-through">
-                            {v.price.toLocaleString("de-DE")} €
-                          </div>
-                          <div className="text-2xl font-semibold tracking-tight text-primary">
-                            {displayPrice.toLocaleString("de-DE")} €
-                          </div>
-                        </>
-                      ) : (
-                        <div className="text-2xl font-semibold tracking-tight">
-                          {displayPrice.toLocaleString("de-DE")} €
-                        </div>
-                      )}
-                      <div className="text-[11px] text-muted-foreground">inkl. MwSt.</div>
-                    </div>
-                    <Link
-                      to="/fahrzeug/$slug"
-                      params={{ slug: slugOrId }}
-                      className="inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90"
-                    >
-                      Details <ChevronRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </div>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 function BrandSplitter() {
   return (
@@ -2281,10 +2111,7 @@ function ServiceCtaBanner() {
         >
           <div className="flex flex-col items-start gap-8 md:flex-row md:items-center md:justify-between">
             <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white/80">
-                <Wrench className="h-3.5 w-3.5" /> Werkstatt &amp; Service
-              </div>
-              <h3 className="mt-4 font-serif text-3xl leading-tight md:text-4xl">
+              <h3 className="font-serif text-3xl leading-tight md:text-4xl">
                 Ihr Partner für Service &amp; Werkstatt im Main-Kinzig-Kreis.
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-white/75">
@@ -2501,10 +2328,7 @@ function AboutTeamSection() {
       <div className="mx-auto max-w-7xl px-6 py-20">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-5">
           <div className="lg:col-span-2">
-            <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-surface px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              <Award className="h-3.5 w-3.5 text-primary" /> Auto Semmel · Familienunternehmen
-            </div>
-            <h2 className="mt-3 font-serif text-3xl leading-tight md:text-4xl">
+            <h2 className="font-serif text-3xl leading-tight md:text-4xl">
               Über 40 Jahre Auto Semmel in Langenselbold.
             </h2>
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
@@ -2514,18 +2338,6 @@ function AboutTeamSection() {
               wir Ihr verlässlicher Ansprechpartner — vom ersten Probefahrt-Termin bis zur Werkstatt
               nach vielen treuen Jahren.
             </p>
-            <ul className="mt-5 space-y-2.5 text-sm">
-              {[
-                "Offizieller Stellantis-Vertragspartner",
-                "Eigene Meisterwerkstatt vor Ort",
-                "Persönliche Betreuung — keine anonyme Kette",
-              ].map((b) => (
-                <li key={b} className="flex items-start gap-2.5">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  <span className="text-foreground/90">{b}</span>
-                </li>
-              ))}
-            </ul>
           </div>
 
           <div className="lg:col-span-3 grid grid-cols-1 gap-4 sm:grid-cols-1">
@@ -2661,9 +2473,6 @@ function NewsletterSection() {
         <div className="mx-auto max-w-4xl rounded-3xl border border-primary/20 bg-card/80 p-8 shadow-xl backdrop-blur md:p-12">
           <div className="grid items-center gap-10 md:grid-cols-[1.1fr_1fr]">
             <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
-                <Mail className="h-3.5 w-3.5" /> Newsletter · La Famiglia
-              </div>
               <h2 className="font-display text-3xl font-bold leading-tight text-foreground md:text-4xl">
                 Bleiben Sie startklar — Der Auto Semmel Newsletter
               </h2>
@@ -2671,19 +2480,9 @@ function NewsletterSection() {
                 Erhalten Sie Angebote zu Werkstatt-Aktionen (z.B. Reifenwechsel) und neuen Alfa
                 Romeo & Fiat Modellen aus Langenselbold.
               </p>
-              <ul className="mt-5 grid gap-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" /> Nur relevante Angebote, keine
-                  Weitergabe
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" /> Jederzeit per 1-Klick
-                  abbestellbar
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" /> DSGVO-konformes Double-Opt-In
-                </li>
-              </ul>
+              <p className="mt-4 text-sm text-muted-foreground">
+                Anmeldung per Double-Opt-In, jederzeit mit einem Klick abbestellbar.
+              </p>
             </div>
 
             {submitted ? (
