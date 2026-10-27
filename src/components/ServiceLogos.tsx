@@ -7,9 +7,9 @@
  *   public/partner/fiat-service.png
  *   public/partner/alfa-romeo-service.png
  *   public/partner/stellantis-logo.jpg
- * Fehlt eine Datei, wird ein Text-Badge angezeigt.
+ * Fehlt eine Datei, wird ein neutrales Text-Badge angezeigt.
  */
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type LogoProps = {
   className?: string;
@@ -18,12 +18,20 @@ type LogoProps = {
 
 function PartnerLogo({ src, title, className }: LogoProps & { src: string }) {
   const [failed, setFailed] = useState(false);
+  const ref = useRef<HTMLImageElement>(null);
+
+  // Der Ladefehler kann schon vor der Hydration passiert sein (SSR-HTML): beim Mounten prüfen.
+  useEffect(() => {
+    const img = ref.current;
+    if (img && img.complete && img.naturalWidth === 0) setFailed(true);
+  }, []);
+
   if (failed) {
     return (
       <span
         role="img"
         aria-label={title}
-        className={`inline-flex items-center justify-center text-xs font-semibold uppercase tracking-wider ${className ?? ""}`}
+        className="inline-flex max-w-full items-center rounded-md border border-border/70 bg-muted/40 px-2.5 py-1.5 text-[10px] font-semibold uppercase leading-tight tracking-wider text-muted-foreground"
       >
         {title}
       </span>
@@ -31,6 +39,7 @@ function PartnerLogo({ src, title, className }: LogoProps & { src: string }) {
   }
   return (
     <img
+      ref={ref}
       src={src}
       alt={title}
       className={className}

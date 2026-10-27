@@ -37,6 +37,7 @@
   --color-tricolore-red: var(--tricolore-red);
   --font-display: "Playfair Display", ui-serif, Georgia, serif;
   --font-sans: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-display);
 }
 
 :root {

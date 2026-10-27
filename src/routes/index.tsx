@@ -232,13 +232,13 @@ function Nav() {
             <div className="truncate font-display text-lg font-semibold tracking-tight">
               Auto Semmel
             </div>
-            <div className="hidden text-[10px] uppercase tracking-[0.25em] text-muted-foreground sm:block">
+            <div className="hidden whitespace-nowrap text-[10px] uppercase tracking-[0.25em] text-muted-foreground xl:block">
               Langenselbold · Alfa Romeo · Fiat · Abarth
             </div>
           </div>
         </a>
 
-        <nav className="hidden items-center gap-8 text-sm font-medium text-muted-foreground lg:flex">
+        <nav className="hidden items-center gap-5 whitespace-nowrap text-sm font-medium text-muted-foreground lg:flex xl:gap-8">
           <a href="#fahrzeuge" className="transition hover:text-foreground">
             Fahrzeugbestand
           </a>
@@ -259,10 +259,10 @@ function Nav() {
           </a>
         </nav>
 
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="hidden items-center gap-3 whitespace-nowrap lg:flex">
           <a
             href="tel:+4961842633"
-            className="flex items-center gap-2 rounded-full border border-border/60 px-4 py-2 text-sm text-foreground/90 transition hover:border-primary/60 hover:text-primary"
+            className="hidden items-center gap-2 rounded-full xl:flex border border-border/60 px-4 py-2 text-sm text-foreground/90 transition hover:border-primary/60 hover:text-primary"
           >
             <Phone className="h-4 w-4" />
             06184 / 2633
@@ -323,7 +323,7 @@ function Hero() {
   const stockCount = useVehicles().filter((v) => v.status !== "Verkauft").length;
   const rating = averageRating(usePublishedReviews());
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative isolate overflow-hidden">
       <div className="absolute inset-0 -z-10">
         <img
           src={heroGiulia}
@@ -334,7 +334,7 @@ function Hero() {
           fetchPriority="high"
           decoding="async"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-background/10 max-md:from-background/95 max-md:via-background/90 max-md:to-background/80" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
         <div className="absolute inset-0 carbon-texture opacity-20 mix-blend-multiply" />
       </div>
@@ -548,7 +548,7 @@ function TrustBar() {
           <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
             Autorisierter Servicepartner
           </span>
-          <div className="flex items-center gap-6 opacity-90">
+          <div className="flex max-w-full flex-wrap items-center justify-center gap-x-6 gap-y-3 opacity-90">
             <FiatServiceLogo className="h-9 w-auto" />
             <AlfaRomeoServiceLogo className="h-9 w-auto" />
             <span className="hidden h-7 w-px bg-border sm:block" />
@@ -633,8 +633,17 @@ function SectionHeader({
   );
 }
 
+/** "2024" oder "Neu"/"–", wenn kein Erstzulassungsdatum vorliegt (Neuwagen). */
+function registrationYearLabel(v: Vehicle): string {
+  if (v.firstRegistration) {
+    const y = new Date(v.firstRegistration).getFullYear();
+    if (Number.isFinite(y)) return String(y);
+  }
+  return v.condition === "Neuwagen" ? "Neu" : "–";
+}
+
 function VehicleCard({ vehicle: v, onTestDrive }: { vehicle: Vehicle; onTestDrive: () => void }) {
-  const year = new Date(v.firstRegistration).getFullYear();
+  const year = registrationYearLabel(v);
   const slugOrId = v.slug ?? v.id;
   return (
     <article className="brand-card group flex flex-col overflow-hidden rounded-2xl border border-border/70 bg-surface transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-[var(--shadow-card)]">
@@ -653,9 +662,8 @@ function VehicleCard({ vehicle: v, onTestDrive }: { vehicle: Vehicle; onTestDriv
             {v.discountPrice != null && v.discountPrice < v.price && (
               <Badge tone="primary">SALE</Badge>
             )}
-            <Badge tone={v.brand === "Fiat Professional" ? "outline" : "primary"}>
-              {v.brand === "Fiat Professional" ? "Fiat Professional" : "Top Deal"}
-            </Badge>
+            {v.brand === "Fiat Professional" && <Badge tone="outline">Fiat Professional</Badge>}
+            {v.badge && v.brand !== "Fiat Professional" && <Badge tone="primary">{v.badge}</Badge>}
             {v.fuelType === "Elektro" && <Badge tone="green">Elektro</Badge>}
             {v.vatDeductible && <Badge tone="ghost">MwSt. ausweisbar</Badge>}
           </div>
@@ -678,7 +686,7 @@ function VehicleCard({ vehicle: v, onTestDrive }: { vehicle: Vehicle; onTestDriv
         </h3>
 
         <div className="mt-4 grid grid-cols-5 gap-2 text-[11px] text-muted-foreground">
-          <Spec icon={<Calendar className="h-4 w-4" />} v={`${year}`} />
+          <Spec icon={<Calendar className="h-4 w-4" />} v={year} />
           <Spec
             icon={<Gauge className="h-4 w-4" />}
             v={`${v.mileage.toLocaleString("de-DE")} km`}
@@ -822,12 +830,16 @@ function VehicleDetailDialog({
 }) {
   if (!vehicle) return null;
   const v = vehicle;
-  const year = new Date(v.firstRegistration).getFullYear();
+  const year = registrationYearLabel(v);
   const specs = [
     {
       icon: Calendar,
       label: "Erstzulassung",
-      value: new Date(v.firstRegistration).toLocaleDateString("de-DE"),
+      value: v.firstRegistration
+        ? new Date(v.firstRegistration).toLocaleDateString("de-DE")
+        : v.condition === "Neuwagen"
+          ? "Neuwagen"
+          : "–",
     },
     { icon: Gauge, label: "Kilometerstand", value: `${v.mileage.toLocaleString("de-DE")} km` },
     {
@@ -1232,10 +1244,10 @@ function WerkstattHub() {
               ].map(({ Logo, alt, sub }) => (
                 <div
                   key={alt}
-                  className="group flex items-center gap-4 rounded-xl border border-border/70 bg-surface px-4 py-3 shadow-[var(--shadow-soft)] transition hover:-translate-y-0.5 hover:border-border"
+                  className="group flex min-w-0 items-center gap-4 rounded-xl border border-border/70 bg-surface px-4 py-3 shadow-[var(--shadow-soft)] transition hover:-translate-y-0.5 hover:border-border"
                 >
                   <Logo title={alt} className="h-14 w-auto shrink-0" />
-                  <div className="min-w-0 text-xs leading-snug text-muted-foreground">
+                  <div className="min-w-0 break-words text-xs leading-snug text-muted-foreground">
                     <div className="font-semibold text-foreground/90">
                       Garantie-Erhalt sichergestellt
                     </div>
@@ -2008,7 +2020,7 @@ function Footer() {
           <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
             Offizieller Servicepartner
           </span>
-          <div className="flex items-center gap-6 opacity-90">
+          <div className="flex max-w-full flex-wrap items-center justify-center gap-x-6 gap-y-3 opacity-90">
             <FiatServiceLogo className="h-9 w-auto" />
             <AlfaRomeoServiceLogo className="h-9 w-auto" />
             <span className="hidden h-7 w-px bg-border sm:block" />
@@ -2263,6 +2275,7 @@ function ServiceCtaBanner() {
         <div
           className="relative overflow-hidden rounded-3xl border border-border/70 bg-gradient-to-br from-[#1a1b1f] via-[#222428] to-[#0e0f12] px-8 py-12 text-white shadow-xl md:px-14 md:py-16"
           style={{
+            backgroundColor: "#16171a",
             backgroundImage:
               "radial-gradient(circle at 90% 10%, rgba(185,14,10,0.35), transparent 60%), radial-gradient(circle at 10% 90%, rgba(0,140,69,0.18), transparent 55%)",
           }}
@@ -2299,15 +2312,27 @@ function ServiceCtaBanner() {
 /* ------------------------------------------------------------------ */
 
 function FiatProfessionalSection() {
-  // Mock B2B vehicle (Netto/Brutto explizit)
-  const grossPrice = 38_900;
-  const netPrice = Math.round(grossPrice / 1.19);
+  const vehicles = useVehicles();
+  const v = vehicles.find((x) => x.brand === "Fiat Professional" && x.status !== "Verkauft");
+  if (!v) return null; // ohne echtes Nutzfahrzeug im Bestand kein erfundenes Beispiel zeigen
+
+  const gross = v.discountPrice ?? v.price;
+  const net = Math.round(gross / 1.19);
   const specs = [
-    { icon: <Package className="h-4 w-4" />, label: "Ladevolumen", value: "11,5 m³" },
-    { icon: <Truck className="h-4 w-4" />, label: "Nutzlast", value: "1.485 kg" },
-    { icon: <Cog className="h-4 w-4" />, label: "Getriebe", value: "9-Gang Automatik" },
-    { icon: <Gauge className="h-4 w-4" />, label: "Leistung", value: "140 PS (103 kW)" },
+    {
+      icon: <Gauge className="h-4 w-4" />,
+      label: "Leistung",
+      value: `${v.powerHp} PS (${Math.round(v.powerHp * 0.7355)} kW)`,
+    },
+    { icon: <Cog className="h-4 w-4" />, label: "Getriebe", value: v.transmission },
+    { icon: <Truck className="h-4 w-4" />, label: "Kraftstoff", value: v.fuelType },
+    {
+      icon: <Package className="h-4 w-4" />,
+      label: "Kilometer",
+      value: `${v.mileage.toLocaleString("de-DE")} km`,
+    },
   ];
+  const slugOrId = v.slug ?? v.id;
 
   return (
     <section id="gewerbe" className="bg-background">
@@ -2322,8 +2347,7 @@ function FiatProfessionalSection() {
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               Für Handwerk, Handel und Lieferdienste aus Langenselbold, Hanau und dem gesamten
-              Main-Kinzig-Kreis. Persönliche Beratung, attraktives Gewerbe-Leasing und Service
-              direkt vor Ort.
+              Main-Kinzig-Kreis. Beratung, Finanzierung auf Anfrage und Service direkt vor Ort.
             </p>
           </div>
           <a
@@ -2338,17 +2362,26 @@ function FiatProfessionalSection() {
           {/* Vehicle card */}
           <article className="brand-card lg:col-span-3 overflow-hidden rounded-2xl border border-border/70 bg-surface shadow-sm">
             <div className="relative aspect-[16/10] w-full overflow-hidden bg-gradient-to-br from-muted to-background">
-              <div className="absolute inset-0 grid place-items-center text-muted-foreground/40">
-                <Truck className="h-24 w-24" strokeWidth={1} />
-              </div>
-              <div className="absolute left-4 top-4 flex flex-wrap gap-2">
-                <span className="rounded-full bg-foreground px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-background">
-                  Netto ausweisbar
-                </span>
-                <span className="rounded-full border border-border/70 bg-background/90 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-foreground">
-                  Gewerbe-Leasing
-                </span>
-              </div>
+              {v.images[0] ? (
+                <img
+                  src={v.images[0]}
+                  alt={`${v.brand} ${v.model} ${v.version}`}
+                  loading="lazy"
+                  decoding="async"
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              ) : (
+                <div className="absolute inset-0 grid place-items-center text-muted-foreground/40">
+                  <Truck className="h-24 w-24" strokeWidth={1} />
+                </div>
+              )}
+              {v.vatDeductible && (
+                <div className="absolute left-4 top-4 flex flex-wrap gap-2">
+                  <span className="rounded-full bg-foreground px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-background">
+                    Netto ausweisbar
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="p-6">
@@ -2356,7 +2389,7 @@ function FiatProfessionalSection() {
                 Fiat Professional
               </div>
               <h3 className="mt-1 font-display text-xl font-semibold">
-                Fiat Ducato Kastenwagen L2H2 140 Multijet
+                {v.brand} {v.model} {v.version}
               </h3>
 
               <dl className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -2376,17 +2409,20 @@ function FiatProfessionalSection() {
               <div className="mt-6 flex flex-wrap items-end justify-between gap-4 border-t border-border/60 pt-5">
                 <div>
                   <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                    Netto-Preis (Gewerbe)
+                    {v.vatDeductible ? "Netto-Preis (Gewerbe)" : "Preis"}
                   </div>
                   <div className="mt-0.5 font-display text-3xl font-bold text-primary">
-                    {netPrice.toLocaleString("de-DE")} €
+                    {(v.vatDeductible ? net : gross).toLocaleString("de-DE")} €
                   </div>
                   <div className="mt-0.5 text-xs text-muted-foreground">
-                    Brutto {grossPrice.toLocaleString("de-DE")} € · zzgl. 19 % USt.
+                    {v.vatDeductible
+                      ? `Brutto ${gross.toLocaleString("de-DE")} € · zzgl. 19 % USt.`
+                      : "inkl. MwSt."}
                   </div>
                 </div>
                 <Link
-                  to="/"
+                  to="/fahrzeug/$slug"
+                  params={{ slug: slugOrId }}
                   className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-xs font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
                 >
                   Details ansehen <ArrowRight className="h-3.5 w-3.5" />
@@ -2401,10 +2437,8 @@ function FiatProfessionalSection() {
               <h3 className="font-display text-lg font-semibold">Ihre Vorteile als Gewerbekunde</h3>
               <ul className="mt-4 space-y-3 text-sm">
                 {[
-                  "Individuelle Leasing- & Finanzierungskonzepte",
-                  "MwSt. ausweisbar — voll vorsteuerabzugsfähig",
-                  "Persönlicher Gewerbekunden-Betreuer",
-                  "Ersatzfahrzeug während Werkstattaufenthalt",
+                  "Beratung zu Finanzierung und Leasing auf Anfrage",
+                  "MwSt. ausweisbar bei gewerblichen Fahrzeugen",
                   "Wartung & Service direkt in Langenselbold",
                 ].map((b) => (
                   <li key={b} className="flex items-start gap-2.5">
@@ -2423,8 +2457,8 @@ function FiatProfessionalSection() {
                 Gewerbliches Leasingangebot anfordern
               </h3>
               <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
-                Wir kalkulieren Ihre Wunschrate auf Basis von Laufzeit und Laufleistung — inklusive
-                Service-Paket auf Anfrage.
+                Sagen Sie uns Laufzeit und Laufleistung – wir erstellen Ihnen ein individuelles,
+                unverbindliches Angebot.
               </p>
               <a
                 href="tel:+4961842633"
@@ -2452,27 +2486,21 @@ function FiatProfessionalSection() {
 /* ------------------------------------------------------------------ */
 
 function AboutTeamSection() {
+  // Nur belegte Kontaktdaten (Hauptnummer/Info-Adresse); keine erfundenen Namen, Durchwahlen oder Adressen.
   const team = [
     {
-      name: "Siegfried Polenz",
-      role: "Geschäftsführung",
+      name: "Verkauf",
+      role: "Neu- & Gebrauchtwagen, Probefahrt, Ankauf",
       phone: "06184 / 2633",
-      email: "s.polenz@auto-semmel.de",
+      email: "info@auto-semmel.de",
       tone: "primary" as const,
     },
     {
-      name: "Verkaufsteam Alfa Romeo & Fiat",
-      role: "Neu- & Gebrauchtwagen",
-      phone: "06184 / 2633 -10",
-      email: "verkauf@auto-semmel.de",
+      name: "Werkstatt",
+      role: "Service, Reparatur, HU/AU",
+      phone: "06184 / 2633",
+      email: "info@auto-semmel.de",
       tone: "accent" as const,
-    },
-    {
-      name: "Werkstattleitung",
-      role: "Service · Stellantis-zertifiziert",
-      phone: "06184 / 2633 -20",
-      email: "werkstatt@auto-semmel.de",
-      tone: "muted" as const,
     },
   ];
 
@@ -2482,7 +2510,7 @@ function AboutTeamSection() {
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-5">
           <div className="lg:col-span-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-surface px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              <Award className="h-3.5 w-3.5 text-primary" /> Auto Semmel · seit 1982
+              <Award className="h-3.5 w-3.5 text-primary" /> Auto Semmel · Familienunternehmen
             </div>
             <h2 className="mt-3 font-serif text-3xl leading-tight md:text-4xl">
               Über 40 Jahre Auto Semmel in Langenselbold.
@@ -2508,7 +2536,7 @@ function AboutTeamSection() {
             </ul>
           </div>
 
-          <div className="lg:col-span-3 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="lg:col-span-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
             {team.map((m) => (
               <article
                 key={m.name}
@@ -2648,12 +2676,13 @@ function NewsletterSection() {
                 Bleiben Sie startklar — Der Auto Semmel Newsletter
               </h2>
               <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-                Erhalten Sie exklusive Angebote zu Werkstatt-Aktionen (z.B. Reifenwechsel), neuen
-                Alfa Romeo & Fiat Modellen und Einladungen zu unseren Hof-Events in Langenselbold.
+                Erhalten Sie Angebote zu Werkstatt-Aktionen (z.B. Reifenwechsel) und neuen Alfa
+                Romeo & Fiat Modellen aus Langenselbold.
               </p>
               <ul className="mt-5 grid gap-2 text-sm text-muted-foreground">
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" /> Maximal 1 E-Mail pro Monat
+                  <CheckCircle2 className="h-4 w-4 text-primary" /> Nur relevante Angebote, keine
+                  Weitergabe
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-primary" /> Jederzeit per 1-Klick
