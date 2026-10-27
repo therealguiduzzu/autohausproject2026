@@ -1244,7 +1244,7 @@ function WerkstattHub() {
               ].map(({ Logo, alt, sub }) => (
                 <div
                   key={alt}
-                  className="group flex min-w-0 items-center gap-4 rounded-xl border border-border/70 bg-surface px-4 py-3 shadow-[var(--shadow-soft)] transition hover:-translate-y-0.5 hover:border-border"
+                  className="group flex min-w-0 flex-col items-start gap-3 rounded-xl border border-border/70 bg-surface px-4 py-3 shadow-[var(--shadow-soft)] transition hover:-translate-y-0.5 hover:border-border"
                 >
                   <Logo title={alt} className="h-14 w-auto shrink-0" />
                   <div className="min-w-0 break-words text-xs leading-snug text-muted-foreground">
@@ -1974,7 +1974,7 @@ function Footer() {
           </ul>
         </div>
 
-        <div id="ueber-uns" className="lg:col-span-2">
+        <div className="lg:col-span-2">
           <h5 className="mb-4 text-xs font-semibold uppercase tracking-[0.25em] text-foreground">
             Verkauf
           </h5>
@@ -2106,8 +2106,7 @@ function Highlights() {
               Aktuelle Fahrzeug-Highlights in Langenselbold
             </h2>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              Drei handverlesene Empfehlungen unseres Verkaufsteams – sofort verfügbar,
-              probefahrbereit und mit Stellantis Garantie.
+              Drei Empfehlungen aus unserem Bestand – sofort verfügbar und probefahrbereit.
             </p>
           </div>
           <a
@@ -2217,15 +2216,15 @@ function BrandSplitter() {
         >
           <div className="absolute inset-0 bg-gradient-to-tr from-black/70 via-transparent to-transparent" />
           <div className="relative max-w-md">
-            <div className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">
+            <div className="text-xs font-semibold uppercase tracking-[0.3em] text-[#ff8a84]">
               La Performance
             </div>
             <h3 className="mt-4 font-serif text-3xl leading-tight md:text-4xl">
               Alfa Romeo – Die Symbiose aus Luxus und Performance.
             </h3>
             <p className="mt-4 text-sm leading-relaxed text-white/75">
-              Vom Giulia Quadrifoglio bis zum neuen Tonale Plug-in Hybrid: entdecken Sie die
-              kompromisslose Ingenieurskunst aus Arese.
+              Von der Giulia über den Stelvio bis zum Tonale: Alfa Romeo aus unserem Bestand in
+              Langenselbold.
             </p>
             <a
               href="#fahrzeuge"
@@ -2489,18 +2488,11 @@ function AboutTeamSection() {
   // Nur belegte Kontaktdaten (Hauptnummer/Info-Adresse); keine erfundenen Namen, Durchwahlen oder Adressen.
   const team = [
     {
-      name: "Verkauf",
-      role: "Neu- & Gebrauchtwagen, Probefahrt, Ankauf",
+      name: "Ihr Kontakt",
+      role: "Verkauf, Werkstatt und Ankauf – wir melden uns zu den Öffnungszeiten.",
       phone: "06184 / 2633",
       email: "info@auto-semmel.de",
       tone: "primary" as const,
-    },
-    {
-      name: "Werkstatt",
-      role: "Service, Reparatur, HU/AU",
-      phone: "06184 / 2633",
-      email: "info@auto-semmel.de",
-      tone: "accent" as const,
     },
   ];
 
@@ -2536,11 +2528,11 @@ function AboutTeamSection() {
             </ul>
           </div>
 
-          <div className="lg:col-span-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="lg:col-span-3 grid grid-cols-1 gap-4 sm:grid-cols-1">
             {team.map((m) => (
               <article
                 key={m.name}
-                className="brand-card group flex flex-col rounded-2xl border border-border/70 bg-surface p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="brand-card group flex flex-col self-start rounded-2xl border border-border/70 bg-surface p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               >
                 <div
                   className={`grid h-16 w-16 place-items-center rounded-full ${

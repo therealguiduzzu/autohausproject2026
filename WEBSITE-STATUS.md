@@ -10,7 +10,7 @@ Status: ✅ erledigt · 🔄 läuft · ⬜ offen · ➖ übersprungen (Bestand/K
 | 3 | Texte | ⬜ (Texte stehen im Code, nicht in `texte.md`) | |
 | 4 | Design-Richtung | ➖ Konzept-Design übernommen | |
 | 5 | Bauen | ✅ als Konzept gebaut | |
-| 6 | Prüfen und Feinschliff | 🔄 Prüfdurchgang 1+2 erledigt, unabhängige Abnahme läuft | 2026-10-27 |
+| 6 | Prüfen und Feinschliff | 🔄 Prüfdurchgänge erledigt, Fehler behoben; unabhängiges Urteil „fix“, Design-Entscheidungen beim Auftraggeber | 2026-10-27 |
 | 7 | Livegang | ⬜ | |
 | 8 | Danach | ⬜ | |
 
@@ -24,3 +24,7 @@ Status: ✅ erledigt · 🔄 läuft · ⬜ offen · ➖ übersprungen (Bestand/K
 ## Offene Fragen an die Person
 - Partner-Logos (FIAT Service, Alfa Romeo Service, Stellantis) vom Autohaus erhalten?
 - Bestätigung der Aussagen: „über 40 Jahre", „offizieller Stellantis-Partner", Garantie, Ersatzwagen, Hol- und Bringservice, Festpreise.
+
+## Phase 6 – Ergebnis (2026-10-27)
+Behoben: Hero-Bild unsichtbar, mobile Seitenbreite 444–610 px (Logo-Fallback), Nav-Umbrüche, Schrift `font-serif`, „NaN“-Erstzulassung, Standard-Badge „Top Deal“, erfundener Ducato-Block, erfundene Kontakt-/Teamdaten, unlesbares CTA-Banner, doppelte ID `#ueber-uns`, Servicepartner-Karten, Mediävalziffern bei Preisen.
+Offen (Entscheidung nötig): Hero-CTAs, Suchfilter, doppelte Bestandsanzeige, „Template-Look“, Mobil-Länge, unbelegte Aussagen. Siehe Bericht im Chat.

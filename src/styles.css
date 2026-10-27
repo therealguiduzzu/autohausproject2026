@@ -121,6 +121,15 @@
     font-family: var(--font-display);
     letter-spacing: -0.02em;
   }
+  /* Playfair hat Mediävalziffern; Preise/Zahlen sollen gleich hoch stehen. */
+  .font-display,
+  .font-serif,
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-variant-numeric: lining-nums;
+  }
 }
 
 @utility text-balance {
